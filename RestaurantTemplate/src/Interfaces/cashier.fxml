@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.SVGPath?>
+
+<AnchorPane id="AnchorPane" nodeOrientation="RIGHT_TO_LEFT" prefHeight="880.0" prefWidth="1280.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Interfaces.cashier">
+   <children>
+      <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         
+         <!-- ================= TOP HEADER BAR ================= -->
+         <top>
+            <VBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="6.0" left="22.0" right="22.0" top="14.0" />
+               </padding>
+               <children>
+                  <HBox alignment="CENTER" maxHeight="74.0" minHeight="68.0" prefHeight="70.0" styleClass="header-bar">
+                     <children>
+                        
+                        <!-- USER BADGE SECTION -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <StackPane style="-fx-background-color: #FFF3EB; -fx-background-radius: 50%; -fx-min-width: 42px; -fx-min-height: 42px; -fx-border-color: #FF7043; -fx-border-radius: 50%; -fx-border-width: 1.5px;">
+                                 <children>
+                                    <SVGPath content="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#E65100" scaleX="1.1" scaleY="1.1" />
+                                 </children>
+                              </StackPane>
+                              <VBox alignment="CENTER_RIGHT" spacing="2.0">
+                                 <children>
+                                    <HBox alignment="CENTER_RIGHT" spacing="6.0">
+                                       <children>
+                                          <Circle fill="#4CAF50" radius="4.0" />
+                                          <Label fx:id="lblUserName" styleClass="info-chip-text" text="كريم الدين" textFill="#2B1810" />
+                                       </children>
+                                    </HBox>
+                                    <Label fx:id="lblUserRole" styleClass="info-chip-label" text="الكاشير العام • POS" textFill="#FF6B00" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <!-- BRAND / TITLE CENTER SECTION -->
+                        <HBox alignment="CENTER" spacing="12.0">
+                           <children>
+                              <StackPane style="-fx-background-color: linear-gradient(to bottom right, #FF7043, #E65100); -fx-background-radius: 12px; -fx-min-width: 44px; -fx-min-height: 44px;">
+                                 <children>
+                                    <!-- POS / Cashier Terminal SVG -->
+                                    <SVGPath content="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" fill="WHITE" scaleX="1.1" scaleY="1.1" />
+                                 </children>
+                              </StackPane>
+                              <VBox alignment="CENTER_RIGHT">
+                                 <children>
+                                    <Label styleClass="header-brand-title" text="نقطة البيع والكاشير" />
+                                    <Label styleClass="header-brand-subtitle" text="تسجيل الطلبات، الفواتير، وحالة الصالة المباشرة" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <!-- DATE & LIVE TIME CHIPS -->
+                        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                           <children>
+                              <!-- DATE CHIP -->
+                              <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="info-chip">
+                                 <children>
+                                    <SVGPath content="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" fill="#E65100" scaleX="0.85" scaleY="0.85" />
+                                    <VBox alignment="CENTER_RIGHT">
+                                       <children>
+                                          <Label fx:id="lblDate" styleClass="info-chip-text" text="السبت، 22 أغسطس 2026" />
+                                          <Label styleClass="info-chip-label" text="تاريخ اليوم" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+
+                              <!-- LIVE CLOCK CHIP -->
+                              <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="info-chip">
+                                 <children>
+                                    <SVGPath content="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="#E65100" scaleX="0.9" scaleY="0.9" />
+                                    <VBox alignment="CENTER_RIGHT">
+                                       <children>
+                                          <Label fx:id="lblTime" styleClass="live-time-text" text="00:00:00 م" />
+                                          <Label styleClass="info-chip-label" text="الوقت المباشر" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </HBox>
+                        
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </top>
+
+         <!-- ================= CENTER CONTENT (TABS) ================= -->
+         <center>
+            <VBox spacing="10.0" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="6.0" left="22.0" right="22.0" top="4.0" />
+               </padding>
+               <children>
+                  
+                  <TabPane fx:id="tabPaneCashier" prefHeight="720.0" styleClass="custom-tab-pane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+                    <tabs>
+                      
+                      <!-- =========================================================================
+                           TAB 1: MENU & POS CART (قائمة الطعام والطلب الحالي)
+                           ========================================================================= -->
+                      <Tab text="🍔 قائمة الطعام والطلب (Menu &amp; POS)">
+                        <content>
+                           <HBox spacing="16.0">
+                              <padding>
+                                 <Insets bottom="8.0" left="4.0" right="4.0" top="10.0" />
+                              </padding>
+                              <children>
+                                 
+                                 <!-- LEFT SIDE: MENU ITEMS & CATEGORY FILTER -->
+                                 <VBox spacing="12.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                       
+                                       <!-- Category Filters Bar & Search -->
+                                       <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="panel-card">
+                                          <children>
+                                             <Label styleClass="field-label" text="التصنيف:" />
+                                             <HBox fx:id="pnlCategoryButtons" alignment="CENTER_LEFT" spacing="8.0" />
+                                             <Region HBox.hgrow="ALWAYS" />
+                                             
+                                             <HBox alignment="CENTER_LEFT" maxWidth="260.0" prefWidth="220.0" spacing="6.0">
+                                                <children>
+                                                   <SVGPath content="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#FF7043" scaleX="0.85" scaleY="0.85" />
+                                                   <JFXTextField fx:id="txtMenuSearch" focusColor="#FF6B00" promptText="بحث في القائمة..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                                </children>
+                                             </HBox>
+                                          </children>
+                                       </HBox>
+
+                                       <!-- Scrollable FlowPane of Menu Items -->
+                                       <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="main-scroll-pane" VBox.vgrow="ALWAYS">
+                                          <content>
+                                             <FlowPane fx:id="pnlMenuItems" hgap="14.0" vgap="14.0">
+                                                <padding>
+                                                   <Insets bottom="10.0" left="4.0" right="4.0" top="4.0" />
+                                                </padding>
+                                             </FlowPane>
+                                          </content>
+                                       </ScrollPane>
+
+                                    </children>
+                                 </VBox>
+
+                                 <!-- RIGHT SIDE: CURRENT ORDER CART & 3 BUTTONS -->
+                                 <VBox maxWidth="430.0" minWidth="380.0" prefWidth="410.0" spacing="12.0" styleClass="pos-cart-panel">
+                                    <children>
+                                       
+                                       <!-- Cart Header -->
+                                       <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                          <children>
+                                             <SVGPath content="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" fill="#E65100" scaleX="1.1" scaleY="1.1" />
+                                             <VBox>
+                                                <children>
+                                                   <Label styleClass="panel-header-title" text="سلة الطلب الحالي (Current Order)" />
+                                                   <Label fx:id="lblCurrentOrderNum" styleClass="panel-header-desc" text="طلب رقم: #ORD-501" />
+                                                </children>
+                                             </VBox>
+                                             <Region HBox.hgrow="ALWAYS" />
+                                             <JFXButton fx:id="btnClearCart" onAction="#handleClearCart" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="تفريغ" />
+                                          </children>
+                                       </HBox>
+
+                                       <!-- Table / Customer Inputs -->
+                                       <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                          <children>
+                                             <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                                                <children>
+                                                   <Label styleClass="field-label" text="الطاولة / الموقع:" />
+                                                   <JFXComboBox fx:id="cbOrderTable" maxWidth="1.7976931348623157E308" promptText="اختر الطاولة..." styleClass="jfx-combo-box" />
+                                                </children>
+                                             </VBox>
+                                             <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                                                <children>
+                                                   <Label styleClass="field-label" text="اسم العميل (اختياري):" />
+                                                   <JFXTextField fx:id="txtOrderCustName" focusColor="#FF6B00" promptText="عميل صالة..." unFocusColor="#FFDEC9" />
+                                                </children>
+                                             </VBox>
+                                          </children>
+                                       </HBox>
+
+                                       <!-- TableView of Ordered Items -->
+                                       <TableView fx:id="tblCart" minHeight="210.0" prefHeight="230.0" styleClass="custom-table-view" VBox.vgrow="ALWAYS">
+                                          <columns>
+                                             <TableColumn fx:id="colCartItem" minWidth="130.0" prefWidth="150.0" text="الصنف" />
+                                             <TableColumn fx:id="colCartQty" maxWidth="75.0" minWidth="65.0" prefWidth="70.0" text="الكمية" />
+                                             <TableColumn fx:id="colCartPrice" minWidth="70.0" prefWidth="80.0" text="السعر" />
+                                             <TableColumn fx:id="colCartTotal" minWidth="75.0" prefWidth="85.0" text="الإجمالي" />
+                                          </columns>
+                                          <columnResizePolicy>
+                                             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                          </columnResizePolicy>
+                                       </TableView>
+
+                                       <!-- Bill Totals Summary Box -->
+                                       <VBox spacing="4.0" styleClass="cart-summary-box">
+                                          <children>
+                                             <HBox alignment="CENTER_LEFT">
+                                                <children>
+                                                   <Label styleClass="info-chip-label" text="المجموع الفرعي:" />
+                                                   <Region HBox.hgrow="ALWAYS" />
+                                                   <Label fx:id="lblSubTotal" styleClass="info-chip-text" text="0.00 ج.م" />
+                                                </children>
+                                             </HBox>
+                                             <HBox alignment="CENTER_LEFT">
+                                                <children>
+                                                   <Label styleClass="info-chip-label" text="ضريبة القيمة المضافة (14%):" />
+                                                   <Region HBox.hgrow="ALWAYS" />
+                                                   <Label fx:id="lblTax" styleClass="info-chip-text" text="0.00 ج.م" />
+                                                </children>
+                                             </HBox>
+                                             <HBox alignment="CENTER_LEFT">
+                                                <children>
+                                                   <Label styleClass="cart-total-label" text="الإجمالي النهائي المستحق:" />
+                                                   <Region HBox.hgrow="ALWAYS" />
+                                                   <Label fx:id="lblGrandTotal" styleClass="cart-total-amount" text="0.00 ج.م" />
+                                                </children>
+                                             </HBox>
+                                          </children>
+                                       </VBox>
+
+                                       <!-- THE THREE REQUESTED ACTION BUTTONS -->
+                                       <VBox spacing="8.0">
+                                          <children>
+                                             <HBox spacing="8.0">
+                                                <children>
+                                                   <!-- 1. ASSIGN TO TABLE -->
+                                                   <JFXButton fx:id="btnAssignTable" buttonType="RAISED" maxWidth="1.7976931348623157E308" onAction="#handleAssignToTable" ripplerFill="#FFE0B2" styleClass="btn-pos-assign" text="📍 تعيين لطاولة" HBox.hgrow="ALWAYS" />
+                                                   
+                                                   <!-- 2. CANCEL ORDER -->
+                                                   <JFXButton fx:id="btnCancelOrder" buttonType="RAISED" maxWidth="1.7976931348623157E308" onAction="#handleCancelOrder" ripplerFill="#FFCDD2" styleClass="btn-pos-cancel" text="❌ إلغاء الطلب" HBox.hgrow="ALWAYS" />
+                                                </children>
+                                             </HBox>
+
+                                             <!-- 3. PAY ORDER -->
+                                             <JFXButton fx:id="btnPayOrder" buttonType="RAISED" maxWidth="1.7976931348623157E308" onAction="#handlePayOrder" ripplerFill="#C8E6C9" styleClass="btn-pos-pay" text="💳 دفع وإنهاء الفاتورة (Pay)" />
+                                          </children>
+                                       </VBox>
+
+                                    </children>
+                                 </VBox>
+
+                              </children>
+                           </HBox>
+                        </content>
+                      </Tab>
+
+                      <!-- =========================================================================
+                           TAB 2: ORDERS (سجل وقائمة الطلبات)
+                           ========================================================================= -->
+                      <Tab text="🧾 سجل الطلبات (Orders)">
+                        <content>
+                           <VBox spacing="14.0">
+                              <padding>
+                                 <Insets bottom="10.0" left="4.0" right="4.0" top="10.0" />
+                              </padding>
+                              <children>
+                                 
+                                 <!-- Filter & Search Bar -->
+                                 <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="panel-card">
+                                    <children>
+                                       <Label styleClass="field-label" text="حالة الطلبات:" />
+                                       
+                                       <!-- Category Filters for Orders -->
+                                       <JFXButton fx:id="btnFilterAll" onAction="#handleFilterAllOrders" styleClass="btn-action-add" text="عرض الكل (All)" />
+                                       <JFXButton fx:id="btnFilterOpen" onAction="#handleFilterOpenOrders" styleClass="btn-action-clear" text="🔵 مفتوحة (Open)" />
+                                       <JFXButton fx:id="btnFilterRunning" onAction="#handleFilterRunningOrders" styleClass="btn-action-edit" text="🟡 قيد التنفيذ (Running)" />
+                                       <JFXButton fx:id="btnFilterClosed" onAction="#handleFilterClosedOrders" styleClass="btn-action-clear" text="🟢 مكتملة ومغلقة (Closed)" />
+                                       
+                                       <Region HBox.hgrow="ALWAYS" />
+                                       
+                                       <!-- Orders Search -->
+                                       <HBox alignment="CENTER_LEFT" maxWidth="380.0" prefWidth="320.0" spacing="8.0">
+                                          <children>
+                                             <SVGPath content="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z" fill="#FF7043" scaleX="0.9" scaleY="0.9" />
+                                             <JFXTextField fx:id="txtOrdersSearch" focusColor="#FF6B00" promptText="بحث برقم الطلب، العميل، أو الطاولة..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                          </children>
+                                       </HBox>
+
+                                       <!-- Total Count Badge -->
+                                       <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                          <children>
+                                             <Label styleClass="info-chip-label" text="إجمالي الطلبات:" />
+                                             <Label fx:id="lblOrdersCount" styleClass="info-chip-text" text="0" textFill="#E65100" />
+                                          </children>
+                                       </HBox>
+                                    </children>
+                                 </HBox>
+
+                                 <!-- TableView of Orders -->
+                                 <TableView fx:id="tblOrders" minHeight="420.0" styleClass="custom-table-view" VBox.vgrow="ALWAYS">
+                                    <columns>
+                                       <TableColumn fx:id="colOrderId" maxWidth="100.0" minWidth="85.0" prefWidth="95.0" text="رقم الطلب" />
+                                       <TableColumn fx:id="colOrderCust" minWidth="150.0" prefWidth="180.0" text="اسم العميل" />
+                                       <TableColumn fx:id="colOrderItems" minWidth="260.0" prefWidth="350.0" text="محتويات وأصناف الطلب" />
+                                       <TableColumn fx:id="colOrderTable" minWidth="95.0" prefWidth="110.0" text="رقم الطاولة" />
+                                       <TableColumn fx:id="colOrderTotal" minWidth="100.0" prefWidth="120.0" text="إجمالي الفاتورة" />
+                                       <TableColumn fx:id="colOrderTime" minWidth="110.0" prefWidth="130.0" text="الوقت والتاريخ" />
+                                       <TableColumn fx:id="colOrderStatus" minWidth="100.0" prefWidth="120.0" text="حالة الطلب" />
+                                    </columns>
+                                    <columnResizePolicy>
+                                       <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
+                                 </TableView>
+
+                              </children>
+                           </VBox>
+                        </content>
+                      </Tab>
+
+                      <!-- =========================================================================
+                           TAB 3: TABLES (حالة الطاولات والصالة)
+                           ========================================================================= -->
+                      <Tab text="🪑 حالة الطاولات (Tables)">
+                        <content>
+                           <VBox spacing="14.0">
+                              <padding>
+                                 <Insets bottom="10.0" left="4.0" right="4.0" top="10.0" />
+                              </padding>
+                              <children>
+                                 
+                                 <!-- Table Status Legend & Counters -->
+                                 <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="panel-card">
+                                    <children>
+                                       <Label styleClass="panel-header-title" text="مخطط صالة المطعم ومتابعة الطاولات" />
+                                       <Region HBox.hgrow="ALWAYS" />
+                                       
+                                       <HBox alignment="CENTER" spacing="8.0">
+                                          <children>
+                                             <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                                <children>
+                                                   <Circle fill="#4CAF50" radius="4.0" />
+                                                   <Label styleClass="info-chip-label" text="فارغة ومتاحة (Empty):" />
+                                                   <Label fx:id="lblTablesEmpty" styleClass="info-chip-text" text="6" textFill="#2E7D32" />
+                                                </children>
+                                             </HBox>
+                                             <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                                <children>
+                                                   <Circle fill="#FF9800" radius="4.0" />
+                                                   <Label styleClass="info-chip-label" text="مشغولة بطلب (Assigned):" />
+                                                   <Label fx:id="lblTablesAssigned" styleClass="info-chip-text" text="3" textFill="#E65100" />
+                                                </children>
+                                             </HBox>
+                                             <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                                <children>
+                                                   <Circle fill="#E53935" radius="4.0" />
+                                                   <Label styleClass="info-chip-label" text="محجوزة (Reserved):" />
+                                                   <Label fx:id="lblTablesReserved" styleClass="info-chip-text" text="3" textFill="#D32F2F" />
+                                                </children>
+                                             </HBox>
+                                          </children>
+                                       </HBox>
+                                    </children>
+                                 </HBox>
+
+                                 <!-- Scrollable FlowPane of Tables -->
+                                 <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="main-scroll-pane" VBox.vgrow="ALWAYS">
+                                    <content>
+                                       <FlowPane fx:id="pnlCashierTables" hgap="16.0" vgap="16.0">
+                                          <padding>
+                                             <Insets bottom="12.0" left="6.0" right="6.0" top="6.0" />
+                                          </padding>
+                                       </FlowPane>
+                                    </content>
+                                 </ScrollPane>
+
+                              </children>
+                           </VBox>
+                        </content>
+                      </Tab>
+
+                    </tabs>
+                  </TabPane>
+
+               </children>
+            </VBox>
+         </center>
+
+         <!-- ================= BOTTOM FOOTER BAR ================= -->
+         <bottom>
+            <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="10.0" left="22.0" right="22.0" top="4.0" />
+               </padding>
+               <children>
+                  <HBox alignment="CENTER" spacing="16.0" styleClass="footer-bar">
+                     <children>
+                        <HBox alignment="CENTER" spacing="6.0">
+                           <children>
+                              <Circle fill="#4CAF50" radius="4.0" />
+                              <Label styleClass="footer-text" text="نقطة البيع متصلة بالطابعة وقاعدة البيانات" />
+                           </children>
+                        </HBox>
+                        <Label styleClass="footer-text" text="|" />
+                        <Label styleClass="footer-highlight" text="نظام إدارة المطعم • الكاشير ونقاط البيع" />
+                        <Label styleClass="footer-text" text="|" />
+                        <Label styleClass="footer-text" text="جميع الحقوق محفوظة © 2026" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+         </bottom>
+
+      </BorderPane>
+   </children>
+</AnchorPane>

@@ -1,0 +1,520 @@
+/* ==========================================================================
+   Restaurant Management System - Orange Theme & Arabic Typography
+   With JFoenix Material Design Support
+   ========================================================================== */
+
+.root {
+    -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", "Tahoma", "Dubai", sans-serif;
+    -fx-background-color: linear-gradient(to bottom right, #FFF8F3, #FFF0E6, #FFEADC);
+    -jfx-focus-color: #FF6B00;
+    -jfx-unfocus-color: #FFDEC9;
+}
+
+/* --------------------------------------------------------------------------
+   Top Navigation & Header Bar
+   -------------------------------------------------------------------------- */
+.header-bar {
+    -fx-background-color: rgba(255, 255, 255, 0.94);
+    -fx-background-radius: 22px;
+    -fx-border-color: #FFD8BE;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 22px;
+    -fx-effect: dropshadow(gaussian, rgba(230, 81, 0, 0.08), 20, 0.2, 0, 6);
+    -fx-padding: 12px 24px;
+}
+
+.header-brand-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2B1810;
+}
+
+.header-brand-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #FF6B00;
+    -fx-font-weight: bold;
+}
+
+.info-chip {
+    -fx-background-color: #FFF3EB;
+    -fx-background-radius: 14px;
+    -fx-border-color: #FFDECA;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+    -fx-padding: 6px 14px;
+}
+
+.info-chip-text {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3E2415;
+}
+
+.info-chip-label {
+    -fx-font-size: 10px;
+    -fx-text-fill: #8D6E63;
+}
+
+.live-time-text {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #E65100;
+}
+
+.user-badge {
+    -fx-background-color: linear-gradient(to right, #FF7043, #FF5722);
+    -fx-background-radius: 16px;
+    -fx-padding: 6px 14px;
+    -fx-effect: dropshadow(gaussian, rgba(255, 87, 34, 0.25), 10, 0.2, 0, 3);
+}
+
+.user-badge-name {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+}
+
+.user-badge-role {
+    -fx-font-size: 10px;
+    -fx-text-fill: #FFE0B2;
+}
+
+/* --------------------------------------------------------------------------
+   Dashboard ScrollPane & Containers
+   -------------------------------------------------------------------------- */
+.main-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.main-scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.main-scroll-pane .scroll-bar:vertical,
+.main-scroll-pane .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+    -fx-pref-height: 8px;
+}
+
+.main-scroll-pane .scroll-bar .thumb {
+    -fx-background-color: #FFCCAA;
+    -fx-background-radius: 4px;
+}
+
+.main-scroll-pane .scroll-bar .thumb:hover {
+    -fx-background-color: #FF8F4D;
+}
+
+/* --------------------------------------------------------------------------
+   Interactive Feature Cards (JFXButton Card Styling)
+   -------------------------------------------------------------------------- */
+.dashboard-card-btn {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 20px;
+    -fx-border-color: #FFE3D1;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 20px;
+    -fx-padding: 16px 18px;
+    -fx-cursor: hand;
+    -fx-alignment: top-center;
+    -jfx-rippler-fill: rgba(255, 107, 0, 0.35);
+    -fx-effect: dropshadow(gaussian, rgba(43, 24, 16, 0.05), 16, 0.1, 0, 6);
+}
+
+.dashboard-card-btn:hover {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FF6B00;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 0, 0.28), 24, 0.25, 0, 10);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.dashboard-card-btn:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 0, 0.4), 12, 0.2, 0, 2);
+}
+
+.card-icon-container {
+    -fx-background-color: linear-gradient(to bottom right, #FFF3EB, #FFE6D5);
+    -fx-background-radius: 16px;
+    -fx-border-color: #FFD2B8;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+    -fx-alignment: center;
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
+}
+
+.dashboard-card-btn:hover .card-icon-container {
+    -fx-background-color: linear-gradient(to bottom right, #FF7043, #FF5722);
+    -fx-border-color: #FF5722;
+    -fx-effect: dropshadow(gaussian, rgba(255, 87, 34, 0.35), 12, 0.3, 0, 4);
+}
+
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2B1810;
+}
+
+.dashboard-card-btn:hover .card-title {
+    -fx-text-fill: #E65100;
+}
+
+.card-subtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: #7A6357;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.card-action-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FF6B00;
+}
+
+.dashboard-card-btn:hover .card-action-label {
+    -fx-text-fill: #D84315;
+}
+
+/* --------------------------------------------------------------------------
+   Login Window Components & Form
+   -------------------------------------------------------------------------- */
+.login-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 26px;
+    -fx-border-color: #FFD8BE;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 26px;
+    -fx-effect: dropshadow(gaussian, rgba(230, 81, 0, 0.12), 28, 0.25, 0, 10);
+    -fx-padding: 36px 40px;
+}
+
+.login-header-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2B1810;
+}
+
+.login-header-desc {
+    -fx-font-size: 13px;
+    -fx-text-fill: #8D6E63;
+}
+
+/* JFoenix TextFields & Inputs in Login */
+.jfx-text-field, .jfx-password-field {
+    -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", "Tahoma", sans-serif;
+    -fx-font-size: 13.5px;
+    -fx-text-fill: #2B1810;
+    -fx-prompt-text-fill: #A89084;
+    -jfx-focus-color: #FF6B00;
+    -jfx-unfocus-color: #FFDEC9;
+}
+
+.field-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3E2415;
+}
+
+.show-hide-jfx-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+    -fx-padding: 6px;
+    -jfx-rippler-fill: #FFCCAA;
+}
+
+.show-hide-jfx-btn:hover {
+    -fx-background-color: #FFE6D5;
+}
+
+.login-jfx-button {
+    -fx-background-color: linear-gradient(to right, #FF7043, #FF5722);
+    -fx-background-radius: 14px;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-cursor: hand;
+    -fx-padding: 12px 24px;
+    -jfx-rippler-fill: #FFE0B2;
+    -fx-effect: dropshadow(gaussian, rgba(255, 87, 34, 0.3), 14, 0.2, 0, 4);
+}
+
+.login-jfx-button:hover {
+    -fx-background-color: linear-gradient(to right, #FF8A65, #FF7043);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-effect: dropshadow(gaussian, rgba(255, 87, 34, 0.45), 18, 0.3, 0, 6);
+}
+
+.login-msg-error {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #D32F2F;
+}
+
+.login-msg-success {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #388E3C;
+}
+
+/* --------------------------------------------------------------------------
+   Employees & Management Window Styling (JFoenix Controls)
+   -------------------------------------------------------------------------- */
+.panel-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 20px;
+    -fx-border-color: #FFE3D1;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(43, 24, 16, 0.06), 18, 0.15, 0, 5);
+    -fx-padding: 18px 22px;
+}
+
+.panel-header-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2B1810;
+}
+
+.panel-header-desc {
+    -fx-font-size: 11px;
+    -fx-text-fill: #8D6E63;
+}
+
+/* JFoenix Form Controls */
+.jfx-combo-box {
+    -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", "Tahoma", sans-serif;
+    -fx-font-size: 12.5px;
+    -jfx-focus-color: #FF6B00;
+    -jfx-unfocus-color: #FFDEC9;
+}
+
+.jfx-date-picker {
+    -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", "Tahoma", sans-serif;
+    -fx-font-size: 12.5px;
+    -jfx-default-color: #FF6B00;
+    -jfx-focus-color: #FF6B00;
+    -jfx-unfocus-color: #FFDEC9;
+}
+
+/* JFoenix Checkbox in Orange Theme */
+.jfx-check-box {
+    -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", "Tahoma", sans-serif;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3E2415;
+    -jfx-checked-color: #E65100;
+    -jfx-unchecked-color: #FFB380;
+    -fx-cursor: hand;
+}
+
+.access-rights-box {
+    -fx-background-color: #FFF6F0;
+    -fx-background-radius: 16px;
+    -fx-border-color: #FFD8BE;
+    -fx-border-width: 1.2px;
+    -fx-border-radius: 16px;
+    -fx-padding: 14px 18px;
+}
+
+/* JFoenix CRUD Action Buttons */
+.btn-action-add {
+    -fx-background-color: linear-gradient(to right, #FF7043, #FF5722);
+    -fx-background-radius: 12px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-cursor: hand;
+    -fx-padding: 9px 20px;
+    -jfx-rippler-fill: #FFE0B2;
+    -fx-effect: dropshadow(gaussian, rgba(255, 87, 34, 0.28), 10, 0.2, 0, 3);
+}
+
+.btn-action-add:hover {
+    -fx-background-color: linear-gradient(to right, #FF8A65, #FF7043);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.btn-action-edit {
+    -fx-background-color: linear-gradient(to right, #FFA726, #FB8C00);
+    -fx-background-radius: 12px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-cursor: hand;
+    -fx-padding: 9px 20px;
+    -jfx-rippler-fill: #FFE0B2;
+    -fx-effect: dropshadow(gaussian, rgba(251, 140, 0, 0.28), 10, 0.2, 0, 3);
+}
+
+.btn-action-edit:hover {
+    -fx-background-color: linear-gradient(to right, #FFB74D, #FFA726);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.btn-action-delete {
+    -fx-background-color: linear-gradient(to right, #EF5350, #E53935);
+    -fx-background-radius: 12px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-cursor: hand;
+    -fx-padding: 9px 20px;
+    -jfx-rippler-fill: #FFCDD2;
+    -fx-effect: dropshadow(gaussian, rgba(229, 57, 53, 0.28), 10, 0.2, 0, 3);
+}
+
+.btn-action-delete:hover {
+    -fx-background-color: linear-gradient(to right, #E57373, #EF5350);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.btn-action-clear {
+    -fx-background-color: #FFF3EB;
+    -fx-background-radius: 12px;
+    -fx-border-color: #FFDEC9;
+    -fx-border-width: 1.2px;
+    -fx-border-radius: 12px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6D4C41;
+    -fx-cursor: hand;
+    -fx-padding: 9px 18px;
+    -jfx-rippler-fill: #FFCCAA;
+}
+
+.btn-action-clear:hover {
+    -fx-background-color: #FFE6D5;
+    -fx-border-color: #FF8F4D;
+}
+
+.btn-action-search {
+    -fx-background-color: linear-gradient(to right, #FF7043, #FF5722);
+    -fx-background-radius: 10px;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-cursor: hand;
+    -fx-padding: 7px 16px;
+    -jfx-rippler-fill: #FFE0B2;
+}
+
+.btn-action-search:hover {
+    -fx-background-color: linear-gradient(to right, #FF8A65, #FF7043);
+}
+
+/* --------------------------------------------------------------------------
+   TableView Modern Orange Styling
+   -------------------------------------------------------------------------- */
+.custom-table-view {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 16px;
+    -fx-border-color: #FFD8BE;
+    -fx-border-width: 1.2px;
+    -fx-border-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(43, 24, 16, 0.04), 14, 0.1, 0, 4);
+    -fx-padding: 0;
+}
+
+.custom-table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #FFF3EB, #FFE6D5);
+    -fx-background-radius: 15px 15px 0 0;
+    -fx-border-color: transparent transparent #FFD8BE transparent;
+    -fx-border-width: 1.5px;
+}
+
+.custom-table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2B1810;
+    -fx-padding: 8px 6px;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.custom-table-view .column-header .label {
+    -fx-text-fill: #3E2415;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.custom-table-view .table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: transparent transparent #FFF0E6 transparent;
+    -fx-border-width: 1px;
+    -fx-font-size: 12px;
+    -fx-text-fill: #2B1810;
+    -fx-padding: 3px 0;
+}
+
+.custom-table-view .table-row-cell:odd {
+    -fx-background-color: #FFFCFA;
+}
+
+.custom-table-view .table-row-cell:hover {
+    -fx-background-color: #FFF0E6;
+    -fx-cursor: hand;
+}
+
+.custom-table-view .table-row-cell:selected {
+    -fx-background-color: #FFE0CC;
+    -fx-text-fill: #2B1810;
+}
+
+.custom-table-view .table-row-cell:selected .text {
+    -fx-fill: #BF360C;
+    -fx-font-weight: bold;
+}
+
+.custom-table-view .placeholder .label {
+    -fx-text-fill: #8D6E63;
+    -fx-font-size: 13px;
+}
+
+/* --------------------------------------------------------------------------
+   Footer / Status Bar
+   -------------------------------------------------------------------------- */
+.footer-bar {
+    -fx-background-color: rgba(255, 255, 255, 0.85);
+    -fx-background-radius: 16px;
+    -fx-border-color: #FFE5D4;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+    -fx-padding: 8px 20px;
+}
+
+.footer-status-dot {
+    -fx-background-color: #4CAF50;
+    -fx-background-radius: 50%;
+    -fx-min-width: 10px;
+    -fx-min-height: 10px;
+    -fx-max-width: 10px;
+    -fx-max-height: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.6), 6, 0.4, 0, 0);
+}
+
+.footer-text {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6D4C41;
+}
+
+.footer-highlight {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FF6B00;
+}

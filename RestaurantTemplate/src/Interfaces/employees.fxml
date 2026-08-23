@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXCheckBox?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import com.jfoenix.controls.JFXDatePicker?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.SVGPath?>
+
+<AnchorPane id="AnchorPane" nodeOrientation="RIGHT_TO_LEFT" prefHeight="820.0" prefWidth="1280.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Interfaces.employees">
+   <children>
+      <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         
+         <!-- ================= TOP HEADER BAR ================= -->
+         <top>
+            <VBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="6.0" left="22.0" right="22.0" top="14.0" />
+               </padding>
+               <children>
+                  <HBox alignment="CENTER" maxHeight="74.0" minHeight="68.0" prefHeight="70.0" styleClass="header-bar">
+                     <children>
+                        
+                        <!-- USER BADGE SECTION -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <StackPane style="-fx-background-color: #FFF3EB; -fx-background-radius: 50%; -fx-min-width: 42px; -fx-min-height: 42px; -fx-border-color: #FF7043; -fx-border-radius: 50%; -fx-border-width: 1.5px;">
+                                 <children>
+                                    <SVGPath content="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#E65100" scaleX="1.1" scaleY="1.1" />
+                                 </children>
+                              </StackPane>
+                              <VBox alignment="CENTER_RIGHT" spacing="2.0">
+                                 <children>
+                                    <HBox alignment="CENTER_RIGHT" spacing="6.0">
+                                       <children>
+                                          <Circle fill="#4CAF50" radius="4.0" />
+                                          <Label fx:id="lblUserName" styleClass="info-chip-text" text="كريم الدين" textFill="#2B1810" />
+                                       </children>
+                                    </HBox>
+                                    <Label fx:id="lblUserRole" styleClass="info-chip-label" text="المدير العام • Admin" textFill="#FF6B00" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <!-- BRAND / TITLE CENTER SECTION -->
+                        <HBox alignment="CENTER" spacing="12.0">
+                           <children>
+                              <StackPane style="-fx-background-color: linear-gradient(to bottom right, #FF7043, #E65100); -fx-background-radius: 12px; -fx-min-width: 44px; -fx-min-height: 44px;">
+                                 <children>
+                                    <!-- Employees Team Icon -->
+                                    <SVGPath content="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z" fill="WHITE" scaleX="1.1" scaleY="1.1" />
+                                 </children>
+                              </StackPane>
+                              <VBox alignment="CENTER_RIGHT">
+                                 <children>
+                                    <Label styleClass="header-brand-title" text="شؤون الموظفين" />
+                                    <Label styleClass="header-brand-subtitle" text="إدارة الكادر الوظيفي وصلاحيات النظام" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <!-- DATE & LIVE TIME CHIPS -->
+                        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                           <children>
+                              <!-- DATE CHIP -->
+                              <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="info-chip">
+                                 <children>
+                                    <SVGPath content="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" fill="#E65100" scaleX="0.85" scaleY="0.85" />
+                                    <VBox alignment="CENTER_RIGHT">
+                                       <children>
+                                          <Label fx:id="lblDate" styleClass="info-chip-text" text="السبت، 22 أغسطس 2026" />
+                                          <Label styleClass="info-chip-label" text="تاريخ اليوم" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+
+                              <!-- LIVE CLOCK CHIP -->
+                              <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="info-chip">
+                                 <children>
+                                    <SVGPath content="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="#E65100" scaleX="0.9" scaleY="0.9" />
+                                    <VBox alignment="CENTER_RIGHT">
+                                       <children>
+                                          <Label fx:id="lblTime" styleClass="live-time-text" text="00:00:00 م" />
+                                          <Label styleClass="info-chip-label" text="الوقت المباشر" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </HBox>
+                        
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </top>
+
+         <!-- ================= CENTER CONTENT (SCROLLABLE) ================= -->
+         <center>
+            <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="main-scroll-pane" BorderPane.alignment="CENTER">
+               <content>
+                  <VBox spacing="14.0">
+                     <padding>
+                        <Insets bottom="10.0" left="22.0" right="22.0" top="6.0" />
+                     </padding>
+                     <children>
+                        
+                        <!-- ================= 1. EMPLOYEE FORM & ACCESS RIGHTS PANEL ================= -->
+                        <VBox spacing="12.0" styleClass="panel-card">
+                           <children>
+                              
+                              <!-- PANEL HEADER -->
+                              <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                 <children>
+                                    <SVGPath content="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
+                                    <Label styleClass="panel-header-title" text="بيانات الموظف الأساسية والصلاحيات (JFoenix Material)" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Label fx:id="lblFormStatus" styleClass="panel-header-desc" text="املأ البيانات المطلوبة ثم اضغط إضافة أو تعديل" />
+                                 </children>
+                              </HBox>
+
+                              <!-- 13 INPUT FIELDS GRID (JFOENIX CONTROLS) -->
+                              <GridPane hgap="16.0" vgap="14.0">
+                                 <columnConstraints>
+                                    <ColumnConstraints percentWidth="25.0" />
+                                    <ColumnConstraints percentWidth="25.0" />
+                                    <ColumnConstraints percentWidth="25.0" />
+                                    <ColumnConstraints percentWidth="25.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="58.0" />
+                                    <RowConstraints minHeight="58.0" />
+                                    <RowConstraints minHeight="58.0" />
+                                    <RowConstraints minHeight="58.0" />
+                                 </rowConstraints>
+                                 <children>
+                                    
+                                    <!-- 1. NATIONAL ID -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                       <children>
+                                          <Label styleClass="field-label" text="الرقم القومي / الهوية *" />
+                                          <JFXTextField fx:id="txtNationalId" focusColor="#FF6B00" labelFloat="true" promptText="أدخل الرقم القومي..." unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 2. FULL NAME -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                       <children>
+                                          <Label styleClass="field-label" text="الاسم الكامل *" />
+                                          <JFXTextField fx:id="txtName" focusColor="#FF6B00" labelFloat="true" promptText="أدخل اسم الموظف..." unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 3. JOB TITLE -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                                       <children>
+                                          <Label styleClass="field-label" text="المسمى الوظيفي *" />
+                                          <JFXComboBox fx:id="cbJobTitle" editable="true" focusColor="#FF6B00" labelFloat="true" maxWidth="1.7976931348623157E308" promptText="اختر أو اكتب المسمى..." unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 4. DEPARTMENT -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                                       <children>
+                                          <Label styleClass="field-label" text="القسم / الإدارة *" />
+                                          <JFXComboBox fx:id="cbDepartment" editable="true" focusColor="#FF6B00" labelFloat="true" maxWidth="1.7976931348623157E308" promptText="اختر أو اكتب القسم..." unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 5. PHONE 1 -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                       <children>
+                                          <Label styleClass="field-label" text="رقم الهاتف الأساسي *" />
+                                          <JFXTextField fx:id="txtPhone1" focusColor="#FF6B00" labelFloat="true" promptText="مثال: 01012345678" unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 6. PHONE 2 -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <children>
+                                          <Label styleClass="field-label" text="رقم الهاتف الإضافي" />
+                                          <JFXTextField fx:id="txtPhone2" focusColor="#FF6B00" labelFloat="true" promptText="رقم هاتف بديل..." unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 7. ADDRESS -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <children>
+                                          <Label styleClass="field-label" text="العنوان" />
+                                          <JFXTextField fx:id="txtAddress" focusColor="#FF6B00" labelFloat="true" promptText="المدينة، الشارع، المحافظة..." unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 8. DATE OF BIRTH -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                       <children>
+                                          <Label styleClass="field-label" text="تاريخ الميلاد" />
+                                          <JFXDatePicker fx:id="dpBirthDate" defaultColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="اختر تاريخ الميلاد..." />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 9. USERNAME -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                       <children>
+                                          <Label styleClass="field-label" text="اسم المستخدم للنظام" />
+                                          <JFXTextField fx:id="txtUsername" focusColor="#FF6B00" labelFloat="true" promptText="اسم الدخول للنظام..." unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 10. PASSWORD -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                       <children>
+                                          <Label styleClass="field-label" text="كلمة المرور للنظام" />
+                                          <JFXTextField fx:id="txtPassword" focusColor="#FF6B00" labelFloat="true" promptText="كلمة المرور..." unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 11. SALARY -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                       <children>
+                                          <Label styleClass="field-label" text="الراتب الأساسي (ج.م)" />
+                                          <JFXTextField fx:id="txtSalary" focusColor="#FF6B00" labelFloat="true" promptText="مثال: 6500" unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 12. SALARY DATE -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                       <children>
+                                          <Label styleClass="field-label" text="تاريخ استحقاق الراتب" />
+                                          <JFXDatePicker fx:id="dpSalaryDate" defaultColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="تاريخ الصرف..." />
+                                       </children>
+                                    </VBox>
+
+                                    <!-- 13. BANK ACCOUNT NUMBER -->
+                                    <VBox spacing="2.0" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                                       <children>
+                                          <Label styleClass="field-label" text="رقم الحساب البنكي / المحفظة الإلكترونية" />
+                                          <JFXTextField fx:id="txtBankAccount" focusColor="#FF6B00" labelFloat="true" promptText="مثال: EG12345678901234567890..." unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+
+                                 </children>
+                              </GridPane>
+
+                              <!-- ================= EIGHT ACCESS RIGHTS JFX CHECKBOXES ================= -->
+                              <VBox spacing="8.0" styleClass="access-rights-box">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                       <children>
+                                          <SVGPath content="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" fill="#E65100" scaleX="0.9" scaleY="0.9" />
+                                          <Label styleClass="field-label" text="صلاحيات الوصول للنظام (Access Rights):" textFill="#E65100" />
+                                          <Region HBox.hgrow="ALWAYS" />
+                                          <JFXCheckBox fx:id="chkSelectAll" checkedColor="#E65100" onAction="#handleSelectAllPermissions" styleClass="jfx-check-box" text="تحديد كل الصلاحيات" unCheckedColor="#FFB380" />
+                                       </children>
+                                    </HBox>
+                                    
+                                    <!-- 8 JFX CHECKBOXES -->
+                                    <GridPane hgap="16.0" vgap="8.0">
+                                       <columnConstraints>
+                                          <ColumnConstraints percentWidth="25.0" />
+                                          <ColumnConstraints percentWidth="25.0" />
+                                          <ColumnConstraints percentWidth="25.0" />
+                                          <ColumnConstraints percentWidth="25.0" />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints minHeight="26.0" />
+                                          <RowConstraints minHeight="26.0" />
+                                       </rowConstraints>
+                                       <children>
+                                          <!-- 1. Cashier -->
+                                          <JFXCheckBox fx:id="chkCashier" checkedColor="#E65100" styleClass="jfx-check-box" text="1. الكاشير (Cashier)" unCheckedColor="#FFB380" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                          <!-- 2. Settings -->
+                                          <JFXCheckBox fx:id="chkSettings" checkedColor="#E65100" styleClass="jfx-check-box" text="2. الإعدادات (Settings)" unCheckedColor="#FFB380" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                          <!-- 3. Reports -->
+                                          <JFXCheckBox fx:id="chkReports" checkedColor="#E65100" styleClass="jfx-check-box" text="3. التقارير (Reports)" unCheckedColor="#FFB380" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                          <!-- 4. Sales -->
+                                          <JFXCheckBox fx:id="chkSales" checkedColor="#E65100" styleClass="jfx-check-box" text="4. المبيعات (Sales)" unCheckedColor="#FFB380" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                                          <!-- 5. Employees -->
+                                          <JFXCheckBox fx:id="chkEmployees" checkedColor="#E65100" styleClass="jfx-check-box" text="5. الموظفون (Employees)" unCheckedColor="#FFB380" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                          <!-- 6. Customers -->
+                                          <JFXCheckBox fx:id="chkCustomers" checkedColor="#E65100" styleClass="jfx-check-box" text="6. العملاء (Customers)" unCheckedColor="#FFB380" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                          <!-- 7. Reservations -->
+                                          <JFXCheckBox fx:id="chkReservations" checkedColor="#E65100" styleClass="jfx-check-box" text="7. الحجوزات (Reservations)" unCheckedColor="#FFB380" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                          <!-- 8. Inventory -->
+                                          <JFXCheckBox fx:id="chkInventory" checkedColor="#E65100" styleClass="jfx-check-box" text="8. المخزون (Inventory)" unCheckedColor="#FFB380" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                       </children>
+                                    </GridPane>
+                                 </children>
+                              </VBox>
+
+                              <!-- JFX CRUD ACTION BUTTONS -->
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <children>
+                                    <JFXButton fx:id="btnAdd" buttonType="RAISED" onAction="#handleAddEmployee" ripplerFill="#FFE0B2" styleClass="btn-action-add" text="➕ إضافة موظف جديد" />
+                                    <JFXButton fx:id="btnEdit" buttonType="RAISED" onAction="#handleEditEmployee" ripplerFill="#FFE0B2" styleClass="btn-action-edit" text="✏️ حفظ التعديلات" />
+                                    <JFXButton fx:id="btnDelete" buttonType="RAISED" onAction="#handleDeleteEmployee" ripplerFill="#FFCDD2" styleClass="btn-action-delete" text="🗑️ حذف الموظف المحدد" />
+                                    <JFXButton fx:id="btnClear" onAction="#handleClearFields" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="🔄 تفريغ الحقول" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Label fx:id="lblActionMessage" text="" visible="false" />
+                                 </children>
+                              </HBox>
+
+                           </children>
+                        </VBox>
+
+                        <!-- ================= 2. SEARCH BAR & TABLEVIEW PANEL ================= -->
+                        <VBox spacing="12.0" styleClass="panel-card">
+                           <children>
+                              
+                              <!-- SEARCH BAR & STATS -->
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <children>
+                                    <Label styleClass="panel-header-title" text="قائمة الموظفين المسجلين" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    
+                                    <!-- Search JFX Input Container -->
+                                    <HBox alignment="CENTER_LEFT" maxWidth="420.0" minWidth="320.0" prefWidth="380.0" spacing="8.0">
+                                       <children>
+                                          <SVGPath content="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#FF7043" scaleX="0.95" scaleY="0.95" />
+                                          <JFXTextField fx:id="txtSearch" focusColor="#FF6B00" labelFloat="true" promptText="بحث بالاسم، اسم المستخدم، أو الرقم القومي..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                       </children>
+                                    </HBox>
+
+                                    <JFXButton fx:id="btnSearch" buttonType="RAISED" onAction="#handleSearch" ripplerFill="#FFE0B2" styleClass="btn-action-search" text="بحث 🔍" />
+                                    <JFXButton fx:id="btnClearSearch" onAction="#handleClearSearch" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="عرض الكل" />
+
+                                    <!-- Total Count Badge -->
+                                    <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                       <children>
+                                          <Label styleClass="info-chip-label" text="إجمالي الموظفين:" />
+                                          <Label fx:id="lblTotalCount" styleClass="info-chip-text" text="0" textFill="#E65100" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </HBox>
+
+                              <!-- TABLEVIEW OF EMPLOYEES -->
+                              <!-- Info shown: (ID, National ID, Name, Job Title, Department, Phone 1, Phone 2, Address, Birth Date, Salary, Salary Date) -->
+                              <!-- Excludes: (Password, Username, Access Rights, Bank Account) -->
+                              <TableView fx:id="tblEmployees" minHeight="260.0" prefHeight="300.0" styleClass="custom-table-view">
+                                 <columns>
+                                    <TableColumn fx:id="colSeq" maxWidth="50.0" minWidth="40.0" prefWidth="45.0" text="م" />
+                                    <TableColumn fx:id="colNationalId" minWidth="120.0" prefWidth="130.0" text="الرقم القومي" />
+                                    <TableColumn fx:id="colName" minWidth="150.0" prefWidth="170.0" text="الاسم الكامل" />
+                                    <TableColumn fx:id="colJobTitle" minWidth="110.0" prefWidth="125.0" text="المسمى الوظيفي" />
+                                    <TableColumn fx:id="colDepartment" minWidth="100.0" prefWidth="115.0" text="القسم" />
+                                    <TableColumn fx:id="colPhone1" minWidth="110.0" prefWidth="120.0" text="الهاتف 1" />
+                                    <TableColumn fx:id="colPhone2" minWidth="100.0" prefWidth="110.0" text="الهاتف 2" />
+                                    <TableColumn fx:id="colAddress" minWidth="130.0" prefWidth="150.0" text="العنوان" />
+                                    <TableColumn fx:id="colBirthDate" minWidth="95.0" prefWidth="105.0" text="تاريخ الميلاد" />
+                                    <TableColumn fx:id="colSalary" minWidth="85.0" prefWidth="95.0" text="الراتب" />
+                                    <TableColumn fx:id="colSalaryDate" minWidth="95.0" prefWidth="105.0" text="تاريخ الراتب" />
+                                 </columns>
+                                 <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                 </columnResizePolicy>
+                              </TableView>
+
+                           </children>
+                        </VBox>
+
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </center>
+
+         <!-- ================= BOTTOM FOOTER BAR ================= -->
+         <bottom>
+            <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="10.0" left="22.0" right="22.0" top="4.0" />
+               </padding>
+               <children>
+                  <HBox alignment="CENTER" spacing="16.0" styleClass="footer-bar">
+                     <children>
+                        <HBox alignment="CENTER" spacing="6.0">
+                           <children>
+                              <Circle fill="#4CAF50" radius="4.0" />
+                              <Label styleClass="footer-text" text="وحدة الموارد البشرية متصلة" />
+                           </children>
+                        </HBox>
+                        <Label styleClass="footer-text" text="|" />
+                        <Label styleClass="footer-highlight" text="نظام إدارة المطعم • قسم الموظفين" />
+                        <Label styleClass="footer-text" text="|" />
+                        <Label styleClass="footer-text" text="جميع الحقوق محفوظة © 2026" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+         </bottom>
+
+      </BorderPane>
+   </children>
+</AnchorPane>

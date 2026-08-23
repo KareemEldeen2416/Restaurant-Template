@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXPasswordField?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.SVGPath?>
+
+<AnchorPane id="AnchorPane" nodeOrientation="RIGHT_TO_LEFT" prefHeight="700.0" prefWidth="1000.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Interfaces.login">
+   <children>
+      <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         
+         <!-- ================= TOP HEADER BAR (DATE & TIME ONLY) ================= -->
+         <top>
+            <VBox alignment="CENTER" spacing="12.0" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="10.0" left="25.0" right="25.0" top="18.0" />
+               </padding>
+               <children>
+                  <HBox alignment="CENTER" maxHeight="76.0" minHeight="70.0" prefHeight="74.0" styleClass="header-bar">
+                     <children>
+                        
+                        <!-- DATE CHIP -->
+                        <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="info-chip">
+                           <children>
+                              <SVGPath content="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" fill="#E65100" scaleX="0.9" scaleY="0.9" />
+                              <VBox alignment="CENTER_RIGHT">
+                                 <children>
+                                    <Label fx:id="lblDate" styleClass="info-chip-text" text="السبت، 22 أغسطس 2026" />
+                                    <Label styleClass="info-chip-label" text="تاريخ اليوم" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <!-- BRAND / TITLE CENTER SECTION -->
+                        <HBox alignment="CENTER" spacing="14.0">
+                           <children>
+                              <StackPane style="-fx-background-color: linear-gradient(to bottom right, #FF7043, #E65100); -fx-background-radius: 14px; -fx-min-width: 48px; -fx-min-height: 48px;">
+                                 <children>
+                                    <!-- Fork & Knife Icon -->
+                                    <SVGPath content="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" fill="WHITE" scaleX="1.15" scaleY="1.15" />
+                                 </children>
+                              </StackPane>
+                              <VBox alignment="CENTER_RIGHT">
+                                 <children>
+                                    <Label styleClass="header-brand-title" text="نظام إدارة المطعم" />
+                                    <Label styleClass="header-brand-subtitle" text="بوابة تسجيل الدخول الآمنة" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <!-- LIVE COUNTING TIME CHIP -->
+                        <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="info-chip">
+                           <children>
+                              <SVGPath content="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="#E65100" scaleX="0.95" scaleY="0.95" />
+                              <VBox alignment="CENTER_RIGHT">
+                                 <children>
+                                    <Label fx:id="lblTime" styleClass="live-time-text" text="00:00:00 م" />
+                                    <Label styleClass="info-chip-label" text="الوقت المباشر" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </top>
+
+         <!-- ================= CENTER LOGIN CARD (JFOENIX) ================= -->
+         <center>
+            <VBox alignment="CENTER" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="20.0" left="25.0" right="25.0" top="10.0" />
+               </padding>
+               <children>
+                  <VBox alignment="CENTER" maxWidth="450.0" minWidth="380.0" prefWidth="430.0" spacing="22.0" styleClass="login-card">
+                     <children>
+                        
+                        <!-- AVATAR / ICON BADGE -->
+                        <StackPane style="-fx-background-color: linear-gradient(to bottom right, #FFF3EB, #FFE2CC); -fx-background-radius: 50%; -fx-min-width: 72px; -fx-min-height: 72px; -fx-max-width: 72px; -fx-max-height: 72px; -fx-border-color: #FF8F4D; -fx-border-radius: 50%; -fx-border-width: 2px;">
+                           <children>
+                              <!-- User Avatar SVG -->
+                              <SVGPath content="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#E65100" scaleX="1.6" scaleY="1.6" />
+                           </children>
+                        </StackPane>
+
+                        <!-- TITLE & DESCRIPTION -->
+                        <VBox alignment="CENTER" spacing="4.0">
+                           <children>
+                              <Label styleClass="login-header-title" text="تسجيل الدخول" />
+                              <Label styleClass="login-header-desc" text="أدخل بيانات الحساب للوصول إلى لوحة التحكم" />
+                           </children>
+                        </VBox>
+
+                        <!-- USERNAME JFX TEXT FIELD -->
+                        <VBox alignment="CENTER_RIGHT" spacing="4.0">
+                           <children>
+                              <Label styleClass="field-label" text="اسم المستخدم" />
+                              <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                 <children>
+                                    <SVGPath content="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#FF7043" scaleX="1.1" scaleY="1.1" />
+                                    <JFXTextField fx:id="txtUsername" focusColor="#FF6B00" labelFloat="true" promptText="أدخل اسم المستخدم..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+
+                        <!-- PASSWORD JFX FIELD WITH SHOW/HIDE BUTTON -->
+                        <VBox alignment="CENTER_RIGHT" spacing="4.0">
+                           <children>
+                              <Label styleClass="field-label" text="كلمة المرور" />
+                              <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                 <children>
+                                    <!-- Lock SVG -->
+                                    <SVGPath content="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" fill="#FF7043" scaleX="1.05" scaleY="1.05" />
+                                    
+                                    <!-- STACKED JFX PASSWORD FIELDS (MASKED & PLAIN) -->
+                                    <StackPane alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <JFXPasswordField fx:id="txtPasswordHidden" focusColor="#FF6B00" labelFloat="true" promptText="أدخل كلمة المرور..." unFocusColor="#FFDEC9" />
+                                          <JFXTextField fx:id="txtPasswordVisible" focusColor="#FF6B00" labelFloat="true" promptText="أدخل كلمة المرور..." unFocusColor="#FFDEC9" visible="false" />
+                                       </children>
+                                    </StackPane>
+
+                                    <!-- SHOW / HIDE PASSWORD JFX BUTTON -->
+                                    <JFXButton fx:id="btnTogglePassword" onAction="#handleTogglePassword" styleClass="show-hide-jfx-btn">
+                                       <graphic>
+                                          <!-- Eye Icon -->
+                                          <SVGPath fx:id="svgEyeIcon" content="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="#8D6E63" scaleX="1.1" scaleY="1.1" />
+                                       </graphic>
+                                    </JFXButton>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+
+                        <!-- FEEDBACK MESSAGE LABEL -->
+                        <Label fx:id="lblMessage" alignment="CENTER" maxWidth="1.7976931348623157E308" text="" visible="false" wrapText="true" />
+
+                        <!-- JFX LOGIN BUTTON -->
+                        <JFXButton fx:id="btnLogin" buttonType="RAISED" maxWidth="1.7976931348623157E308" onAction="#handleLogin" prefHeight="48.0" ripplerFill="#FFE0B2" styleClass="login-jfx-button" text="تسجيل الدخول  ➔" />
+
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </center>
+
+         <!-- ================= BOTTOM FOOTER BAR ================= -->
+         <bottom>
+            <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="14.0" left="25.0" right="25.0" top="6.0" />
+               </padding>
+               <children>
+                  <HBox alignment="CENTER" spacing="16.0" styleClass="footer-bar">
+                     <children>
+                        <HBox alignment="CENTER" spacing="6.0">
+                           <children>
+                              <Circle fill="#4CAF50" radius="4.0" />
+                              <Label styleClass="footer-text" text="بوابة النظام آمنة ومحمية" />
+                           </children>
+                        </HBox>
+                        <Label styleClass="footer-text" text="|" />
+                        <Label styleClass="footer-highlight" text="نظام إدارة المطاعم الذكي" />
+                        <Label styleClass="footer-text" text="|" />
+                        <Label styleClass="footer-text" text="جميع الحقوق محفوظة © 2026" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+         </bottom>
+
+      </BorderPane>
+   </children>
+</AnchorPane>

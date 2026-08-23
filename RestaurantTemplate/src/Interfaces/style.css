@@ -210,10 +210,10 @@
     -fx-text-fill: #8D6E63;
 }
 
-/* JFoenix TextFields & Inputs in Login */
+/* JFoenix TextFields & Inputs */
 .jfx-text-field, .jfx-password-field {
     -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", "Tahoma", sans-serif;
-    -fx-font-size: 13.5px;
+    -fx-font-size: 13px;
     -fx-text-fill: #2B1810;
     -fx-prompt-text-fill: #A89084;
     -jfx-focus-color: #FF6B00;
@@ -221,7 +221,7 @@
 }
 
 .field-label {
-    -fx-font-size: 13px;
+    -fx-font-size: 12.5px;
     -fx-font-weight: bold;
     -fx-text-fill: #3E2415;
 }
@@ -270,7 +270,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Employees & Management Window Styling (JFoenix Controls)
+   Panels, Forms & Cards Styling
    -------------------------------------------------------------------------- */
 .panel-card {
     -fx-background-color: #FFFFFF;
@@ -289,11 +289,11 @@
 }
 
 .panel-header-desc {
-    -fx-font-size: 11px;
+    -fx-font-size: 11.5px;
     -fx-text-fill: #8D6E63;
 }
 
-/* JFoenix Form Controls */
+/* JFoenix ComboBox */
 .jfx-combo-box {
     -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", "Tahoma", sans-serif;
     -fx-font-size: 12.5px;
@@ -301,12 +301,58 @@
     -jfx-unfocus-color: #FFDEC9;
 }
 
-.jfx-date-picker {
-    -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", "Tahoma", sans-serif;
+/* Custom Orange DatePicker */
+.material-date-picker {
+    -fx-background-color: #FFFBF8;
+    -fx-background-radius: 10px;
+    -fx-border-color: #FFDEC9;
+    -fx-border-width: 1.2px;
+    -fx-border-radius: 10px;
     -fx-font-size: 12.5px;
-    -jfx-default-color: #FF6B00;
-    -jfx-focus-color: #FF6B00;
-    -jfx-unfocus-color: #FFDEC9;
+    -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", sans-serif;
+}
+
+.material-date-picker:focused {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FF6B00;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 0, 0.2), 6, 0.2, 0, 1);
+}
+
+.material-date-picker > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+.material-date-picker > .arrow-button > .arrow {
+    -fx-background-color: #E65100;
+}
+
+.material-date-picker > .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2B1810;
+    -fx-prompt-text-fill: #A89084;
+}
+
+.date-picker-popup {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 12px;
+    -fx-border-color: #FFD8BE;
+    -fx-border-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(43, 24, 16, 0.15), 14, 0.2, 0, 4);
+}
+
+.date-picker-popup > .month-year-pane {
+    -fx-background-color: linear-gradient(to right, #FFF3EB, #FFE6D5);
+    -fx-background-radius: 12px 12px 0 0;
+}
+
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: #FFE6D5;
+}
+
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: #FF6B00;
+    -fx-text-fill: #FFFFFF;
 }
 
 /* JFoenix Checkbox in Orange Theme */
@@ -416,6 +462,148 @@
 
 .btn-action-search:hover {
     -fx-background-color: linear-gradient(to right, #FF8A65, #FF7043);
+}
+
+/* --------------------------------------------------------------------------
+   KPI Metric Cards (Reports Dashboard)
+   -------------------------------------------------------------------------- */
+.kpi-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18px;
+    -fx-border-color: #FFD8BE;
+    -fx-border-width: 1.2px;
+    -fx-border-radius: 18px;
+    -fx-padding: 14px 18px;
+    -fx-effect: dropshadow(gaussian, rgba(43, 24, 16, 0.05), 14, 0.12, 0, 4);
+}
+
+.kpi-card:hover {
+    -fx-border-color: #FF7043;
+    -fx-effect: dropshadow(gaussian, rgba(255, 112, 67, 0.2), 16, 0.18, 0, 6);
+}
+
+.kpi-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #E65100;
+}
+
+.kpi-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2B1810;
+}
+
+.kpi-subtext {
+    -fx-font-size: 10.5px;
+    -fx-text-fill: #8D6E63;
+}
+
+/* --------------------------------------------------------------------------
+   JavaFX Charts Styling (Orange Restaurant Palette)
+   -------------------------------------------------------------------------- */
+.custom-chart {
+    -fx-background-color: transparent;
+    -fx-padding: 10px;
+}
+
+.custom-chart .chart-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2B1810;
+}
+
+.custom-chart .chart-legend {
+    -fx-background-color: #FFF3EB;
+    -fx-background-radius: 10px;
+    -fx-padding: 6px 12px;
+}
+
+.custom-chart .axis {
+    -fx-tick-label-fill: #5D4037;
+    -fx-tick-label-font-size: 11px;
+    -fx-font-family: "Cairo", "Tajawal", "Segoe UI", sans-serif;
+}
+
+.custom-chart .axis:bottom {
+    -fx-border-color: transparent transparent #FFD8BE transparent;
+}
+
+.custom-chart .axis:left {
+    -fx-border-color: transparent #FFD8BE transparent transparent;
+}
+
+.custom-chart .chart-bar {
+    -fx-background-color: linear-gradient(to top, #FF7043, #FF8F4D);
+    -fx-background-radius: 6px 6px 0 0;
+}
+
+.custom-chart .chart-bar:hover {
+    -fx-background-color: linear-gradient(to top, #E65100, #FF5722);
+}
+
+.custom-chart .chart-series-line {
+    -fx-stroke: #FF6B00;
+    -fx-stroke-width: 3.5px;
+}
+
+.custom-chart .chart-line-symbol {
+    -fx-background-color: #FF5722, #FFFFFF;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 6px;
+    -fx-padding: 5px;
+}
+
+.custom-chart .chart-plot-background {
+    -fx-background-color: #FFFDFB;
+    -fx-background-radius: 12px;
+}
+
+.custom-chart .chart-vertical-grid-lines,
+.custom-chart .chart-horizontal-grid-lines {
+    -fx-stroke: #FFE5D4;
+    -fx-stroke-dash-array: 3 3;
+}
+
+/* --------------------------------------------------------------------------
+   Modern TabPane Styling
+   -------------------------------------------------------------------------- */
+.custom-tab-pane {
+    -fx-tab-min-width: 140px;
+    -fx-tab-max-height: 38px;
+}
+
+.custom-tab-pane .tab-header-area {
+    -fx-padding: 0 0 10px 0;
+}
+
+.custom-tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.custom-tab-pane .tab {
+    -fx-background-color: #FFF3EB;
+    -fx-background-radius: 12px;
+    -fx-border-color: #FFDEC9;
+    -fx-border-radius: 12px;
+    -fx-padding: 6px 16px;
+    -fx-cursor: hand;
+}
+
+.custom-tab-pane .tab:selected {
+    -fx-background-color: linear-gradient(to right, #FF7043, #FF5722);
+    -fx-border-color: #FF5722;
+    -fx-effect: dropshadow(gaussian, rgba(255, 87, 34, 0.25), 8, 0.2, 0, 2);
+}
+
+.custom-tab-pane .tab .tab-label {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3E2415;
+}
+
+.custom-tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #FFFFFF;
 }
 
 /* --------------------------------------------------------------------------

@@ -3,9 +3,9 @@
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXCheckBox?>
 <?import com.jfoenix.controls.JFXComboBox?>
-<?import com.jfoenix.controls.JFXDatePicker?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
@@ -128,26 +128,26 @@
                      <children>
                         
                         <!-- ================= 1. EMPLOYEE FORM & ACCESS RIGHTS PANEL ================= -->
-                        <VBox spacing="12.0" styleClass="panel-card">
+                        <VBox spacing="14.0" styleClass="panel-card">
                            <children>
                               
                               <!-- PANEL HEADER -->
                               <HBox alignment="CENTER_LEFT" spacing="8.0">
                                  <children>
                                     <SVGPath content="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
-                                    <Label styleClass="panel-header-title" text="بيانات الموظف الأساسية والصلاحيات (JFoenix Material)" />
+                                    <Label styleClass="panel-header-title" text="بيانات الموظف الأساسية والصلاحيات" />
                                     <Region HBox.hgrow="ALWAYS" />
                                     <Label fx:id="lblFormStatus" styleClass="panel-header-desc" text="املأ البيانات المطلوبة ثم اضغط إضافة أو تعديل" />
                                  </children>
                               </HBox>
 
-                              <!-- 13 INPUT FIELDS GRID (JFOENIX CONTROLS) -->
-                              <GridPane hgap="16.0" vgap="14.0">
+                              <!-- 13 INPUT FIELDS GRID (NON-FLOATING PROMPTS, FULL-WIDTH BALANCED COLUMNS) -->
+                              <GridPane hgap="18.0" vgap="14.0">
                                  <columnConstraints>
-                                    <ColumnConstraints percentWidth="25.0" />
-                                    <ColumnConstraints percentWidth="25.0" />
-                                    <ColumnConstraints percentWidth="25.0" />
-                                    <ColumnConstraints percentWidth="25.0" />
+                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
                                  </columnConstraints>
                                  <rowConstraints>
                                     <RowConstraints minHeight="58.0" />
@@ -158,106 +158,106 @@
                                  <children>
                                     
                                     <!-- 1. NATIONAL ID -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <VBox spacing="3.0" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
                                        <children>
                                           <Label styleClass="field-label" text="الرقم القومي / الهوية *" />
-                                          <JFXTextField fx:id="txtNationalId" focusColor="#FF6B00" labelFloat="true" promptText="أدخل الرقم القومي..." unFocusColor="#FFDEC9" />
+                                          <JFXTextField fx:id="txtNationalId" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="أدخل الرقم القومي..." unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                     <!-- 2. FULL NAME -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                    <VBox spacing="3.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
                                        <children>
                                           <Label styleClass="field-label" text="الاسم الكامل *" />
-                                          <JFXTextField fx:id="txtName" focusColor="#FF6B00" labelFloat="true" promptText="أدخل اسم الموظف..." unFocusColor="#FFDEC9" />
+                                          <JFXTextField fx:id="txtName" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="أدخل اسم الموظف..." unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                     <!-- 3. JOB TITLE -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                                    <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
                                        <children>
                                           <Label styleClass="field-label" text="المسمى الوظيفي *" />
-                                          <JFXComboBox fx:id="cbJobTitle" editable="true" focusColor="#FF6B00" labelFloat="true" maxWidth="1.7976931348623157E308" promptText="اختر أو اكتب المسمى..." unFocusColor="#FFDEC9" />
+                                          <JFXComboBox fx:id="cbJobTitle" editable="true" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="اختر أو اكتب المسمى..." unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                     <!-- 4. DEPARTMENT -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                                    <VBox spacing="3.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
                                        <children>
                                           <Label styleClass="field-label" text="القسم / الإدارة *" />
-                                          <JFXComboBox fx:id="cbDepartment" editable="true" focusColor="#FF6B00" labelFloat="true" maxWidth="1.7976931348623157E308" promptText="اختر أو اكتب القسم..." unFocusColor="#FFDEC9" />
+                                          <JFXComboBox fx:id="cbDepartment" editable="true" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="اختر أو اكتب القسم..." unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                     <!-- 5. PHONE 1 -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <VBox spacing="3.0" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
                                        <children>
                                           <Label styleClass="field-label" text="رقم الهاتف الأساسي *" />
-                                          <JFXTextField fx:id="txtPhone1" focusColor="#FF6B00" labelFloat="true" promptText="مثال: 01012345678" unFocusColor="#FFDEC9" />
+                                          <JFXTextField fx:id="txtPhone1" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="مثال: 01012345678" unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                     <!-- 6. PHONE 2 -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <VBox spacing="3.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
                                        <children>
                                           <Label styleClass="field-label" text="رقم الهاتف الإضافي" />
-                                          <JFXTextField fx:id="txtPhone2" focusColor="#FF6B00" labelFloat="true" promptText="رقم هاتف بديل..." unFocusColor="#FFDEC9" />
+                                          <JFXTextField fx:id="txtPhone2" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="رقم هاتف بديل..." unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                     <!-- 7. ADDRESS -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                    <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
                                        <children>
                                           <Label styleClass="field-label" text="العنوان" />
-                                          <JFXTextField fx:id="txtAddress" focusColor="#FF6B00" labelFloat="true" promptText="المدينة، الشارع، المحافظة..." unFocusColor="#FFDEC9" />
+                                          <JFXTextField fx:id="txtAddress" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="المدينة، الشارع، المحافظة..." unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                     <!-- 8. DATE OF BIRTH -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                    <VBox spacing="3.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
                                        <children>
                                           <Label styleClass="field-label" text="تاريخ الميلاد" />
-                                          <JFXDatePicker fx:id="dpBirthDate" defaultColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="اختر تاريخ الميلاد..." />
+                                          <DatePicker fx:id="dpBirthDate" maxWidth="1.7976931348623157E308" promptText="اختر تاريخ الميلاد..." styleClass="material-date-picker" />
                                        </children>
                                     </VBox>
 
                                     <!-- 9. USERNAME -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                    <VBox spacing="3.0" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2">
                                        <children>
                                           <Label styleClass="field-label" text="اسم المستخدم للنظام" />
-                                          <JFXTextField fx:id="txtUsername" focusColor="#FF6B00" labelFloat="true" promptText="اسم الدخول للنظام..." unFocusColor="#FFDEC9" />
+                                          <JFXTextField fx:id="txtUsername" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="اسم الدخول للنظام..." unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                     <!-- 10. PASSWORD -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <VBox spacing="3.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2">
                                        <children>
                                           <Label styleClass="field-label" text="كلمة المرور للنظام" />
-                                          <JFXTextField fx:id="txtPassword" focusColor="#FF6B00" labelFloat="true" promptText="كلمة المرور..." unFocusColor="#FFDEC9" />
+                                          <JFXTextField fx:id="txtPassword" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="كلمة المرور..." unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                     <!-- 11. SALARY -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                    <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2">
                                        <children>
                                           <Label styleClass="field-label" text="الراتب الأساسي (ج.م)" />
-                                          <JFXTextField fx:id="txtSalary" focusColor="#FF6B00" labelFloat="true" promptText="مثال: 6500" unFocusColor="#FFDEC9" />
+                                          <JFXTextField fx:id="txtSalary" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="مثال: 6500" unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                     <!-- 12. SALARY DATE -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                    <VBox spacing="3.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2">
                                        <children>
                                           <Label styleClass="field-label" text="تاريخ استحقاق الراتب" />
-                                          <JFXDatePicker fx:id="dpSalaryDate" defaultColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="تاريخ الصرف..." />
+                                          <DatePicker fx:id="dpSalaryDate" maxWidth="1.7976931348623157E308" promptText="تاريخ الصرف..." styleClass="material-date-picker" />
                                        </children>
                                     </VBox>
 
-                                    <!-- 13. BANK ACCOUNT NUMBER -->
-                                    <VBox spacing="2.0" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                                    <!-- 13. BANK ACCOUNT NUMBER (Spans 2 columns) -->
+                                    <VBox spacing="3.0" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3">
                                        <children>
                                           <Label styleClass="field-label" text="رقم الحساب البنكي / المحفظة الإلكترونية" />
-                                          <JFXTextField fx:id="txtBankAccount" focusColor="#FF6B00" labelFloat="true" promptText="مثال: EG12345678901234567890..." unFocusColor="#FFDEC9" />
+                                          <JFXTextField fx:id="txtBankAccount" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="مثال: EG12345678901234567890..." unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
@@ -276,13 +276,13 @@
                                        </children>
                                     </HBox>
                                     
-                                    <!-- 8 JFX CHECKBOXES -->
-                                    <GridPane hgap="16.0" vgap="8.0">
+                                    <!-- 8 JFX CHECKBOXES (BALANCED 4 COLUMNS) -->
+                                    <GridPane hgap="18.0" vgap="10.0">
                                        <columnConstraints>
-                                          <ColumnConstraints percentWidth="25.0" />
-                                          <ColumnConstraints percentWidth="25.0" />
-                                          <ColumnConstraints percentWidth="25.0" />
-                                          <ColumnConstraints percentWidth="25.0" />
+                                          <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                                          <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                                          <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                                          <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
                                        </columnConstraints>
                                        <rowConstraints>
                                           <RowConstraints minHeight="26.0" />
@@ -290,21 +290,21 @@
                                        </rowConstraints>
                                        <children>
                                           <!-- 1. Cashier -->
-                                          <JFXCheckBox fx:id="chkCashier" checkedColor="#E65100" styleClass="jfx-check-box" text="1. الكاشير (Cashier)" unCheckedColor="#FFB380" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                          <JFXCheckBox fx:id="chkCashier" checkedColor="#E65100" maxWidth="1.7976931348623157E308" styleClass="jfx-check-box" text="1. الكاشير (Cashier)" unCheckedColor="#FFB380" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                                           <!-- 2. Settings -->
-                                          <JFXCheckBox fx:id="chkSettings" checkedColor="#E65100" styleClass="jfx-check-box" text="2. الإعدادات (Settings)" unCheckedColor="#FFB380" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                          <JFXCheckBox fx:id="chkSettings" checkedColor="#E65100" maxWidth="1.7976931348623157E308" styleClass="jfx-check-box" text="2. الإعدادات (Settings)" unCheckedColor="#FFB380" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                                           <!-- 3. Reports -->
-                                          <JFXCheckBox fx:id="chkReports" checkedColor="#E65100" styleClass="jfx-check-box" text="3. التقارير (Reports)" unCheckedColor="#FFB380" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                          <JFXCheckBox fx:id="chkReports" checkedColor="#E65100" maxWidth="1.7976931348623157E308" styleClass="jfx-check-box" text="3. التقارير (Reports)" unCheckedColor="#FFB380" GridPane.columnIndex="2" GridPane.rowIndex="0" />
                                           <!-- 4. Sales -->
-                                          <JFXCheckBox fx:id="chkSales" checkedColor="#E65100" styleClass="jfx-check-box" text="4. المبيعات (Sales)" unCheckedColor="#FFB380" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                                          <JFXCheckBox fx:id="chkSales" checkedColor="#E65100" maxWidth="1.7976931348623157E308" styleClass="jfx-check-box" text="4. المبيعات (Sales)" unCheckedColor="#FFB380" GridPane.columnIndex="3" GridPane.rowIndex="0" />
                                           <!-- 5. Employees -->
-                                          <JFXCheckBox fx:id="chkEmployees" checkedColor="#E65100" styleClass="jfx-check-box" text="5. الموظفون (Employees)" unCheckedColor="#FFB380" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                          <JFXCheckBox fx:id="chkEmployees" checkedColor="#E65100" maxWidth="1.7976931348623157E308" styleClass="jfx-check-box" text="5. الموظفون (Employees)" unCheckedColor="#FFB380" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                                           <!-- 6. Customers -->
-                                          <JFXCheckBox fx:id="chkCustomers" checkedColor="#E65100" styleClass="jfx-check-box" text="6. العملاء (Customers)" unCheckedColor="#FFB380" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                          <JFXCheckBox fx:id="chkCustomers" checkedColor="#E65100" maxWidth="1.7976931348623157E308" styleClass="jfx-check-box" text="6. العملاء (Customers)" unCheckedColor="#FFB380" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                           <!-- 7. Reservations -->
-                                          <JFXCheckBox fx:id="chkReservations" checkedColor="#E65100" styleClass="jfx-check-box" text="7. الحجوزات (Reservations)" unCheckedColor="#FFB380" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                          <JFXCheckBox fx:id="chkReservations" checkedColor="#E65100" maxWidth="1.7976931348623157E308" styleClass="jfx-check-box" text="7. الحجوزات (Reservations)" unCheckedColor="#FFB380" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                           <!-- 8. Inventory -->
-                                          <JFXCheckBox fx:id="chkInventory" checkedColor="#E65100" styleClass="jfx-check-box" text="8. المخزون (Inventory)" unCheckedColor="#FFB380" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                          <JFXCheckBox fx:id="chkInventory" checkedColor="#E65100" maxWidth="1.7976931348623157E308" styleClass="jfx-check-box" text="8. المخزون (Inventory)" unCheckedColor="#FFB380" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                                        </children>
                                     </GridPane>
                                  </children>
@@ -336,10 +336,10 @@
                                     <Region HBox.hgrow="ALWAYS" />
                                     
                                     <!-- Search JFX Input Container -->
-                                    <HBox alignment="CENTER_LEFT" maxWidth="420.0" minWidth="320.0" prefWidth="380.0" spacing="8.0">
+                                    <HBox alignment="CENTER_LEFT" maxWidth="450.0" minWidth="320.0" prefWidth="380.0" spacing="8.0">
                                        <children>
                                           <SVGPath content="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#FF7043" scaleX="0.95" scaleY="0.95" />
-                                          <JFXTextField fx:id="txtSearch" focusColor="#FF6B00" labelFloat="true" promptText="بحث بالاسم، اسم المستخدم، أو الرقم القومي..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                          <JFXTextField fx:id="txtSearch" focusColor="#FF6B00" promptText="بحث بالاسم، اسم المستخدم، أو الرقم القومي..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
                                        </children>
                                     </HBox>
 
@@ -357,8 +357,6 @@
                               </HBox>
 
                               <!-- TABLEVIEW OF EMPLOYEES -->
-                              <!-- Info shown: (ID, National ID, Name, Job Title, Department, Phone 1, Phone 2, Address, Birth Date, Salary, Salary Date) -->
-                              <!-- Excludes: (Password, Username, Access Rights, Bank Account) -->
                               <TableView fx:id="tblEmployees" minHeight="260.0" prefHeight="300.0" styleClass="custom-table-view">
                                  <columns>
                                     <TableColumn fx:id="colSeq" maxWidth="50.0" minWidth="40.0" prefWidth="45.0" text="م" />

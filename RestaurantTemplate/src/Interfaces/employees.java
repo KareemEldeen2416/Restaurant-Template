@@ -3,7 +3,6 @@ package Interfaces;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXComboBox;
-import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
 import java.net.URL;
 import java.time.LocalDate;
@@ -26,6 +25,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -33,11 +33,11 @@ import javafx.scene.control.TextField;
 import javafx.util.Duration;
 
 /**
- * Controller for the Employees Management Window with JFoenix Material Controls.
+ * Controller for the Employees Management Window.
  * Features:
  * - Live Arabic clock & date in the top bar.
- * - 13 JFoenix Form Fields for employee data.
- * - 8 JFoenix Checkboxes for access rights permissions.
+ * - 13 Form Fields for employee data.
+ * - 8 Checkboxes for access rights permissions.
  * - Search by Name, Username, and National ID.
  * - CRUD operations (Add, Edit, Delete, Clear).
  * - Filtered TableView showing employee data except sensitive/security fields.
@@ -55,7 +55,7 @@ public class employees implements Initializable {
     @FXML private Label lblTime;
 
     // =========================================================================
-    // FXML Form Inputs (13 JFoenix Fields)
+    // FXML Form Inputs (13 Fields)
     // =========================================================================
     @FXML private JFXTextField txtNationalId;
     @FXML private JFXTextField txtName;
@@ -64,11 +64,11 @@ public class employees implements Initializable {
     @FXML private JFXTextField txtPhone1;
     @FXML private JFXTextField txtPhone2;
     @FXML private JFXTextField txtAddress;
-    @FXML private JFXDatePicker dpBirthDate;
+    @FXML private DatePicker dpBirthDate;
     @FXML private JFXTextField txtUsername;
     @FXML private JFXTextField txtPassword;
     @FXML private JFXTextField txtSalary;
-    @FXML private JFXDatePicker dpSalaryDate;
+    @FXML private DatePicker dpSalaryDate;
     @FXML private JFXTextField txtBankAccount;
 
     // =========================================================================

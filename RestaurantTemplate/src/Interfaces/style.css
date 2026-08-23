@@ -375,6 +375,19 @@
     -fx-padding: 14px 18px;
 }
 
+/* JFoenix ToggleButton */
+.jfx-toggle-button {
+    -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2B1810;
+    -jfx-toggle-color: #FF6B00;
+    -jfx-toggle-line-color: #FFCCAA;
+    -jfx-untoggle-color: #CFD8DC;
+    -jfx-untoggle-line-color: #ECEFF1;
+    -fx-cursor: hand;
+}
+
 /* JFoenix CRUD Action Buttons */
 .btn-action-add {
     -fx-background-color: linear-gradient(to right, #FF7043, #FF5722);
@@ -854,6 +867,154 @@
     -fx-text-fill: #2E7D32;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
+}
+
+/* --------------------------------------------------------------------------
+   Support & Contact Channels Styling
+   -------------------------------------------------------------------------- */
+.support-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 20px;
+    -fx-border-color: #FFE3D1;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 20px;
+    -fx-padding: 20px 24px;
+    -fx-effect: dropshadow(gaussian, rgba(43, 24, 16, 0.06), 18, 0.15, 0, 5);
+}
+
+.support-contact-chip {
+    -fx-background-color: #FFF6F0;
+    -fx-background-radius: 16px;
+    -fx-border-color: #FFDEC9;
+    -fx-border-width: 1.2px;
+    -fx-border-radius: 16px;
+    -fx-padding: 14px 18px;
+    -fx-cursor: hand;
+}
+
+.support-contact-chip:hover {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FF7043;
+    -fx-effect: dropshadow(gaussian, rgba(255, 112, 67, 0.25), 14, 0.2, 0, 4);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.btn-social-fb {
+    -fx-background-color: #1877F2;
+    -fx-background-radius: 12px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-cursor: hand;
+    -fx-padding: 9px 18px;
+    -jfx-rippler-fill: #BBDEFB;
+}
+
+.btn-social-fb:hover {
+    -fx-background-color: #166FE5;
+    -fx-scale-x: 1.03;
+}
+
+.btn-social-insta {
+    -fx-background-color: linear-gradient(to right, #833AB4, #FD1D1D, #FCB045);
+    -fx-background-radius: 12px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-cursor: hand;
+    -fx-padding: 9px 18px;
+    -jfx-rippler-fill: #FFE0B2;
+}
+
+.btn-social-insta:hover {
+    -fx-scale-x: 1.03;
+}
+
+.btn-social-linkedin {
+    -fx-background-color: #0A66C2;
+    -fx-background-radius: 12px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-cursor: hand;
+    -fx-padding: 9px 18px;
+    -jfx-rippler-fill: #B3E5FC;
+}
+
+.btn-social-linkedin:hover {
+    -fx-background-color: #084E96;
+    -fx-scale-x: 1.03;
+}
+
+.btn-website {
+    -fx-background-color: linear-gradient(to right, #FF7043, #FF5722);
+    -fx-background-radius: 12px;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-cursor: hand;
+    -fx-padding: 10px 22px;
+    -jfx-rippler-fill: #FFE0B2;
+    -fx-effect: dropshadow(gaussian, rgba(255, 87, 34, 0.3), 10, 0.2, 0, 3);
+}
+
+.btn-website:hover {
+    -fx-background-color: linear-gradient(to right, #FF8A65, #FF7043);
+    -fx-scale-x: 1.03;
+}
+
+/* --------------------------------------------------------------------------
+   Dark Mode Classes (When Dark Mode Toggle is Activated)
+   -------------------------------------------------------------------------- */
+.dark-theme {
+    -fx-background-color: linear-gradient(to bottom right, #1E1B18, #25201B, #1A1613);
+}
+
+.dark-theme .header-bar {
+    -fx-background-color: rgba(38, 33, 28, 0.95);
+    -fx-border-color: #4E382A;
+}
+
+.dark-theme .header-brand-title {
+    -fx-text-fill: #FFF3EB;
+}
+
+.dark-theme .panel-card,
+.dark-theme .support-card,
+.dark-theme .login-card,
+.dark-theme .pos-cart-panel,
+.dark-theme .custom-table-view,
+.dark-theme .kpi-card {
+    -fx-background-color: #2D2620;
+    -fx-border-color: #4E382A;
+}
+
+.dark-theme .panel-header-title,
+.dark-theme .card-title,
+.dark-theme .field-label,
+.dark-theme .jfx-text-field,
+.dark-theme .jfx-password-field,
+.dark-theme .table-title-text,
+.dark-theme .info-chip-text {
+    -fx-text-fill: #FFF3EB;
+}
+
+.dark-theme .info-chip,
+.dark-theme .cart-summary-box,
+.dark-theme .access-rights-box,
+.dark-theme .support-contact-chip {
+    -fx-background-color: #382F27;
+    -fx-border-color: #5A4232;
+}
+
+.dark-theme .footer-bar {
+    -fx-background-color: rgba(38, 33, 28, 0.9);
+    -fx-border-color: #4E382A;
+}
+
+.dark-theme .footer-text {
+    -fx-text-fill: #D7CCC8;
 }
 
 /* --------------------------------------------------------------------------

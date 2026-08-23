@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import com.jfoenix.controls.JFXToggleButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.SVGPath?>
+
+<AnchorPane id="AnchorPane" fx:id="rootPane" nodeOrientation="RIGHT_TO_LEFT" prefHeight="800.0" prefWidth="1200.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Interfaces.settings">
+   <children>
+      <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         
+         <!-- ================= TOP HEADER BAR ================= -->
+         <top>
+            <VBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="6.0" left="22.0" right="22.0" top="14.0" />
+               </padding>
+               <children>
+                  <HBox alignment="CENTER" maxHeight="74.0" minHeight="68.0" prefHeight="70.0" styleClass="header-bar">
+                     <children>
+                        
+                        <!-- USER BADGE SECTION -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <StackPane style="-fx-background-color: #FFF3EB; -fx-background-radius: 50%; -fx-min-width: 42px; -fx-min-height: 42px; -fx-border-color: #FF7043; -fx-border-radius: 50%; -fx-border-width: 1.5px;">
+                                 <children>
+                                    <SVGPath content="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#E65100" scaleX="1.1" scaleY="1.1" />
+                                 </children>
+                              </StackPane>
+                              <VBox alignment="CENTER_RIGHT" spacing="2.0">
+                                 <children>
+                                    <HBox alignment="CENTER_RIGHT" spacing="6.0">
+                                       <children>
+                                          <Circle fill="#4CAF50" radius="4.0" />
+                                          <Label fx:id="lblUserName" styleClass="info-chip-text" text="كريم الدين" textFill="#2B1810" />
+                                       </children>
+                                    </HBox>
+                                    <Label fx:id="lblUserRole" styleClass="info-chip-label" text="المدير العام • Admin" textFill="#FF6B00" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <!-- BRAND / TITLE CENTER SECTION -->
+                        <HBox alignment="CENTER" spacing="12.0">
+                           <children>
+                              <StackPane style="-fx-background-color: linear-gradient(to bottom right, #FF7043, #E65100); -fx-background-radius: 12px; -fx-min-width: 44px; -fx-min-height: 44px;">
+                                 <children>
+                                    <!-- Settings Gear SVG -->
+                                    <SVGPath content="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" fill="WHITE" scaleX="1.1" scaleY="1.1" />
+                                 </children>
+                              </StackPane>
+                              <VBox alignment="CENTER_RIGHT">
+                                 <children>
+                                    <Label styleClass="header-brand-title" text="إعدادات النظام والبرنامج" />
+                                    <Label styleClass="header-brand-subtitle" text="تفعيل النسخة، المظهر، وتفضيلات التشغيل" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <!-- DATE & LIVE TIME CHIPS -->
+                        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                           <children>
+                              <!-- DATE CHIP -->
+                              <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="info-chip">
+                                 <children>
+                                    <SVGPath content="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" fill="#E65100" scaleX="0.85" scaleY="0.85" />
+                                    <VBox alignment="CENTER_RIGHT">
+                                       <children>
+                                          <Label fx:id="lblDate" styleClass="info-chip-text" text="السبت، 22 أغسطس 2026" />
+                                          <Label styleClass="info-chip-label" text="تاريخ اليوم" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+
+                              <!-- LIVE CLOCK CHIP -->
+                              <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="info-chip">
+                                 <children>
+                                    <SVGPath content="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="#E65100" scaleX="0.9" scaleY="0.9" />
+                                    <VBox alignment="CENTER_RIGHT">
+                                       <children>
+                                          <Label fx:id="lblTime" styleClass="live-time-text" text="00:00:00 م" />
+                                          <Label styleClass="info-chip-label" text="الوقت المباشر" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </HBox>
+                        
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </top>
+
+         <!-- ================= CENTER CONTENT (SCROLLABLE) ================= -->
+         <center>
+            <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="main-scroll-pane" BorderPane.alignment="CENTER">
+               <content>
+                  <VBox maxWidth="900.0" spacing="18.0">
+                     <padding>
+                        <Insets bottom="20.0" left="30.0" right="30.0" top="12.0" />
+                     </padding>
+                     <children>
+                        
+                        <!-- ================= 1. SOFTWARE ACTIVATION PANEL ================= -->
+                        <VBox spacing="14.0" styleClass="panel-card">
+                           <children>
+                              
+                              <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                 <children>
+                                    <StackPane style="-fx-background-color: #FFF3EB; -fx-background-radius: 10px; -fx-min-width: 36px; -fx-min-height: 36px;">
+                                       <children>
+                                          <SVGPath content="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
+                                       </children>
+                                    </StackPane>
+                                    <VBox>
+                                       <children>
+                                          <Label styleClass="panel-header-title" text="تفعيل وترخيص البرنامج (Software Activation)" />
+                                          <Label styleClass="panel-header-desc" text="أدخل مفتاح الترخيص الخاص بمؤسستك لتفعيل كافة الميزات السحابية وقاعدة البيانات" />
+                                       </children>
+                                    </VBox>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <!-- License Status Badge -->
+                                    <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                       <children>
+                                          <Circle fill="#4CAF50" radius="4.0" />
+                                          <Label fx:id="lblLicenseStatus" styleClass="info-chip-text" text="النسخة مرخصة ومفعلة" textFill="#2E7D32" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </HBox>
+
+                              <!-- ACTIVATION KEY FIELD -->
+                              <VBox spacing="6.0">
+                                 <children>
+                                    <Label styleClass="field-label" text="مفتاح تفعيل البرنامج (Software Activation Key) *" />
+                                    <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                       <children>
+                                          <JFXTextField fx:id="txtActivationKey" focusColor="#FF6B00" promptText="مثال: REST-2026-PROX-9988-ABCD-EFGH" text="REST-2026-PROX-9988-ABCD-EFGH" unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                          <JFXButton fx:id="btnActivate" buttonType="RAISED" onAction="#handleActivateKey" ripplerFill="#FFE0B2" styleClass="btn-action-add" text="🔑 تفعيل الترخيص" />
+                                          <JFXButton fx:id="btnCheckKey" onAction="#handleCheckKey" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="تحقق من الصلاحية" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+
+                              <Label fx:id="lblActivationMsg" styleClass="login-msg-success" text="✔ الترخيص الحالي مفعل وصالح حتى: 31 ديسمبر 2030 (مدى الحياة)" />
+
+                           </children>
+                        </VBox>
+
+                        <!-- ================= 2. APPEARANCE & DARK MODE PANEL ================= -->
+                        <VBox spacing="14.0" styleClass="panel-card">
+                           <children>
+                              
+                              <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                 <children>
+                                    <StackPane style="-fx-background-color: #FFF3EB; -fx-background-radius: 10px; -fx-min-width: 36px; -fx-min-height: 36px;">
+                                       <children>
+                                          <SVGPath content="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
+                                       </children>
+                                    </StackPane>
+                                    <VBox>
+                                       <children>
+                                          <Label styleClass="panel-header-title" text="المظهر والوضع الليلي (Appearance &amp; Dark Mode)" />
+                                          <Label styleClass="panel-header-desc" text="التحكم في سمة النظام لتوفير تجربة مريحة للعين أثناء فترات العمل المسائية" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+
+                              <!-- JFX TOGGLE BUTTON FOR DARK MODE -->
+                              <HBox alignment="CENTER_LEFT" spacing="14.0" styleClass="access-rights-box">
+                                 <children>
+                                    <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label styleClass="field-label" text="تفعيل الوضع الليلي الداكن (Dark Mode)" />
+                                          <Label fx:id="lblDarkModeDesc" styleClass="info-chip-label" text="الوضع المضيء (Light Theme) مفعل حاليًا" />
+                                       </children>
+                                    </VBox>
+                                    
+                                    <!-- The Requested JFXToggleButton -->
+                                    <JFXToggleButton fx:id="tglDarkMode" onAction="#handleToggleDarkMode" styleClass="jfx-toggle-button" text="الوضع الليلي" toggleColor="#FF6B00" toggleLineColor="#FFCCAA" unToggleColor="#CFD8DC" unToggleLineColor="#ECEFF1" />
+                                 </children>
+                              </HBox>
+
+                           </children>
+                        </VBox>
+
+                        <!-- ================= 3. GENERAL RESTAURANT PREFERENCES ================= -->
+                        <VBox spacing="14.0" styleClass="panel-card">
+                           <children>
+                              
+                              <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                 <children>
+                                    <StackPane style="-fx-background-color: #FFF3EB; -fx-background-radius: 10px; -fx-min-width: 36px; -fx-min-height: 36px;">
+                                       <children>
+                                          <SVGPath content="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
+                                       </children>
+                                    </StackPane>
+                                    <VBox>
+                                       <children>
+                                          <Label styleClass="panel-header-title" text="تفضيلات وبيانات المطعم العامة" />
+                                          <Label styleClass="panel-header-desc" text="الاسم التجاري، العملة المستخدمة، ونسبة ضريبة القيمة المضافة" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+
+                              <HBox spacing="16.0">
+                                 <children>
+                                    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label styleClass="field-label" text="اسم المطعم التجاري:" />
+                                          <JFXTextField fx:id="txtRestaurantName" focusColor="#FF6B00" promptText="اسم المطعم..." text="مطعم وكافيه لوتس للمأكولات الفاخرة" unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+                                    <VBox spacing="4.0" prefWidth="180.0">
+                                       <children>
+                                          <Label styleClass="field-label" text="العملة الرسمية:" />
+                                          <JFXTextField fx:id="txtCurrency" focusColor="#FF6B00" text="ج.م (EGP)" unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+                                    <VBox spacing="4.0" prefWidth="160.0">
+                                       <children>
+                                          <Label styleClass="field-label" text="ضريبة القيمة المضافة:" />
+                                          <JFXTextField fx:id="txtVat" focusColor="#FF6B00" text="14%" unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <children>
+                                    <JFXButton fx:id="btnSaveSettings" buttonType="RAISED" onAction="#handleSaveSettings" ripplerFill="#FFE0B2" styleClass="btn-action-add" text="💾 حفظ وتطبيق الإعدادات" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Label fx:id="lblSettingsSavedMsg" styleClass="login-msg-success" text="" visible="false" />
+                                 </children>
+                              </HBox>
+
+                           </children>
+                        </VBox>
+
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </center>
+
+         <!-- ================= BOTTOM FOOTER BAR ================= -->
+         <bottom>
+            <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="10.0" left="22.0" right="22.0" top="4.0" />
+               </padding>
+               <children>
+                  <HBox alignment="CENTER" spacing="16.0" styleClass="footer-bar">
+                     <children>
+                        <HBox alignment="CENTER" spacing="6.0">
+                           <children>
+                              <Circle fill="#4CAF50" radius="4.0" />
+                              <Label styleClass="footer-text" text="الإعدادات متصلة بملف التهيئة المحلي" />
+                           </children>
+                        </HBox>
+                        <Label styleClass="footer-text" text="|" />
+                        <Label styleClass="footer-highlight" text="نظام إدارة المطعم • لوحة الإعدادات والتهيئة" />
+                        <Label styleClass="footer-text" text="|" />
+                        <Label styleClass="footer-text" text="جميع الحقوق محفوظة © 2026" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+         </bottom>
+
+      </BorderPane>
+   </children>
+</AnchorPane>

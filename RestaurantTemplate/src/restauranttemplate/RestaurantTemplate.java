@@ -18,7 +18,7 @@ public class RestaurantTemplate extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/reservations.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/inventory.fxml"));
             Parent root = loader.load();
 
             Scene scene = new Scene(root, 1000, 700);

@@ -607,6 +607,81 @@
 }
 
 /* --------------------------------------------------------------------------
+   Interactive Table Cards (Reservations Floor Plan)
+   -------------------------------------------------------------------------- */
+.table-card-btn {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18px;
+    -fx-border-color: #FFE3D1;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 18px;
+    -fx-padding: 14px 16px;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+    -jfx-rippler-fill: rgba(255, 107, 0, 0.25);
+    -fx-effect: dropshadow(gaussian, rgba(43, 24, 16, 0.05), 14, 0.12, 0, 4);
+    -fx-min-width: 200px;
+    -fx-pref-width: 230px;
+    -fx-min-height: 135px;
+}
+
+.table-card-btn:hover {
+    -fx-border-color: #FF7043;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 0, 0.25), 18, 0.25, 0, 6);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.table-card-available {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #C8E6C9;
+    -fx-border-width: 1.5px;
+}
+
+.table-card-reserved {
+    -fx-background-color: #FFFBF9;
+    -fx-border-color: #FFAB91;
+    -fx-border-width: 1.5px;
+}
+
+.table-card-selected {
+    -fx-background-color: #FFF3EB;
+    -fx-border-color: #E65100;
+    -fx-border-width: 2.2px;
+    -fx-effect: dropshadow(gaussian, rgba(230, 81, 0, 0.35), 18, 0.25, 0, 4);
+}
+
+.badge-available {
+    -fx-background-color: #E8F5E9;
+    -fx-background-radius: 10px;
+    -fx-padding: 4px 10px;
+    -fx-text-fill: #2E7D32;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.badge-reserved {
+    -fx-background-color: #FBE9E7;
+    -fx-background-radius: 10px;
+    -fx-padding: 4px 10px;
+    -fx-text-fill: #D84315;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.table-title-text {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2B1810;
+}
+
+.table-chairs-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7A6357;
+    -fx-font-weight: bold;
+}
+
+/* --------------------------------------------------------------------------
    TableView Modern Orange Styling
    -------------------------------------------------------------------------- */
 .custom-table-view {

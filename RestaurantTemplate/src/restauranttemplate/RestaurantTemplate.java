@@ -8,7 +8,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Main Application Launcher for Restaurant Management System
+ * Main Application Launcher for Restaurant Management System.
  * Starts with the Login window and transitions to Main Dashboard.
  * 
  * @author KareemEldeen
@@ -18,7 +18,7 @@ public class RestaurantTemplate extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/support.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/reservations.fxml"));
             Parent root = loader.load();
 
             Scene scene = new Scene(root, 1000, 700);

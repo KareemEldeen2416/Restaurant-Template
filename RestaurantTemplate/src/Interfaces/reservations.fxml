@@ -7,6 +7,8 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -22,7 +24,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.SVGPath?>
 
-<AnchorPane id="AnchorPane" nodeOrientation="RIGHT_TO_LEFT" prefHeight="880.0" prefWidth="1280.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Interfaces.reservations">
+<AnchorPane id="AnchorPane" nodeOrientation="RIGHT_TO_LEFT" prefHeight="920.0" prefWidth="1280.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Interfaces.reservations">
    <children>
       <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          
@@ -71,8 +73,8 @@
                               </StackPane>
                               <VBox alignment="CENTER_RIGHT">
                                  <children>
-                                    <Label styleClass="header-brand-title" text="إدارة الحجوزات والطاولات" />
-                                    <Label styleClass="header-brand-subtitle" text="حجز الطاولات، المواعيد، ومتابعة حالة الصالة المباشرة" />
+                                    <Label styleClass="header-brand-title" text="إدارة الحجوزات وطاولات المطعم" />
+                                    <Label styleClass="header-brand-subtitle" text="تهيئة الطاولات، حجز المواعيد، ومتابعة حالة الصالة المباشرة" />
                                  </children>
                               </VBox>
                            </children>
@@ -117,221 +119,351 @@
             </VBox>
          </top>
 
-         <!-- ================= CENTER CONTENT (SCROLLABLE) ================= -->
+         <!-- ================= CENTER CONTENT (TABS) ================= -->
          <center>
-            <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="main-scroll-pane" BorderPane.alignment="CENTER">
-               <content>
-                  <VBox spacing="16.0">
-                     <padding>
-                        <Insets bottom="12.0" left="22.0" right="22.0" top="6.0" />
-                     </padding>
-                     <children>
+            <VBox spacing="10.0" BorderPane.alignment="CENTER">
+               <padding>
+                  <Insets bottom="6.0" left="22.0" right="22.0" top="4.0" />
+               </padding>
+               <children>
+                  
+                  <TabPane fx:id="tabPaneReservations" prefHeight="760.0" styleClass="custom-tab-pane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+                     <tabs>
                         
-                        <!-- ================= 1. RESTAURANT TABLES CARDS (FLOOR PLAN) ================= -->
-                        <VBox spacing="12.0" styleClass="panel-card">
-                           <children>
-                              
-                              <!-- SECTION HEADER & STATS BADGES -->
-                              <HBox alignment="CENTER_LEFT" spacing="12.0">
-                                 <children>
-                                    <SVGPath content="M4 6h16v2H4zm14 3h-2v9h2zm-12 0H4v9h2zm4 0h4v9h-4z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
-                                    <Label styleClass="panel-header-title" text="مخطط طاولات الصالة (Table Floor Plan)" />
-                                    <Region HBox.hgrow="ALWAYS" />
-                                    
-                                    <!-- Badges -->
-                                    <HBox alignment="CENTER" spacing="10.0">
-                                       <children>
-                                          <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
-                                             <children>
-                                                <Circle fill="#4CAF50" radius="4.0" />
-                                                <Label styleClass="info-chip-label" text="متاحة الآن:" />
-                                                <Label fx:id="lblAvailableCount" styleClass="info-chip-text" text="8" textFill="#2E7D32" />
-                                             </children>
-                                          </HBox>
-                                          <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
-                                             <children>
-                                                <Circle fill="#E65100" radius="4.0" />
-                                                <Label styleClass="info-chip-label" text="محجوزة:" />
-                                                <Label fx:id="lblReservedCount" styleClass="info-chip-text" text="4" textFill="#E65100" />
-                                             </children>
-                                          </HBox>
-                                          <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
-                                             <children>
-                                                <Label styleClass="info-chip-label" text="إجمالي الطاولات:" />
-                                                <Label fx:id="lblTotalTables" styleClass="info-chip-text" text="12" />
-                                             </children>
-                                          </HBox>
-                                       </children>
-                                    </HBox>
-                                 </children>
-                              </HBox>
-
-                              <!-- FLOWPANE OF INTERACTIVE TABLE CARDS -->
-                              <FlowPane fx:id="pnlTableCards" hgap="14.0" vgap="14.0" />
-
-                           </children>
-                        </VBox>
-
-                        <!-- ================= 2. BOOK A TABLE FORM PANEL ================= -->
-                        <VBox spacing="14.0" styleClass="panel-card">
-                           <children>
-                              
-                              <!-- PANEL HEADER -->
-                              <HBox alignment="CENTER_LEFT" spacing="8.0">
-                                 <children>
-                                    <SVGPath content="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
-                                    <Label styleClass="panel-header-title" text="بيانات حجز طاولة (Book a Table)" />
-                                    <Region HBox.hgrow="ALWAYS" />
-                                    <Label fx:id="lblFormStatus" styleClass="panel-header-desc" text="اختر طاولة من المخطط أعلاه أو املأ البيانات ثم اضغط تأكيد الحجز" />
-                                 </children>
-                              </HBox>
-
-                              <!-- 5 MAIN BOOKING INPUT FIELDS + NOTES -->
-                              <GridPane hgap="18.0" vgap="12.0">
-                                 <columnConstraints>
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
-                                 </columnConstraints>
-                                 <rowConstraints>
-                                    <RowConstraints minHeight="58.0" />
-                                    <RowConstraints minHeight="58.0" />
-                                 </rowConstraints>
+                        <!-- =========================================================================
+                             TAB 1: RESTAURANT TABLES (طاولات المطعم)
+                             ========================================================================= -->
+                        <Tab text="🪑 طاولات المطعم (Restaurant Tables)">
+                           <content>
+                              <VBox spacing="16.0">
+                                 <padding>
+                                    <Insets bottom="14.0" left="10.0" right="10.0" top="14.0" />
+                                 </padding>
                                  <children>
                                     
-                                    <!-- 1. TABLE NO -->
-                                    <VBox spacing="3.0" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
+                                    <!-- TABLE SETUP FORM PANEL -->
+                                    <VBox spacing="14.0" styleClass="panel-card">
                                        <children>
-                                          <Label styleClass="field-label" text="رقم الطاولة *" />
-                                          <JFXComboBox fx:id="cbTableNo" maxWidth="1.7976931348623157E308" promptText="اختر رقم الطاولة..." styleClass="jfx-combo-box" />
+                                          
+                                          <!-- PANEL HEADER -->
+                                          <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                             <children>
+                                                <SVGPath content="M4 6h16v2H4zm14 3h-2v9h2zm-12 0H4v9h2zm4 0h4v9h-4z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
+                                                <Label styleClass="panel-header-title" text="بيانات وإعدادات طاولات المطعم (Restaurant Tables Setup)" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Label fx:id="lblTableManagementStatus" styleClass="panel-header-desc" text="أدخل رقم الطاولة وعدد المقاعد ثم اضغط إضافة، تعديل أو حذف" />
+                                             </children>
+                                          </HBox>
+
+                                          <!-- 2 FORM FIELDS & ACTION BUTTONS -->
+                                          <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                             <children>
+                                                <!-- 1. TABLE NUMBER -->
+                                                <VBox minWidth="200.0" prefWidth="260.0" spacing="3.0">
+                                                   <children>
+                                                      <Label styleClass="field-label" text="رقم الطاولة *" />
+                                                      <JFXTextField fx:id="txtTableNumber" focusColor="#FF6B00" promptText="أدخل رقم الطاولة..." unFocusColor="#FFDEC9" />
+                                                   </children>
+                                                </VBox>
+
+                                                <!-- 2. NUMBER OF SEATS -->
+                                                <VBox minWidth="200.0" prefWidth="260.0" spacing="3.0">
+                                                   <children>
+                                                      <Label styleClass="field-label" text="عدد المقاعد *" />
+                                                      <JFXTextField fx:id="txtSeatsCount" focusColor="#FF6B00" promptText="أدخل عدد المقاعد..." unFocusColor="#FFDEC9" />
+                                                   </children>
+                                                </VBox>
+
+                                                <!-- ACTION BUTTONS -->
+                                                <HBox alignment="BOTTOM_LEFT" spacing="10.0" HBox.hgrow="ALWAYS">
+                                                   <children>
+                                                      <JFXButton fx:id="btnAddTable" buttonType="RAISED" onAction="#handleAddTable" ripplerFill="#FFE0B2" styleClass="btn-action-add" text="➕ إضافة طاولة" />
+                                                      <JFXButton fx:id="btnEditTable" buttonType="RAISED" onAction="#handleEditTable" ripplerFill="#FFE0B2" styleClass="btn-action-edit" text="✏️ تعديل الطاولة" />
+                                                      <JFXButton fx:id="btnDeleteTable" buttonType="RAISED" onAction="#handleDeleteTable" ripplerFill="#FFCDD2" styleClass="btn-action-delete" text="🗑️ حذف الطاولة" />
+                                                      <JFXButton fx:id="btnClearTableFields" onAction="#handleClearTableFields" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="🔄 تفريغ" />
+                                                   </children>
+                                                </HBox>
+                                             </children>
+                                          </HBox>
+
                                        </children>
                                     </VBox>
 
-                                    <!-- 2. CUSTOMER NAME -->
-                                    <VBox spacing="3.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
+                                    <!-- RESTAURANT TABLES TABLEVIEW PANEL -->
+                                    <VBox spacing="12.0" styleClass="panel-card" VBox.vgrow="ALWAYS">
                                        <children>
-                                          <Label styleClass="field-label" text="اسم العميل *" />
-                                          <JFXTextField fx:id="txtCustomerName" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="أدخل اسم صاحب الحجز..." unFocusColor="#FFDEC9" />
-                                       </children>
-                                    </VBox>
+                                          
+                                          <!-- SEARCH BAR & COUNTERS -->
+                                          <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                             <children>
+                                                <Label styleClass="panel-header-title" text="سجل طاولات المطعم" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                
+                                                <!-- Search Input -->
+                                                <HBox alignment="CENTER_LEFT" maxWidth="400.0" minWidth="260.0" prefWidth="320.0" spacing="8.0">
+                                                   <children>
+                                                      <SVGPath content="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5 5 7.01 7.01 5 9.5 5 12 5 14 7.01 14 9.5 14 11.99 12 14 9.5 14z" fill="#FF7043" scaleX="0.9" scaleY="0.9" />
+                                                      <JFXTextField fx:id="txtSearchTable" focusColor="#FF6B00" promptText="بحث برقم الطاولة أو عدد المقاعد..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                                   </children>
+                                                </HBox>
 
-                                    <!-- 3. NUMBER OF PERSONS -->
-                                    <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
-                                       <children>
-                                          <Label styleClass="field-label" text="عدد الأفراد / الضيوف *" />
-                                          <JFXTextField fx:id="txtPersonsCount" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="مثال: 4" unFocusColor="#FFDEC9" />
-                                       </children>
-                                    </VBox>
+                                                <JFXButton fx:id="btnSearchTable" buttonType="RAISED" onAction="#handleSearchTable" ripplerFill="#FFE0B2" styleClass="btn-action-search" text="بحث 🔍" />
+                                                <JFXButton fx:id="btnClearSearchTable" onAction="#handleClearSearchTable" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="عرض الكل" />
 
-                                    <!-- 4. DATE OF RESERVATION -->
-                                    <VBox spacing="3.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
-                                       <children>
-                                          <Label styleClass="field-label" text="تاريخ الحجز *" />
-                                          <DatePicker fx:id="dpReservationDate" maxWidth="1.7976931348623157E308" promptText="اختر تاريخ الحجز..." styleClass="material-date-picker" />
-                                       </children>
-                                    </VBox>
+                                                <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                                   <children>
+                                                      <Label styleClass="info-chip-label" text="إجمالي الطاولات:" />
+                                                      <Label fx:id="lblTablesTableCount" styleClass="info-chip-text" text="0" textFill="#E65100" />
+                                                   </children>
+                                                </HBox>
+                                             </children>
+                                          </HBox>
 
-                                    <!-- 5. TIME OF RESERVATION -->
-                                    <VBox spacing="3.0" GridPane.columnIndex="4" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
-                                       <children>
-                                          <Label styleClass="field-label" text="موعد / وقت الحجز *" />
-                                          <JFXComboBox fx:id="cbReservationTime" editable="true" maxWidth="1.7976931348623157E308" promptText="اختر أو اكتب الوقت..." styleClass="jfx-combo-box" />
-                                       </children>
-                                    </VBox>
+                                          <!-- TABLEVIEW (Strictly Table Number & Number of Seats) -->
+                                          <TableView fx:id="tblRestaurantTables" minHeight="240.0" prefHeight="380.0" styleClass="custom-table-view" VBox.vgrow="ALWAYS">
+                                             <columns>
+                                                <TableColumn fx:id="colTblSeq" maxWidth="65.0" minWidth="50.0" prefWidth="55.0" text="م" />
+                                                <TableColumn fx:id="colTblNumber" minWidth="200.0" prefWidth="300.0" text="رقم الطاولة" />
+                                                <TableColumn fx:id="colTblSeats" minWidth="200.0" prefWidth="300.0" text="عدد المقاعد" />
+                                             </columns>
+                                             <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                             </columnResizePolicy>
+                                          </TableView>
 
-                                    <!-- 6. CUSTOMER PHONE (ROW 2) -->
-                                    <VBox spacing="3.0" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
-                                       <children>
-                                          <Label styleClass="field-label" text="رقم هاتف التواصل" />
-                                          <JFXTextField fx:id="txtCustomerPhone" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="مثال: 01012345678" unFocusColor="#FFDEC9" />
-                                       </children>
-                                    </VBox>
-
-                                    <!-- 7. SPECIAL NOTES (ROW 2) -->
-                                    <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
-                                       <children>
-                                          <Label styleClass="field-label" text="ملاحظات الحجز / مناسبة خاصة" />
-                                          <JFXTextField fx:id="txtNotes" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="مثال: طاولة بجوار النافذة، عيد ميلاد، كرسي أطفال..." unFocusColor="#FFDEC9" />
                                        </children>
                                     </VBox>
 
                                  </children>
-                              </GridPane>
+                              </VBox>
+                           </content>
+                        </Tab>
 
-                              <!-- ACTION BUTTONS -->
-                              <HBox alignment="CENTER_LEFT" spacing="12.0">
-                                 <children>
-                                    <JFXButton fx:id="btnBook" buttonType="RAISED" onAction="#handleBookTable" ripplerFill="#FFE0B2" styleClass="btn-action-add" text="➕ تأكيد وحجز الطاولة" />
-                                    <JFXButton fx:id="btnEdit" buttonType="RAISED" onAction="#handleEditReservation" ripplerFill="#FFE0B2" styleClass="btn-action-edit" text="✏️ حفظ تعديلات الحجز" />
-                                    <JFXButton fx:id="btnCancel" buttonType="RAISED" onAction="#handleCancelReservation" ripplerFill="#FFCDD2" styleClass="btn-action-delete" text="❌ إلغاء الحجز وتحرير الطاولة" />
-                                    <JFXButton fx:id="btnClear" onAction="#handleClearFields" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="🔄 تفريغ الحقول" />
-                                    <Region HBox.hgrow="ALWAYS" />
-                                    <Label fx:id="lblActionMessage" text="" visible="false" />
-                                 </children>
-                              </HBox>
-
-                           </children>
-                        </VBox>
-
-                        <!-- ================= 3. TABLE VIEW OF ALL RESERVED TABLES ================= -->
-                        <VBox spacing="12.0" styleClass="panel-card">
-                           <children>
-                              
-                              <!-- TABLE HEADER & SEARCH -->
-                              <HBox alignment="CENTER_LEFT" spacing="12.0">
-                                 <children>
-                                    <Label styleClass="panel-header-title" text="سجل الطاولات المحجوزة وقائمة الحجوزات" />
-                                    <Region HBox.hgrow="ALWAYS" />
-                                    
-                                    <!-- Search Input -->
-                                    <HBox alignment="CENTER_LEFT" maxWidth="450.0" minWidth="320.0" prefWidth="380.0" spacing="8.0">
+                        <!-- =========================================================================
+                             TAB 2: RESERVATIONS & FLOOR PLAN (حجز المواعيد ومخطط الصالة)
+                             ========================================================================= -->
+                        <Tab text="📅 الحجوزات ومخطط الصالة (Reservations &amp; Floor Plan)">
+                           <content>
+                              <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="main-scroll-pane">
+                                 <content>
+                                    <VBox spacing="16.0">
+                                       <padding>
+                                          <Insets bottom="14.0" left="10.0" right="10.0" top="14.0" />
+                                       </padding>
                                        <children>
-                                          <SVGPath content="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5 5 7.01 7.01 5 9.5 5 12 5 14 7.01 14 9.5 14 11.99 12 14 9.5 14z" fill="#FF7043" scaleX="0.95" scaleY="0.95" />
-                                          <JFXTextField fx:id="txtSearch" focusColor="#FF6B00" promptText="بحث باسم العميل، رقم الطاولة، أو الهاتف..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                          
+                                          <!-- 1. FLOOR PLAN TABLE CARDS -->
+                                          <VBox spacing="12.0" styleClass="panel-card">
+                                             <children>
+                                                
+                                                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                                   <children>
+                                                      <SVGPath content="M4 6h16v2H4zm14 3h-2v9h2zm-12 0H4v9h2zm4 0h4v9h-4z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
+                                                      <Label styleClass="panel-header-title" text="مخطط طاولات الصالة (Table Floor Plan)" />
+                                                      <Region HBox.hgrow="ALWAYS" />
+                                                      
+                                                      <HBox alignment="CENTER" spacing="10.0">
+                                                         <children>
+                                                            <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                                               <children>
+                                                                  <Circle fill="#4CAF50" radius="4.0" />
+                                                                  <Label styleClass="info-chip-label" text="متاحة الآن:" />
+                                                                  <Label fx:id="lblAvailableCount" styleClass="info-chip-text" text="0" textFill="#2E7D32" />
+                                                               </children>
+                                                            </HBox>
+                                                            <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                                               <children>
+                                                                  <Circle fill="#E65100" radius="4.0" />
+                                                                  <Label styleClass="info-chip-label" text="محجوزة:" />
+                                                                  <Label fx:id="lblReservedCount" styleClass="info-chip-text" text="0" textFill="#E65100" />
+                                                               </children>
+                                                            </HBox>
+                                                            <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                                               <children>
+                                                                  <Label styleClass="info-chip-label" text="إجمالي الطاولات:" />
+                                                                  <Label fx:id="lblTotalTables" styleClass="info-chip-text" text="0" />
+                                                               </children>
+                                                            </HBox>
+                                                         </children>
+                                                      </HBox>
+                                                   </children>
+                                                </HBox>
+
+                                                <FlowPane fx:id="pnlTableCards" hgap="14.0" vgap="14.0" />
+
+                                             </children>
+                                          </VBox>
+
+                                          <!-- 2. BOOK A TABLE FORM -->
+                                          <VBox spacing="14.0" styleClass="panel-card">
+                                             <children>
+                                                
+                                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                   <children>
+                                                      <SVGPath content="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
+                                                      <Label styleClass="panel-header-title" text="بيانات حجز طاولة (Book a Table)" />
+                                                      <Region HBox.hgrow="ALWAYS" />
+                                                      <Label fx:id="lblFormStatus" styleClass="panel-header-desc" text="اختر طاولة من المخطط أعلاه أو املأ البيانات ثم اضغط تأكيد الحجز" />
+                                                   </children>
+                                                </HBox>
+
+                                                <GridPane hgap="18.0" vgap="12.0">
+                                                   <columnConstraints>
+                                                      <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
+                                                      <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
+                                                      <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
+                                                      <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
+                                                      <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
+                                                   </columnConstraints>
+                                                   <rowConstraints>
+                                                      <RowConstraints minHeight="58.0" />
+                                                      <RowConstraints minHeight="58.0" />
+                                                   </rowConstraints>
+                                                   <children>
+                                                      
+                                                      <VBox spacing="3.0" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
+                                                         <children>
+                                                            <Label styleClass="field-label" text="رقم الطاولة *" />
+                                                            <JFXComboBox fx:id="cbTableNo" maxWidth="1.7976931348623157E308" promptText="اختر رقم الطاولة..." styleClass="jfx-combo-box" />
+                                                         </children>
+                                                      </VBox>
+
+                                                      <VBox spacing="3.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
+                                                         <children>
+                                                            <Label styleClass="field-label" text="اسم العميل *" />
+                                                            <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                                               <children>
+                                                                  <JFXTextField fx:id="txtCustomerName" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" onMouseClicked="#handleCustomerNameClick" promptText="انقر للبحث واختيار عميل..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                                                  <JFXButton fx:id="btnChooseCustomer" buttonType="RAISED" onAction="#handleChooseCustomer" ripplerFill="#FFE0B2" style="-fx-background-color: #FFF3EB; -fx-text-fill: #E65100; -fx-font-weight: bold; -fx-background-radius: 8px; -fx-cursor: hand; -fx-min-width: 38px; -fx-pref-height: 32px; -fx-border-color: #FFD8BE; -fx-border-radius: 8px;" text="👥" />
+                                                               </children>
+                                                            </HBox>
+                                                         </children>
+                                                      </VBox>
+
+                                                      <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
+                                                         <children>
+                                                            <Label styleClass="field-label" text="عدد الأفراد / الضيوف *" />
+                                                            <JFXTextField fx:id="txtPersonsCount" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="مثال: 4" unFocusColor="#FFDEC9" />
+                                                         </children>
+                                                      </VBox>
+
+                                                      <VBox spacing="3.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
+                                                         <children>
+                                                            <Label styleClass="field-label" text="تاريخ الحجز *" />
+                                                            <DatePicker fx:id="dpReservationDate" maxWidth="1.7976931348623157E308" promptText="اختر تاريخ الحجز..." styleClass="material-date-picker" />
+                                                         </children>
+                                                      </VBox>
+
+                                                      <VBox spacing="3.0" GridPane.columnIndex="4" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
+                                                         <children>
+                                                            <Label styleClass="field-label" text="موعد / وقت الحجز *" />
+                                                            <HBox alignment="CENTER" maxHeight="38.0" minHeight="36.0" prefHeight="38.0" spacing="4.0" styleClass="material-time-box">
+                                                               <children>
+                                                                  <SVGPath content="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="#E65100" scaleX="0.85" scaleY="0.85" />
+                                                                  <JFXComboBox fx:id="cbTimeHour" maxWidth="1.7976931348623157E308" prefWidth="54.0" promptText="الساعة" styleClass="time-sub-combo" HBox.hgrow="ALWAYS" />
+                                                                  <Label style="-fx-font-weight: bold; -fx-text-fill: #E65100; -fx-font-size: 13px;" text=":" />
+                                                                  <JFXComboBox fx:id="cbTimeMinute" maxWidth="1.7976931348623157E308" prefWidth="54.0" promptText="الدقيقة" styleClass="time-sub-combo" HBox.hgrow="ALWAYS" />
+                                                                  <JFXComboBox fx:id="cbTimePeriod" maxWidth="1.7976931348623157E308" prefWidth="54.0" promptText="الفترة" styleClass="time-sub-combo" HBox.hgrow="ALWAYS" />
+                                                               </children>
+                                                               <padding>
+                                                                  <Insets left="6.0" right="6.0" />
+                                                               </padding>
+                                                            </HBox>
+                                                         </children>
+                                                      </VBox>
+
+                                                      <VBox spacing="3.0" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
+                                                         <children>
+                                                            <Label styleClass="field-label" text="رقم هاتف التواصل" />
+                                                            <JFXTextField fx:id="txtCustomerPhone" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="مثال: 01012345678" unFocusColor="#FFDEC9" />
+                                                         </children>
+                                                      </VBox>
+
+                                                      <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
+                                                         <children>
+                                                            <Label styleClass="field-label" text="ملاحظات الحجز / مناسبة خاصة" />
+                                                            <JFXTextField fx:id="txtNotes" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="مثال: طاولة بجوار النافذة، عيد ميلاد، كرسي أطفال..." unFocusColor="#FFDEC9" />
+                                                         </children>
+                                                      </VBox>
+
+                                                   </children>
+                                                </GridPane>
+
+                                                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                                   <children>
+                                                      <JFXButton fx:id="btnBook" buttonType="RAISED" onAction="#handleBookTable" ripplerFill="#FFE0B2" styleClass="btn-action-add" text="➕ تأكيد وحجز الطاولة" />
+                                                      <JFXButton fx:id="btnEdit" buttonType="RAISED" onAction="#handleEditReservation" ripplerFill="#FFE0B2" styleClass="btn-action-edit" text="✏️ حفظ تعديلات الحجز" />
+                                                      <JFXButton fx:id="btnCancel" buttonType="RAISED" onAction="#handleCancelReservation" ripplerFill="#FFCDD2" styleClass="btn-action-delete" text="❌ إلغاء الحجز وتحرير الطاولة" />
+                                                      <JFXButton fx:id="btnClear" onAction="#handleClearFields" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="🔄 تفريغ الحقول" />
+                                                      <Region HBox.hgrow="ALWAYS" />
+                                                      <Label fx:id="lblActionMessage" text="" visible="false" />
+                                                   </children>
+                                                </HBox>
+
+                                             </children>
+                                          </VBox>
+
+                                          <!-- 3. TABLE VIEW OF ALL RESERVED TABLES -->
+                                          <VBox spacing="12.0" styleClass="panel-card">
+                                             <children>
+                                                
+                                                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                                   <children>
+                                                      <Label styleClass="panel-header-title" text="سجل الحجوزات (Reservations Log)" />
+                                                      <Region HBox.hgrow="ALWAYS" />
+                                                      
+                                                      <HBox alignment="CENTER_LEFT" maxWidth="450.0" minWidth="320.0" prefWidth="380.0" spacing="8.0">
+                                                         <children>
+                                                            <SVGPath content="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5 5 7.01 7.01 5 9.5 5 12 5 14 7.01 14 9.5 14 11.99 12 14 9.5 14z" fill="#FF7043" scaleX="0.95" scaleY="0.95" />
+                                                            <JFXTextField fx:id="txtSearch" focusColor="#FF6B00" promptText="بحث باسم العميل، رقم الطاولة، أو الهاتف..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                                         </children>
+                                                      </HBox>
+
+                                                      <JFXButton fx:id="btnSearch" buttonType="RAISED" onAction="#handleSearch" ripplerFill="#FFE0B2" styleClass="btn-action-search" text="بحث 🔍" />
+                                                      <JFXButton fx:id="btnClearSearch" onAction="#handleClearSearch" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="عرض الكل" />
+
+                                                      <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
+                                                         <children>
+                                                            <Label styleClass="info-chip-label" text="إجمالي الحجوزات:" />
+                                                            <Label fx:id="lblTableTotalCount" styleClass="info-chip-text" text="0" textFill="#E65100" />
+                                                         </children>
+                                                      </HBox>
+                                                   </children>
+                                                </HBox>
+
+                                                <TableView fx:id="tblReservations" minHeight="240.0" prefHeight="280.0" styleClass="custom-table-view">
+                                                   <columns>
+                                                      <TableColumn fx:id="colSeq" maxWidth="55.0" minWidth="45.0" prefWidth="50.0" text="م" />
+                                                      <TableColumn fx:id="colTableNo" minWidth="100.0" prefWidth="110.0" text="رقم الطاولة" />
+                                                      <TableColumn fx:id="colCustomerName" minWidth="160.0" prefWidth="200.0" text="اسم العميل" />
+                                                      <TableColumn fx:id="colCustomerPhone" minWidth="120.0" prefWidth="140.0" text="رقم الهاتف" />
+                                                      <TableColumn fx:id="colPersonsCount" minWidth="90.0" prefWidth="110.0" text="عدد الأفراد" />
+                                                      <TableColumn fx:id="colChairs" minWidth="90.0" prefWidth="110.0" text="سعة الطاولة" />
+                                                      <TableColumn fx:id="colDate" minWidth="110.0" prefWidth="130.0" text="تاريخ الحجز" />
+                                                      <TableColumn fx:id="colTime" minWidth="100.0" prefWidth="120.0" text="وقت الحجز" />
+                                                      <TableColumn fx:id="colStatus" minWidth="100.0" prefWidth="110.0" text="الحالة" />
+                                                      <TableColumn fx:id="colNotes" minWidth="140.0" prefWidth="180.0" text="ملاحظات" />
+                                                   </columns>
+                                                   <columnResizePolicy>
+                                                      <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                   </columnResizePolicy>
+                                                </TableView>
+
+                                             </children>
+                                          </VBox>
+
                                        </children>
-                                    </HBox>
+                                    </VBox>
+                                 </content>
+                              </ScrollPane>
+                           </content>
+                        </Tab>
 
-                                    <JFXButton fx:id="btnSearch" buttonType="RAISED" onAction="#handleSearch" ripplerFill="#FFE0B2" styleClass="btn-action-search" text="بحث 🔍" />
-                                    <JFXButton fx:id="btnClearSearch" onAction="#handleClearSearch" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="عرض الكل" />
+                     </tabs>
+                  </TabPane>
 
-                                    <!-- Reserved Badge -->
-                                    <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
-                                       <children>
-                                          <Label styleClass="info-chip-label" text="إجمالي الحجوزات:" />
-                                          <Label fx:id="lblTableTotalCount" styleClass="info-chip-text" text="0" textFill="#E65100" />
-                                       </children>
-                                    </HBox>
-                                 </children>
-                              </HBox>
-
-                              <!-- TABLEVIEW OF RESERVATIONS -->
-                              <TableView fx:id="tblReservations" minHeight="260.0" prefHeight="320.0" styleClass="custom-table-view">
-                                 <columns>
-                                    <TableColumn fx:id="colSeq" maxWidth="55.0" minWidth="45.0" prefWidth="50.0" text="م" />
-                                    <TableColumn fx:id="colTableNo" minWidth="100.0" prefWidth="110.0" text="رقم الطاولة" />
-                                    <TableColumn fx:id="colCustomerName" minWidth="160.0" prefWidth="200.0" text="اسم العميل" />
-                                    <TableColumn fx:id="colCustomerPhone" minWidth="120.0" prefWidth="140.0" text="رقم الهاتف" />
-                                    <TableColumn fx:id="colPersonsCount" minWidth="90.0" prefWidth="110.0" text="عدد الأفراد" />
-                                    <TableColumn fx:id="colChairs" minWidth="90.0" prefWidth="110.0" text="سعة الطاولة" />
-                                    <TableColumn fx:id="colDate" minWidth="110.0" prefWidth="130.0" text="تاريخ الحجز" />
-                                    <TableColumn fx:id="colTime" minWidth="100.0" prefWidth="120.0" text="وقت الحجز" />
-                                    <TableColumn fx:id="colStatus" minWidth="100.0" prefWidth="110.0" text="الحالة" />
-                                    <TableColumn fx:id="colNotes" minWidth="140.0" prefWidth="180.0" text="ملاحظات" />
-                                 </columns>
-                                 <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                 </columnResizePolicy>
-                              </TableView>
-
-                           </children>
-                        </VBox>
-
-                     </children>
-                  </VBox>
-               </content>
-            </ScrollPane>
+               </children>
+            </VBox>
          </center>
 
          <!-- ================= BOTTOM FOOTER BAR ================= -->
@@ -350,7 +482,7 @@
                            </children>
                         </HBox>
                         <Label styleClass="footer-text" text="|" />
-                        <Label styleClass="footer-highlight" text="نظام إدارة المطعم • قسم الحجوزات والطاولات" />
+                        <Label styleClass="footer-highlight" text="نظام إدارة المطعم • قسم الحجوزات وطاولات المطعم" />
                         <Label styleClass="footer-text" text="|" />
                         <Label styleClass="footer-text" text="جميع الحقوق محفوظة © 2026" />
                      </children>

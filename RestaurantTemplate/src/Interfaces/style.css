@@ -186,6 +186,21 @@
     -fx-text-fill: #D84315;
 }
 
+.card-disabled,
+.dashboard-card-btn:disabled {
+    -fx-opacity: 0.38;
+    -fx-cursor: default;
+    -fx-border-color: #E2D9D2;
+    -fx-effect: none;
+}
+
+.dashboard-card-btn:disabled:hover {
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+    -fx-border-color: #E2D9D2;
+    -fx-effect: none;
+}
+
 /* --------------------------------------------------------------------------
    Login Window Components & Form
    -------------------------------------------------------------------------- */
@@ -354,6 +369,37 @@
     -fx-background-color: #FF6B00;
     -fx-text-fill: #FFFFFF;
 }
+
+/* Material Time Picker Widget in Orange Theme */
+.material-time-box {
+    -fx-background-color: #FFFBF8;
+    -fx-background-radius: 10px;
+    -fx-border-color: #FFDEC9;
+    -fx-border-width: 1.2px;
+    -fx-border-radius: 10px;
+}
+
+.material-time-box:hover,
+.material-time-box:focused-within {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FF6B00;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 0, 0.2), 6, 0.2, 0, 1);
+}
+
+.time-sub-combo {
+    -fx-font-family: "Cairo", "Tajawal", "Almarai", "Segoe UI", sans-serif;
+    -fx-font-size: 11.5px;
+    -fx-font-weight: bold;
+    -jfx-focus-color: transparent;
+    -jfx-unfocus-color: transparent;
+    -fx-background-color: transparent;
+}
+
+.time-sub-combo > .text-field {
+    -fx-text-fill: #2B1810;
+    -fx-alignment: CENTER;
+}
+
 
 /* JFoenix Checkbox in Orange Theme */
 .jfx-check-box {

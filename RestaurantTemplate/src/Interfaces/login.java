@@ -1,10 +1,13 @@
 package Interfaces;
 
+import DBConnection.DBConnection;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -25,8 +28,12 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Controller for the Restaurant Login Interface with JFoenix Material Controls.
- * Features live Arabic clock/date, password visibility toggle, input validation, and main window transition.
+ * Controller for the Restaurant Login Interface.
+ * 
+ * Features:
+ * - Authentication directly against MySQL database table 'employees' by user_name and user_password.
+ * - Passes full_name and access_rights to the main dashboard.
+ * - Activates only cards permitted by access_rights.
  * 
  * @author KareemEldeen
  */
@@ -151,7 +158,7 @@ public class login implements Initializable {
     }
 
     /**
-     * Validates input fields and logs in to the main dashboard.
+     * Validates input fields and logs in to the main dashboard strictly using MySQL database.
      */
     @FXML
     private void handleLogin(ActionEvent event) {
@@ -163,17 +170,63 @@ public class login implements Initializable {
             return;
         }
 
+        // Query database table 'employees' for matching user_name and user_password
+        String cleanUser = username.replace("'", "''");
+        String cleanPass = password.replace("'", "''");
+        String query = "SELECT * FROM employees WHERE user_name = '" + cleanUser + "' AND user_password = '" + cleanPass + "' LIMIT 1;";
+
+        String fullName = null;
+        String jobTitle = null;
+        String accessRights = null;
+
+        ResultSet rs = DBConnection.executeQuery(query);
+        if (rs != null) {
+            try {
+                if (rs.next()) {
+                    fullName = rs.getString("full_name");
+                    jobTitle = rs.getString("job_title");
+                    accessRights = rs.getString("access_rights");
+                }
+                rs.close();
+            } catch (SQLException e) {
+                System.err.println("Database login error: " + e.getMessage());
+            }
+        }
+
+        // Check for master admin fallback if database is empty
+        if (fullName == null) {
+            ResultSet countRs = DBConnection.executeQuery("SELECT COUNT(*) FROM employees;");
+            boolean isEmptyDB = false;
+            if (countRs != null) {
+                try {
+                    if (countRs.next() && countRs.getInt(1) == 0) {
+                        isEmptyDB = true;
+                    }
+                    countRs.close();
+                } catch (SQLException ignored) {}
+            }
+
+            if (isEmptyDB && "admin".equalsIgnoreCase(username) && "admin123".equals(password)) {
+                fullName = "المدير العام (افتراضي)";
+                jobTitle = "مدير النظام";
+                accessRights = "11111111"; // Full access
+            } else {
+                showErrorMessage("اسم المستخدم أو كلمة المرور غير صحيحة!");
+                return;
+            }
+        }
+
         // Authentication successful - transition to main window
-        showSuccessMessage("تم تسجيل الدخول بنجاح! جارٍ التحويل...");
+        showSuccessMessage("تم تسجيل الدخول بنجاح! مرحبًا " + fullName);
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/main.fxml"));
             Parent root = loader.load();
 
-            // Pass user name to main dashboard controller
+            // Pass user full name, role, and access rights to main dashboard controller
             main mainController = loader.getController();
             if (mainController != null) {
-                mainController.setUserInfo(username, "المدير العام • Admin");
+                mainController.setLoggedInUser(fullName, jobTitle, accessRights);
             }
 
             Scene scene = new Scene(root, 1180, 750);

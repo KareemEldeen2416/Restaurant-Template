@@ -1,10 +1,13 @@
 package Interfaces;
 
+import DBConnection.DBConnection;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,13 +37,24 @@ import javafx.util.Duration;
 
 /**
  * Controller for the Employees Management Window.
- * Features:
- * - Live Arabic clock & date in the top bar.
- * - 13 Form Fields for employee data.
- * - 8 Checkboxes for access rights permissions.
- * - Search by Name, Username, and National ID.
- * - CRUD operations (Add, Edit, Delete, Clear).
- * - Filtered TableView showing employee data except sensitive/security fields.
+ * 
+ * All CRUD Operations (Add, Edit, Delete, Search) are executed directly against the MySQL database.
+ * TableView info is retrieved strictly from the database table: employees.
+ * 
+ * Database Mapping (Table: employees):
+ * - n_id           : الرقم القومي (Primary Key)
+ * - full_name      : الاسم الكامل
+ * - job_title      : المسمى الوظيفي
+ * - department     : القسم
+ * - phone_one      : رقم الهاتف الاساسي
+ * - phone_two      : رقم الهاتف الاضافي
+ * - address        : العنوان
+ * - date_of_birth  : تاريخ الميلاد
+ * - salary         : الراتب الاساسي
+ * - date_of_salary : تاريخ استحقاق الراتب
+ * - user_name      : اسم المستخدم للنظام
+ * - user_password  : كلمة المرور للنظام
+ * - access_rights  : صلاحيات الوصول (8 characters: 1=Cashier, 2=Settings, 3=Reports, 4=Sales, 5=Employees, 6=Customers, 7=Reservations, 8=Inventory)
  * 
  * @author KareemEldeen
  */
@@ -72,7 +86,8 @@ public class employees implements Initializable {
     @FXML private JFXTextField txtBankAccount;
 
     // =========================================================================
-    // FXML Access Rights (8 JFoenix Checkboxes + Select All)
+    // FXML Access Rights (8 Checkboxes + Select All)
+    // 1: Cashier, 2: Settings, 3: Reports, 4: Sales, 5: Employees, 6: Customers, 7: Reservations, 8: Inventory
     // =========================================================================
     @FXML private JFXCheckBox chkSelectAll;
     @FXML private JFXCheckBox chkCashier;
@@ -85,7 +100,7 @@ public class employees implements Initializable {
     @FXML private JFXCheckBox chkInventory;
 
     // =========================================================================
-    // FXML Action Buttons & Status (JFoenix Buttons)
+    // FXML Action Buttons & Status
     // =========================================================================
     @FXML private JFXButton btnAdd;
     @FXML private JFXButton btnEdit;
@@ -95,7 +110,7 @@ public class employees implements Initializable {
     @FXML private Label lblActionMessage;
 
     // =========================================================================
-    // FXML Search & TableView (JFoenix Controls)
+    // FXML Search & TableView
     // =========================================================================
     @FXML private JFXTextField txtSearch;
     @FXML private JFXButton btnSearch;
@@ -119,7 +134,6 @@ public class employees implements Initializable {
     // Data Structures & Timers
     // =========================================================================
     private final ObservableList<EmployeeModel> employeeList = FXCollections.observableArrayList();
-    private FilteredList<EmployeeModel> filteredEmployeeList;
 
     private Timeline clockTimeline;
     private final Locale arabicLocale = Locale.forLanguageTag("ar");
@@ -131,7 +145,9 @@ public class employees implements Initializable {
         initLiveDateTime();
         initComboBoxes();
         initTableColumns();
-        loadInitialMockData();
+        setupAccessRightsListeners();
+        createTableIfNotExists();
+        loadEmployeesFromDatabase(null);
         setupTableSelection();
         setupSearchFilter();
     }
@@ -160,35 +176,15 @@ public class employees implements Initializable {
     }
 
     /**
-     * Fills Department and Job Title Combo Boxes with common restaurant values.
+     * Empties Department and Job Title Combo Boxes.
      */
     private void initComboBoxes() {
         if (cbDepartment != null) {
-            cbDepartment.setItems(FXCollections.observableArrayList(
-                "الإدارة العامة",
-                "الصالة والخدمة",
-                "المطبخ والتحضير",
-                "الكاشير والحسابات",
-                "المخازن والمشتريات",
-                "الدليفري والتوصيل",
-                "الصيانة والنظافة"
-            ));
+            cbDepartment.setItems(FXCollections.observableArrayList());
         }
 
         if (cbJobTitle != null) {
-            cbJobTitle.setItems(FXCollections.observableArrayList(
-                "مدير الفرع",
-                "شيف عمومي (Executive Chef)",
-                "مساعد شيف",
-                "كابتن صالة (Head Waiter)",
-                "مقدم طعام (ويتر)",
-                "كاشير رئيسي",
-                "كاشير",
-                "باريستا",
-                "محاسب مالي",
-                "أمين مخزن",
-                "مندوب توصيل"
-            ));
+            cbJobTitle.setItems(FXCollections.observableArrayList());
         }
     }
 
@@ -208,52 +204,281 @@ public class employees implements Initializable {
         if (colSalary != null) colSalary.setCellValueFactory(cellData -> cellData.getValue().salaryProperty());
         if (colSalaryDate != null) colSalaryDate.setCellValueFactory(cellData -> cellData.getValue().salaryDateProperty());
 
-        filteredEmployeeList = new FilteredList<>(employeeList, p -> true);
         if (tblEmployees != null) {
-            tblEmployees.setItems(filteredEmployeeList);
+            tblEmployees.setItems(employeeList);
         }
         updateTotalCount();
     }
 
     /**
-     * Loads sample employee records into the list.
+     * Ensures the MySQL table 'employees' exists with all matching columns.
      */
-    private void loadInitialMockData() {
-        employeeList.add(new EmployeeModel(
-            1, "29801011234567", "أحمد محمود العطار", "مدير الفرع", "الإدارة العامة",
-            "01012345678", "01198765432", "القاهرة - مدينة نصر", "1990-05-15",
-            "ahmed.manager", "admin@2026", "12500", "2026-09-01", "EG500025001122334455",
-            true, true, true, true, true, true, true, true
-        ));
+    private void createTableIfNotExists() {
+        String sql = "CREATE TABLE IF NOT EXISTS employees ("
+                + "n_id VARCHAR(50) PRIMARY KEY,"
+                + "full_name VARCHAR(100) NOT NULL,"
+                + "job_title VARCHAR(100),"
+                + "department VARCHAR(100),"
+                + "phone_one VARCHAR(50),"
+                + "phone_two VARCHAR(50),"
+                + "address VARCHAR(255),"
+                + "date_of_birth VARCHAR(50),"
+                + "salary VARCHAR(50),"
+                + "date_of_salary VARCHAR(50),"
+                + "user_name VARCHAR(100),"
+                + "user_password VARCHAR(100),"
+                + "access_rights VARCHAR(20)"
+                + ") DEFAULT CHARSET=utf8mb4;";
+        DBConnection.executeUpdate(sql);
+    }
 
-        employeeList.add(new EmployeeModel(
-            2, "29505122345678", "محمود عبد الرحمن", "كاشير رئيسي", "الكاشير والحسابات",
-            "01223456789", "01055566677", "الجيزة - الدقي", "1995-11-20",
-            "mahmoud.pos", "pos@123", "7200", "2026-09-01", "EG500025009988776655",
-            true, false, true, true, false, true, false, false
-        ));
+    /**
+     * Retrieves employees from the MySQL database table 'employees' (or searches by keyword)
+     * and fills the TableView directly.
+     * 
+     * @param keyword Search query or null for all records
+     */
+    private void loadEmployeesFromDatabase(String keyword) {
+        employeeList.clear();
 
-        employeeList.add(new EmployeeModel(
-            3, "29304153456789", "حسام الدين فهمي", "شيف عمومي (Executive Chef)", "المطبخ والتحضير",
-            "01144455566", "", "الإسكندرية - سموحة", "1993-04-10",
-            "chef.hossam", "chef@2026", "9800", "2026-09-01", "EG500025004433221100",
-            false, false, false, false, false, false, false, true
-        ));
+        String query;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            query = "SELECT * FROM employees;";
+        } else {
+            String cleanKey = escapeSql(keyword.trim());
+            query = "SELECT * FROM employees WHERE "
+                    + "full_name LIKE '%" + cleanKey + "%' OR "
+                    + "n_id LIKE '%" + cleanKey + "%' OR "
+                    + "job_title LIKE '%" + cleanKey + "%' OR "
+                    + "department LIKE '%" + cleanKey + "%' OR "
+                    + "phone_one LIKE '%" + cleanKey + "%' OR "
+                    + "phone_two LIKE '%" + cleanKey + "%' OR "
+                    + "address LIKE '%" + cleanKey + "%' OR "
+                    + "user_name LIKE '%" + cleanKey + "%';";
+        }
 
-        employeeList.add(new EmployeeModel(
-            4, "29908184567890", "سارة إبراهيم خليل", "كابتن صالة (Head Waiter)", "الصالة والخدمة",
-            "01555566677", "01233344455", "القاهرة - المعادي", "1999-08-18",
-            "sara.service", "service@123", "6500", "2026-09-01", "EG500025007766554433",
-            false, false, false, false, false, true, true, false
-        ));
+        ResultSet rs = DBConnection.executeQuery(query);
+
+        if (rs != null) {
+            try {
+                int seq = 1;
+                while (rs.next()) {
+                    String nId = rs.getString("n_id");
+                    String fullName = rs.getString("full_name");
+                    String jobTitle = rs.getString("job_title");
+                    String department = rs.getString("department");
+                    String phone1 = rs.getString("phone_one");
+                    String phone2 = rs.getString("phone_two");
+                    String address = rs.getString("address");
+                    String birthDate = rs.getString("date_of_birth");
+                    String salary = rs.getString("salary");
+                    String salaryDate = rs.getString("date_of_salary");
+                    String username = rs.getString("user_name");
+                    String password = rs.getString("user_password");
+                    String accessRights = rs.getString("access_rights");
+
+                    boolean[] rights = parseAccessRights(accessRights);
+
+                    EmployeeModel emp = new EmployeeModel(
+                            seq++, nId, fullName, jobTitle, department,
+                            phone1, phone2, address, birthDate,
+                            formatSalaryForUI(salary), salaryDate, username, password, "",
+                            rights[0], rights[1], rights[2], rights[3],
+                            rights[4], rights[5], rights[6], rights[7]
+                    );
+
+                    employeeList.add(emp);
+                }
+                rs.close();
+            } catch (SQLException e) {
+                System.err.println("Error reading employees from database: " + e.getMessage());
+            }
+        }
 
         refreshSequenceNumbers();
         updateTotalCount();
     }
 
     /**
-     * When selecting a row in the TableView, populates all 13 fields and checkboxes.
+     * Inserts an employee record into MySQL table 'employees'.
      */
+    private int insertEmployeeToDB(EmployeeModel emp) {
+        String accessStr = buildAccessRightsStringFromBooleans(
+                emp.isAccessCashier(), emp.isAccessSettings(), emp.isAccessReports(), emp.isAccessSales(),
+                emp.isAccessEmployees(), emp.isAccessCustomers(), emp.isAccessReservations(), emp.isAccessInventory()
+        );
+
+        String sql = "INSERT INTO employees (n_id, full_name, job_title, department, phone_one, phone_two, address, date_of_birth, salary, date_of_salary, user_name, user_password, access_rights) "
+                + "VALUES ('" + escapeSql(emp.getNationalId()) + "', '"
+                + escapeSql(emp.getName()) + "', '"
+                + escapeSql(emp.getJobTitle()) + "', '"
+                + escapeSql(emp.getDepartment()) + "', '"
+                + escapeSql(emp.getPhone1()) + "', "
+                + getSqlNullable(emp.getPhone2()) + ", '"
+                + escapeSql(emp.getAddress()) + "', '"
+                + escapeSql(emp.getBirthDate()) + "', '"
+                + cleanSalary(emp.getSalary()) + "', '"
+                + escapeSql(emp.getSalaryDate()) + "', '"
+                + escapeSql(emp.getUsername()) + "', '"
+                + escapeSql(emp.getPassword()) + "', '"
+                + accessStr + "') "
+                + "ON DUPLICATE KEY UPDATE "
+                + "full_name = VALUES(full_name), job_title = VALUES(job_title), department = VALUES(department), "
+                + "phone_one = VALUES(phone_one), phone_two = VALUES(phone_two), address = VALUES(address), "
+                + "date_of_birth = VALUES(date_of_birth), salary = VALUES(salary), date_of_salary = VALUES(date_of_salary), "
+                + "user_name = VALUES(user_name), user_password = VALUES(user_password), access_rights = VALUES(access_rights);";
+
+        return DBConnection.executeUpdate(sql);
+    }
+
+    /**
+     * Updates an existing employee in MySQL table 'employees'.
+     */
+    private int updateEmployeeInDB(EmployeeModel emp) {
+        String accessStr = buildAccessRightsStringFromBooleans(
+                emp.isAccessCashier(), emp.isAccessSettings(), emp.isAccessReports(), emp.isAccessSales(),
+                emp.isAccessEmployees(), emp.isAccessCustomers(), emp.isAccessReservations(), emp.isAccessInventory()
+        );
+
+        String sql = "UPDATE employees SET "
+                + "full_name = '" + escapeSql(emp.getName()) + "', "
+                + "job_title = '" + escapeSql(emp.getJobTitle()) + "', "
+                + "department = '" + escapeSql(emp.getDepartment()) + "', "
+                + "phone_one = '" + escapeSql(emp.getPhone1()) + "', "
+                + "phone_two = " + getSqlNullable(emp.getPhone2()) + ", "
+                + "address = '" + escapeSql(emp.getAddress()) + "', "
+                + "date_of_birth = '" + escapeSql(emp.getBirthDate()) + "', "
+                + "salary = '" + cleanSalary(emp.getSalary()) + "', "
+                + "date_of_salary = '" + escapeSql(emp.getSalaryDate()) + "', "
+                + "user_name = '" + escapeSql(emp.getUsername()) + "', "
+                + "user_password = '" + escapeSql(emp.getPassword()) + "', "
+                + "access_rights = '" + accessStr + "' "
+                + "WHERE n_id = '" + escapeSql(emp.getNationalId()) + "';";
+
+        return DBConnection.executeUpdate(sql);
+    }
+
+    /**
+     * Deletes an employee from MySQL table 'employees'.
+     */
+    private int deleteEmployeeFromDB(String nationalId) {
+        String sql = "DELETE FROM employees WHERE n_id = '" + escapeSql(nationalId) + "';";
+        return DBConnection.executeUpdate(sql);
+    }
+
+    /**
+     * Cleans salary string to a pure numeric format (e.g. 18000.00) for MySQL insertion.
+     */
+    private static String cleanSalary(String salaryStr) {
+        if (salaryStr == null || salaryStr.trim().isEmpty()) {
+            return "0.00";
+        }
+        String cleaned = salaryStr.replace("ج.م", "").replace("EGP", "").replace(",", "").replaceAll("[^0-9.]", "").trim();
+        if (cleaned.isEmpty()) {
+            return "0.00";
+        }
+        try {
+            double val = Double.parseDouble(cleaned);
+            return String.format(Locale.US, "%.2f", val);
+        } catch (NumberFormatException e) {
+            return cleaned;
+        }
+    }
+
+    /**
+     * Formats raw numeric salary from database into user-friendly display format.
+     */
+    private static String formatSalaryForUI(String salaryStr) {
+        if (salaryStr == null || salaryStr.trim().isEmpty()) {
+            return "0.00 ج.م";
+        }
+        String cleaned = salaryStr.replace("ج.م", "").replace("EGP", "").replace(",", "").replaceAll("[^0-9.]", "").trim();
+        try {
+            double val = Double.parseDouble(cleaned);
+            return String.format(Locale.US, "%,.2f ج.م", val);
+        } catch (NumberFormatException e) {
+            return salaryStr.endsWith("ج.م") ? salaryStr : salaryStr + " ج.م";
+        }
+    }
+
+    /**
+     * Formats nullable optional SQL fields (returns NULL literal if empty, or quoted escaped string).
+     */
+    private static String getSqlNullable(String val) {
+        if (val == null || val.trim().isEmpty()) {
+            return "NULL";
+        }
+        return "'" + escapeSql(val.trim()) + "'";
+    }
+
+    // =========================================================================
+    // Access Rights Helper Functions (8-character 0/1 representation)
+    // 1st: Cashier, 2nd: Settings, 3rd: Reports, 4th: Sales,
+    // 5th: Employees, 6th: Customers, 7th: Reservations, 8th: Inventory
+    // =========================================================================
+
+    private String buildAccessRightsStringFromBooleans(boolean c, boolean s, boolean r, boolean sa, boolean e, boolean cu, boolean res, boolean inv) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(c ? "1" : "0");
+        sb.append(s ? "1" : "0");
+        sb.append(r ? "1" : "0");
+        sb.append(sa ? "1" : "0");
+        sb.append(e ? "1" : "0");
+        sb.append(cu ? "1" : "0");
+        sb.append(res ? "1" : "0");
+        sb.append(inv ? "1" : "0");
+        return sb.toString();
+    }
+
+    private boolean[] parseAccessRights(String str) {
+        boolean[] rights = new boolean[8];
+        if (str == null || str.length() < 8) {
+            return rights;
+        }
+        for (int i = 0; i < 8; i++) {
+            rights[i] = str.charAt(i) == '1';
+        }
+        return rights;
+    }
+
+    private void setupAccessRightsListeners() {
+        JFXCheckBox[] boxes = {chkCashier, chkSettings, chkReports, chkSales, chkEmployees, chkCustomers, chkReservations, chkInventory};
+        for (JFXCheckBox box : boxes) {
+            if (box != null) {
+                box.selectedProperty().addListener((obs, oldVal, newVal) -> updateSelectAllState());
+            }
+        }
+    }
+
+    @FXML
+    private void handleSelectAllPermissions(ActionEvent event) {
+        boolean selected = chkSelectAll != null && chkSelectAll.isSelected();
+        JFXCheckBox[] boxes = {chkCashier, chkSettings, chkReports, chkSales, chkEmployees, chkCustomers, chkReservations, chkInventory};
+        for (JFXCheckBox box : boxes) {
+            if (box != null) {
+                box.setSelected(selected);
+            }
+        }
+    }
+
+    private void updateSelectAllState() {
+        if (chkSelectAll == null) return;
+        boolean all = (chkCashier != null && chkCashier.isSelected())
+                && (chkSettings != null && chkSettings.isSelected())
+                && (chkReports != null && chkReports.isSelected())
+                && (chkSales != null && chkSales.isSelected())
+                && (chkEmployees != null && chkEmployees.isSelected())
+                && (chkCustomers != null && chkCustomers.isSelected())
+                && (chkReservations != null && chkReservations.isSelected())
+                && (chkInventory != null && chkInventory.isSelected());
+
+        chkSelectAll.setSelected(all);
+    }
+
+    // =========================================================================
+    // Table Selection & Search Filtering (Executed directly in Database)
+    // =========================================================================
+
     private void setupTableSelection() {
         if (tblEmployees != null) {
             tblEmployees.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -264,81 +489,83 @@ public class employees implements Initializable {
         }
     }
 
-    /**
-     * Sets up live real-time search filtering.
-     */
     private void setupSearchFilter() {
         if (txtSearch != null) {
             txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
-                applySearchQuery(newValue);
+                loadEmployeesFromDatabase(newValue);
             });
         }
     }
 
-    private void applySearchQuery(String query) {
-        if (filteredEmployeeList == null) return;
-
-        filteredEmployeeList.setPredicate(emp -> {
-            if (query == null || query.trim().isEmpty()) {
-                return true;
-            }
-            String lowerCaseFilter = query.trim().toLowerCase();
-
-            // Search by Name, Username, and National ID
-            boolean matchName = emp.getName() != null && emp.getName().toLowerCase().contains(lowerCaseFilter);
-            boolean matchUsername = emp.getUsername() != null && emp.getUsername().toLowerCase().contains(lowerCaseFilter);
-            boolean matchNationalId = emp.getNationalId() != null && emp.getNationalId().toLowerCase().contains(lowerCaseFilter);
-
-            return matchName || matchUsername || matchNationalId;
-        });
-
-        updateTotalCount();
-    }
-
     // =========================================================================
-    // CRUD Action Handlers
+    // CRUD Action Handlers (Applied Directly to Database)
     // =========================================================================
 
     /**
-     * 1. Add New Employee
+     * 1. Add Employee (INSERT INTO employees in Database)
      */
     @FXML
     private void handleAddEmployee(ActionEvent event) {
         String nationalId = getSafeText(txtNationalId);
         String name = getSafeText(txtName);
-        String jobTitle = cbJobTitle != null && cbJobTitle.getValue() != null ? cbJobTitle.getValue().trim() : "";
-        String department = cbDepartment != null && cbDepartment.getValue() != null ? cbDepartment.getValue().trim() : "";
+        String jobTitle = getComboBoxValue(cbJobTitle);
+        if (jobTitle.isEmpty()) jobTitle = "موظف";
+        String department = getComboBoxValue(cbDepartment);
+        if (department.isEmpty()) department = "عام";
         String phone1 = getSafeText(txtPhone1);
+        String phone2 = getSafeText(txtPhone2);
+        String address = getSafeText(txtAddress);
+        LocalDate birthDate = dpBirthDate != null ? dpBirthDate.getValue() : null;
+        String username = getSafeText(txtUsername);
+        String password = getSafeText(txtPassword);
+        String salaryStr = getSafeText(txtSalary);
+        LocalDate salaryDate = dpSalaryDate != null ? dpSalaryDate.getValue() : null;
 
-        if (nationalId.isEmpty() || name.isEmpty() || jobTitle.isEmpty() || department.isEmpty() || phone1.isEmpty()) {
-            showNotification("يرجى ملء الحقول الإجبارية (الرقم القومي، الاسم، المسمى الوظيفي، القسم، ورقم الهاتف)!", true);
+        if (nationalId.isEmpty() || name.isEmpty() || username.isEmpty() || password.isEmpty() || salaryStr.isEmpty()) {
+            showNotification("يرجى ملء الحقول الإجبارية (الرقم القومي، الاسم، اسم المستخدم، كلمة المرور، والراتب)!", true);
             return;
         }
 
-        // Check for duplicate national ID
+        // Check for duplicate national ID in database
         for (EmployeeModel emp : employeeList) {
-            if (emp.getNationalId().equals(nationalId)) {
-                showNotification("الرقم القومي (" + nationalId + ") مسجل مسبقًا لموظف آخر!", true);
+            if (emp.getNationalId().equalsIgnoreCase(nationalId)) {
+                showNotification("الرقم القومي (" + nationalId + ") مسجل مسبقًا للموظف (" + emp.getName() + ")!", true);
                 return;
             }
         }
 
+        String birthDateStr = birthDate != null ? birthDate.toString() : "";
+        String salaryDateStr = salaryDate != null ? salaryDate.toString() : "";
+        String formattedSalary = cleanSalary(salaryStr);
+
+        boolean c = chkCashier != null && chkCashier.isSelected();
+        boolean s = chkSettings != null && chkSettings.isSelected();
+        boolean r = chkReports != null && chkReports.isSelected();
+        boolean sa = chkSales != null && chkSales.isSelected();
+        boolean e = chkEmployees != null && chkEmployees.isSelected();
+        boolean cu = chkCustomers != null && chkCustomers.isSelected();
+        boolean res = chkReservations != null && chkReservations.isSelected();
+        boolean inv = chkInventory != null && chkInventory.isSelected();
+
         int newSeq = employeeList.size() + 1;
-        EmployeeModel newEmployee = createModelFromForm(newSeq);
-        employeeList.add(newEmployee);
-        refreshSequenceNumbers();
-        updateTotalCount();
+        EmployeeModel newEmp = new EmployeeModel(
+                newSeq, nationalId, name, jobTitle, department,
+                phone1, phone2, address, birthDateStr,
+                formattedSalary, salaryDateStr, username, password, "",
+                c, s, r, sa, e, cu, res, inv
+        );
 
-        if (tblEmployees != null) {
-            tblEmployees.getSelectionModel().select(newEmployee);
-            tblEmployees.scrollTo(newEmployee);
-        }
+        // Apply INSERT to Database
+        insertEmployeeToDB(newEmp);
 
-        showNotification("تمت إضافة الموظف (" + name + ") بنجاح! ✔", false);
+        // Reload TableView strictly from Database
+        loadEmployeesFromDatabase(txtSearch != null ? txtSearch.getText() : null);
+
+        showNotification("تمت إضافة الموظف (" + name + ") وحفظه في قاعدة البيانات بنجاح! ✔", false);
     }
 
     /**
-     * 2. Edit Selected Employee
+     * 2. Edit Employee (UPDATE employees in Database)
      */
     @FXML
     private void handleEditEmployee(ActionEvent event) {
@@ -350,27 +577,37 @@ public class employees implements Initializable {
 
         String nationalId = getSafeText(txtNationalId);
         String name = getSafeText(txtName);
-        if (nationalId.isEmpty() || name.isEmpty()) {
-            showNotification("لا يمكن ترك الرقم القومي أو الاسم فارغًا!", true);
+        String jobTitle = getComboBoxValue(cbJobTitle);
+        if (jobTitle.isEmpty()) jobTitle = selected.getJobTitle();
+        String department = getComboBoxValue(cbDepartment);
+        if (department.isEmpty()) department = selected.getDepartment();
+        String phone1 = getSafeText(txtPhone1);
+        String phone2 = getSafeText(txtPhone2);
+        String address = getSafeText(txtAddress);
+        LocalDate birthDate = dpBirthDate != null ? dpBirthDate.getValue() : null;
+        String username = getSafeText(txtUsername);
+        String password = getSafeText(txtPassword);
+        String salaryStr = getSafeText(txtSalary);
+        LocalDate salaryDate = dpSalaryDate != null ? dpSalaryDate.getValue() : null;
+
+        if (nationalId.isEmpty() || name.isEmpty() || username.isEmpty() || salaryStr.isEmpty()) {
+            showNotification("لا يمكن ترك الرقم القومي، الاسم، اسم المستخدم، أو الراتب فارغًا!", true);
             return;
         }
 
-        // Update properties
         selected.setNationalId(nationalId);
         selected.setName(name);
-        selected.setJobTitle(cbJobTitle != null && cbJobTitle.getValue() != null ? cbJobTitle.getValue().trim() : "");
-        selected.setDepartment(cbDepartment != null && cbDepartment.getValue() != null ? cbDepartment.getValue().trim() : "");
-        selected.setPhone1(getSafeText(txtPhone1));
-        selected.setPhone2(getSafeText(txtPhone2));
-        selected.setAddress(getSafeText(txtAddress));
-        selected.setBirthDate(dpBirthDate != null && dpBirthDate.getValue() != null ? dpBirthDate.getValue().toString() : "");
-        selected.setUsername(getSafeText(txtUsername));
-        selected.setPassword(getSafeText(txtPassword));
-        selected.setSalary(getSafeText(txtSalary));
-        selected.setSalaryDate(dpSalaryDate != null && dpSalaryDate.getValue() != null ? dpSalaryDate.getValue().toString() : "");
-        selected.setBankAccount(getSafeText(txtBankAccount));
+        selected.setJobTitle(jobTitle);
+        selected.setDepartment(department);
+        selected.setPhone1(phone1);
+        selected.setPhone2(phone2);
+        selected.setAddress(address);
+        if (birthDate != null) selected.setBirthDate(birthDate.toString());
+        selected.setUsername(username);
+        if (!password.isEmpty()) selected.setPassword(password);
+        selected.setSalary(salaryStr);
+        if (salaryDate != null) selected.setSalaryDate(salaryDate.toString());
 
-        // Update permissions
         selected.setAccessCashier(chkCashier != null && chkCashier.isSelected());
         selected.setAccessSettings(chkSettings != null && chkSettings.isSelected());
         selected.setAccessReports(chkReports != null && chkReports.isSelected());
@@ -380,15 +617,17 @@ public class employees implements Initializable {
         selected.setAccessReservations(chkReservations != null && chkReservations.isSelected());
         selected.setAccessInventory(chkInventory != null && chkInventory.isSelected());
 
-        if (tblEmployees != null) {
-            tblEmployees.refresh();
-        }
+        // Apply UPDATE to Database
+        updateEmployeeInDB(selected);
 
-        showNotification("تم حفظ وتحديث بيانات الموظف (" + name + ") بنجاح! ✔", false);
+        // Reload TableView strictly from Database
+        loadEmployeesFromDatabase(txtSearch != null ? txtSearch.getText() : null);
+
+        showNotification("تم تحديث وحفظ بيانات الموظف (" + name + ") في قاعدة البيانات بنجاح! ✔", false);
     }
 
     /**
-     * 3. Delete Selected Employee
+     * 3. Delete Employee (DELETE FROM employees in Database)
      */
     @FXML
     private void handleDeleteEmployee(ActionEvent event) {
@@ -401,17 +640,22 @@ public class employees implements Initializable {
         Alert confirm = new Alert(AlertType.CONFIRMATION);
         confirm.setTitle("تأكيد الحذف");
         confirm.setHeaderText("حذف الموظف: " + selected.getName());
-        confirm.setContentText("هل أنت متأكد من حذف بيانات هذا الموظف نهائيًا من النظام؟");
+        confirm.setContentText("هل أنت متأكد من حذف هذا الموظف نهائيًا من النظام وقاعدة البيانات؟");
         confirm.getDialogPane().setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT);
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             String deletedName = selected.getName();
-            employeeList.remove(selected);
-            refreshSequenceNumbers();
-            updateTotalCount();
+            String deletedNationalId = selected.getNationalId();
+
+            // Apply DELETE to Database
+            deleteEmployeeFromDB(deletedNationalId);
+
+            // Reload TableView strictly from Database
+            loadEmployeesFromDatabase(txtSearch != null ? txtSearch.getText() : null);
             handleClearFields(null);
-            showNotification("تم حذف الموظف (" + deletedName + ") بنجاح! 🗑️", false);
+
+            showNotification("تم حذف الموظف (" + deletedName + ") نهائيًا من قاعدة البيانات! 🗑️", false);
         }
     }
 
@@ -422,8 +666,14 @@ public class employees implements Initializable {
     private void handleClearFields(ActionEvent event) {
         if (txtNationalId != null) txtNationalId.clear();
         if (txtName != null) txtName.clear();
-        if (cbJobTitle != null) cbJobTitle.setValue(null);
-        if (cbDepartment != null) cbDepartment.setValue(null);
+        if (cbJobTitle != null) {
+            cbJobTitle.setValue(null);
+            if (cbJobTitle.getEditor() != null) cbJobTitle.getEditor().clear();
+        }
+        if (cbDepartment != null) {
+            cbDepartment.setValue(null);
+            if (cbDepartment.getEditor() != null) cbDepartment.getEditor().clear();
+        }
         if (txtPhone1 != null) txtPhone1.clear();
         if (txtPhone2 != null) txtPhone2.clear();
         if (txtAddress != null) txtAddress.clear();
@@ -434,8 +684,12 @@ public class employees implements Initializable {
         if (dpSalaryDate != null) dpSalaryDate.setValue(null);
         if (txtBankAccount != null) txtBankAccount.clear();
 
-        // Clear permissions
-        setAllPermissions(false);
+        JFXCheckBox[] boxes = {chkSelectAll, chkCashier, chkSettings, chkReports, chkSales, chkEmployees, chkCustomers, chkReservations, chkInventory};
+        for (JFXCheckBox box : boxes) {
+            if (box != null) {
+                box.setSelected(false);
+            }
+        }
 
         if (tblEmployees != null) {
             tblEmployees.getSelectionModel().clearSelection();
@@ -447,109 +701,63 @@ public class employees implements Initializable {
     }
 
     /**
-     * 5. Search Button Handler
+     * 5. Search Button Handler (Queries MySQL database directly)
      */
     @FXML
     private void handleSearch(ActionEvent event) {
         String query = txtSearch != null ? txtSearch.getText() : "";
-        applySearchQuery(query);
+        loadEmployeesFromDatabase(query);
     }
 
     /**
-     * 6. Clear Search Handler
+     * 6. Clear Search Handler (Reloads all records from MySQL database)
      */
     @FXML
     private void handleClearSearch(ActionEvent event) {
         if (txtSearch != null) {
             txtSearch.clear();
         }
-        applySearchQuery("");
-    }
-
-    /**
-     * 7. Select / Deselect All Permissions
-     */
-    @FXML
-    private void handleSelectAllPermissions(ActionEvent event) {
-        boolean selected = chkSelectAll != null && chkSelectAll.isSelected();
-        setAllPermissions(selected);
-    }
-
-    private void setAllPermissions(boolean state) {
-        if (chkSelectAll != null) chkSelectAll.setSelected(state);
-        if (chkCashier != null) chkCashier.setSelected(state);
-        if (chkSettings != null) chkSettings.setSelected(state);
-        if (chkReports != null) chkReports.setSelected(state);
-        if (chkSales != null) chkSales.setSelected(state);
-        if (chkEmployees != null) chkEmployees.setSelected(state);
-        if (chkCustomers != null) chkCustomers.setSelected(state);
-        if (chkReservations != null) chkReservations.setSelected(state);
-        if (chkInventory != null) chkInventory.setSelected(state);
+        loadEmployeesFromDatabase(null);
     }
 
     // =========================================================================
-    // Helpers & Model Creation
+    // Helpers
     // =========================================================================
-
-    private EmployeeModel createModelFromForm(int seq) {
-        return new EmployeeModel(
-            seq,
-            getSafeText(txtNationalId),
-            getSafeText(txtName),
-            cbJobTitle != null && cbJobTitle.getValue() != null ? cbJobTitle.getValue().trim() : "",
-            cbDepartment != null && cbDepartment.getValue() != null ? cbDepartment.getValue().trim() : "",
-            getSafeText(txtPhone1),
-            getSafeText(txtPhone2),
-            getSafeText(txtAddress),
-            dpBirthDate != null && dpBirthDate.getValue() != null ? dpBirthDate.getValue().toString() : "",
-            getSafeText(txtUsername),
-            getSafeText(txtPassword),
-            getSafeText(txtSalary),
-            dpSalaryDate != null && dpSalaryDate.getValue() != null ? dpSalaryDate.getValue().toString() : "",
-            getSafeText(txtBankAccount),
-            chkCashier != null && chkCashier.isSelected(),
-            chkSettings != null && chkSettings.isSelected(),
-            chkReports != null && chkReports.isSelected(),
-            chkSales != null && chkSales.isSelected(),
-            chkEmployees != null && chkEmployees.isSelected(),
-            chkCustomers != null && chkCustomers.isSelected(),
-            chkReservations != null && chkReservations.isSelected(),
-            chkInventory != null && chkInventory.isSelected()
-        );
-    }
 
     private void populateFieldsFromModel(EmployeeModel model) {
         if (txtNationalId != null) txtNationalId.setText(model.getNationalId());
         if (txtName != null) txtName.setText(model.getName());
-        if (cbJobTitle != null) cbJobTitle.setValue(model.getJobTitle());
-        if (cbDepartment != null) cbDepartment.setValue(model.getDepartment());
+        if (cbJobTitle != null) {
+            cbJobTitle.setValue(model.getJobTitle());
+            if (cbJobTitle.getEditor() != null) cbJobTitle.getEditor().setText(model.getJobTitle());
+        }
+        if (cbDepartment != null) {
+            cbDepartment.setValue(model.getDepartment());
+            if (cbDepartment.getEditor() != null) cbDepartment.getEditor().setText(model.getDepartment());
+        }
         if (txtPhone1 != null) txtPhone1.setText(model.getPhone1());
         if (txtPhone2 != null) txtPhone2.setText(model.getPhone2());
         if (txtAddress != null) txtAddress.setText(model.getAddress());
-        
-        if (dpBirthDate != null) {
-            try {
-                dpBirthDate.setValue(model.getBirthDate() != null && !model.getBirthDate().isEmpty() ? LocalDate.parse(model.getBirthDate()) : null);
-            } catch (Exception e) {
-                dpBirthDate.setValue(null);
-            }
-        }
-
         if (txtUsername != null) txtUsername.setText(model.getUsername());
         if (txtPassword != null) txtPassword.setText(model.getPassword());
-        if (txtSalary != null) txtSalary.setText(model.getSalary());
+        if (txtSalary != null) txtSalary.setText(cleanSalary(model.getSalary()));
 
-        if (dpSalaryDate != null) {
+        if (dpBirthDate != null && model.getBirthDate() != null && !model.getBirthDate().isEmpty()) {
             try {
-                dpSalaryDate.setValue(model.getSalaryDate() != null && !model.getSalaryDate().isEmpty() ? LocalDate.parse(model.getSalaryDate()) : null);
-            } catch (Exception e) {
-                dpSalaryDate.setValue(null);
-            }
+                dpBirthDate.setValue(LocalDate.parse(model.getBirthDate()));
+            } catch (Exception ignored) {}
+        } else if (dpBirthDate != null) {
+            dpBirthDate.setValue(null);
         }
 
-        if (txtBankAccount != null) txtBankAccount.setText(model.getBankAccount());
+        if (dpSalaryDate != null && model.getSalaryDate() != null && !model.getSalaryDate().isEmpty()) {
+            try {
+                dpSalaryDate.setValue(LocalDate.parse(model.getSalaryDate()));
+            } catch (Exception ignored) {}
+        } else if (dpSalaryDate != null) {
+            dpSalaryDate.setValue(null);
+        }
 
-        // Checkboxes
         if (chkCashier != null) chkCashier.setSelected(model.isAccessCashier());
         if (chkSettings != null) chkSettings.setSelected(model.isAccessSettings());
         if (chkReports != null) chkReports.setSelected(model.isAccessReports());
@@ -559,13 +767,10 @@ public class employees implements Initializable {
         if (chkReservations != null) chkReservations.setSelected(model.isAccessReservations());
         if (chkInventory != null) chkInventory.setSelected(model.isAccessInventory());
 
-        boolean allSelected = model.isAccessCashier() && model.isAccessSettings() && model.isAccessReports() &&
-                              model.isAccessSales() && model.isAccessEmployees() && model.isAccessCustomers() &&
-                              model.isAccessReservations() && model.isAccessInventory();
-        if (chkSelectAll != null) chkSelectAll.setSelected(allSelected);
+        updateSelectAllState();
 
         if (lblFormStatus != null) {
-            lblFormStatus.setText("تم عرض بيانات: " + model.getName() + " (المعرف: " + model.getNationalId() + ")");
+            lblFormStatus.setText("تم عرض بيانات الموظف: " + model.getName());
         }
     }
 
@@ -577,13 +782,25 @@ public class employees implements Initializable {
 
     private void updateTotalCount() {
         if (lblTotalCount != null) {
-            int count = filteredEmployeeList != null ? filteredEmployeeList.size() : employeeList.size();
-            lblTotalCount.setText(String.valueOf(count));
+            lblTotalCount.setText(String.valueOf(employeeList.size()));
         }
     }
 
     private String getSafeText(TextField tf) {
         return tf != null && tf.getText() != null ? tf.getText().trim() : "";
+    }
+
+    private String getComboBoxValue(JFXComboBox<String> cb) {
+        if (cb == null) return "";
+        if (cb.isEditable() && cb.getEditor() != null && cb.getEditor().getText() != null) {
+            return cb.getEditor().getText().trim();
+        }
+        return cb.getValue() != null ? cb.getValue().trim() : "";
+    }
+
+    private static String escapeSql(String str) {
+        if (str == null) return "";
+        return str.replace("'", "''");
     }
 
     private void showNotification(String message, boolean isError) {
@@ -608,13 +825,13 @@ public class employees implements Initializable {
         private final SimpleStringProperty phone2;
         private final SimpleStringProperty address;
         private final SimpleStringProperty birthDate;
-        private final SimpleStringProperty username;
-        private final SimpleStringProperty password;
         private final SimpleStringProperty salary;
         private final SimpleStringProperty salaryDate;
-        private final SimpleStringProperty bankAccount;
 
-        // 8 Access Rights
+        private SimpleStringProperty username;
+        private SimpleStringProperty password;
+        private SimpleStringProperty bankAccount;
+
         private boolean accessCashier;
         private boolean accessSettings;
         private boolean accessReports;
@@ -626,7 +843,7 @@ public class employees implements Initializable {
 
         public EmployeeModel(int seq, String nationalId, String name, String jobTitle, String department,
                              String phone1, String phone2, String address, String birthDate,
-                             String username, String password, String salary, String salaryDate, String bankAccount,
+                             String salary, String salaryDate, String username, String password, String bankAccount,
                              boolean accessCashier, boolean accessSettings, boolean accessReports, boolean accessSales,
                              boolean accessEmployees, boolean accessCustomers, boolean accessReservations, boolean accessInventory) {
             this.seq = new SimpleIntegerProperty(seq);
@@ -638,10 +855,11 @@ public class employees implements Initializable {
             this.phone2 = new SimpleStringProperty(phone2);
             this.address = new SimpleStringProperty(address);
             this.birthDate = new SimpleStringProperty(birthDate);
-            this.username = new SimpleStringProperty(username);
-            this.password = new SimpleStringProperty(password);
             this.salary = new SimpleStringProperty(salary);
             this.salaryDate = new SimpleStringProperty(salaryDate);
+
+            this.username = new SimpleStringProperty(username);
+            this.password = new SimpleStringProperty(password);
             this.bankAccount = new SimpleStringProperty(bankAccount);
 
             this.accessCashier = accessCashier;

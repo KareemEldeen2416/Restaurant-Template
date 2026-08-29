@@ -26,9 +26,14 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Main Controller for Restaurant Management System Dashboard with JFoenix Material Cards.
- * Handles live Arabic clock & date, responsive cards, user info, and module navigation.
- *
+ * Main Controller for Restaurant Management System Dashboard.
+ * 
+ * Features:
+ * - Displays active user's full name and role in the top header bar.
+ * - Dynamically activates/deactivates window cards based on user's 8-bit access_rights.
+ * - Live Arabic clock and calendar date.
+ * - Modular window routing.
+ * 
  * @author KareemEldeen
  */
 public class main implements Initializable {
@@ -78,6 +83,10 @@ public class main implements Initializable {
     @FXML
     private JFXButton cardSupport;
 
+    private String userFullName = "المدير العام";
+    private String userRole = "مدير النظام";
+    private String userAccessRights = "11111111";
+
     private Timeline clockTimeline;
     private final Locale arabicLocale = Locale.forLanguageTag("ar");
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE، d MMMM yyyy", arabicLocale);
@@ -86,6 +95,7 @@ public class main implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
+        applyAccessRights(userAccessRights);
     }
 
     /**
@@ -115,17 +125,83 @@ public class main implements Initializable {
     }
 
     /**
-     * Set the current active user name and role dynamically.
+     * Sets the logged in user full name, role, and applies access rights to dashboard cards.
      *
-     * @param userName Name of the user
-     * @param userRole Role description
+     * @param fullName Full name of the user to display in the header bar
+     * @param role Job title or department
+     * @param accessRights 8-character string of '0' and '1' representing permissions
+     */
+    public void setLoggedInUser(String fullName, String role, String accessRights) {
+        this.userFullName = fullName != null && !fullName.trim().isEmpty() ? fullName : "المستخدم";
+        this.userRole = role != null && !role.trim().isEmpty() ? role : "موظف";
+        this.userAccessRights = accessRights != null && accessRights.length() >= 8 ? accessRights : "11111111";
+
+        if (lblUserName != null) {
+            lblUserName.setText(this.userFullName);
+        }
+        if (lblUserRole != null) {
+            lblUserRole.setText(this.userRole);
+        }
+
+        applyAccessRights(this.userAccessRights);
+    }
+
+    /**
+     * Backwards-compatible overload for setting user info.
      */
     public void setUserInfo(String userName, String userRole) {
-        if (lblUserName != null && userName != null && !userName.trim().isEmpty()) {
-            lblUserName.setText(userName);
+        setLoggedInUser(userName, userRole, "11111111");
+    }
+
+    /**
+     * Activates only cards for windows allowed by access_rights:
+     * 1st: Cashier, 2nd: Settings, 3rd: Reports, 4th: Sales,
+     * 5th: Employees, 6th: Customers, 7th: Reservations, 8th: Inventory
+     */
+    public void applyAccessRights(String rights) {
+        if (rights == null || rights.length() < 8) {
+            rights = "11111111"; // Default full access if not provided
         }
-        if (lblUserRole != null && userRole != null && !userRole.trim().isEmpty()) {
-            lblUserRole.setText(userRole);
+
+        boolean allowCashier      = rights.charAt(0) == '1';
+        boolean allowSettings     = rights.charAt(1) == '1';
+        boolean allowReports      = rights.charAt(2) == '1';
+        boolean allowSales        = rights.charAt(3) == '1';
+        boolean allowEmployees    = rights.charAt(4) == '1';
+        boolean allowCustomers    = rights.charAt(5) == '1';
+        boolean allowReservations = rights.charAt(6) == '1';
+        boolean allowInventory    = rights.charAt(7) == '1';
+
+        setCardState(cardCashier, allowCashier);
+        setCardState(cardSettings, allowSettings);
+        setCardState(cardReports, allowReports);
+        setCardState(cardSales, allowSales);
+        setCardState(cardEmployees, allowEmployees);
+        setCardState(cardCustomers, allowCustomers);
+        setCardState(cardReservations, allowReservations);
+        setCardState(cardInventory, allowInventory);
+
+        // Products card is active if either Cashier or Inventory is allowed
+        setCardState(cardProducts, allowCashier || allowInventory);
+
+        // Support card is always active for general help and contact
+        setCardState(cardSupport, true);
+    }
+
+    /**
+     * Sets active/deactivated state and styling on a dashboard card.
+     */
+    private void setCardState(JFXButton card, boolean enabled) {
+        if (card != null) {
+            card.setDisable(!enabled);
+            card.setOpacity(enabled ? 1.0 : 0.35);
+            if (!enabled) {
+                if (!card.getStyleClass().contains("card-disabled")) {
+                    card.getStyleClass().add("card-disabled");
+                }
+            } else {
+                card.getStyleClass().remove("card-disabled");
+            }
         }
     }
 

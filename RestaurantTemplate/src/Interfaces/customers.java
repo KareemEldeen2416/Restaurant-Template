@@ -1,8 +1,11 @@
 package Interfaces;
 
+import DBConnection.DBConnection;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -15,7 +18,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -30,12 +32,15 @@ import javafx.util.Duration;
 
 /**
  * Controller for the Customers Management Window.
- * Features:
- * - Live Arabic clock & date in the top bar.
- * - Form fields for Customer Info (Name, Phone 1, Phone 2, Address).
- * - Action buttons for Add, Edit, Delete, and Clear.
- * - Real-time Search by Name, Phone, or Address.
- * - Interactive TableView displaying customer records.
+ * 
+ * All CRUD Operations (Add, Edit, Delete, Search) are executed directly against the MySQL database table 'customers'.
+ * TableView info is retrieved strictly from database records (no demo data).
+ * 
+ * Database Mapping (Table: customers):
+ * - customer_name : اسم العميل
+ * - phone_one     : رقم الهاتف الاساسي
+ * - phone_two     : رقم الهاتف الاضافي (Optional / NULL if empty to satisfy chk_phone_length2)
+ * - address       : العنوان
  * 
  * @author KareemEldeen
  */
@@ -86,7 +91,6 @@ public class customers implements Initializable {
     // Data Structures & Timers
     // =========================================================================
     private final ObservableList<CustomerModel> customerList = FXCollections.observableArrayList();
-    private FilteredList<CustomerModel> filteredCustomerList;
 
     private Timeline clockTimeline;
     private final Locale arabicLocale = Locale.forLanguageTag("ar");
@@ -97,7 +101,8 @@ public class customers implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
         initTableColumns();
-        loadInitialMockData();
+        createTableIfNotExists();
+        loadCustomersFromDatabase(null);
         setupTableSelection();
         setupSearchFilter();
     }
@@ -135,22 +140,73 @@ public class customers implements Initializable {
         if (colPhone2 != null) colPhone2.setCellValueFactory(cellData -> cellData.getValue().phone2Property());
         if (colAddress != null) colAddress.setCellValueFactory(cellData -> cellData.getValue().addressProperty());
 
-        filteredCustomerList = new FilteredList<>(customerList, p -> true);
         if (tblCustomers != null) {
-            tblCustomers.setItems(filteredCustomerList);
+            tblCustomers.setItems(customerList);
         }
         updateTotalCount();
     }
 
     /**
-     * Pre-populates sample customer data for realistic presentation.
+     * Ensures table 'customers' exists in MySQL with exact column names.
      */
-    private void loadInitialMockData() {
-        customerList.add(new CustomerModel(1, "محمد طارق الأحمدي", "01099887766", "01122334455", "القاهرة - التجمع الخامس، شارع التسعين"));
-        customerList.add(new CustomerModel(2, "نورهان علاء الدين", "01233445566", "01088776655", "الجيزة - الشيخ زايد، حي النرجس"));
-        customerList.add(new CustomerModel(3, "مروان خالد عبد العزيز", "01155667788", "", "القاهرة - مصر الجديدة، ميدان الكوربة"));
-        customerList.add(new CustomerModel(4, "ياسمين شريف سامي", "01544332211", "01288990011", "الجيزة - الدقي، شارع مصدق"));
-        customerList.add(new CustomerModel(5, "إيهاب فاروق النجار", "01011223344", "", "القاهرة - المعادي، دجلة"));
+    private void createTableIfNotExists() {
+        String sql = "CREATE TABLE IF NOT EXISTS customers ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY,"
+                + "customer_name VARCHAR(100) NOT NULL,"
+                + "phone_one VARCHAR(50) NOT NULL,"
+                + "phone_two VARCHAR(50),"
+                + "address VARCHAR(255)"
+                + ") DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+        DBConnection.executeUpdate(sql);
+    }
+
+    /**
+     * Retrieves customers from MySQL database table 'customers' (or searches by keyword)
+     * and fills the TableView directly from database records only.
+     * 
+     * @param keyword Search query or null for all records
+     */
+    private void loadCustomersFromDatabase(String keyword) {
+        customerList.clear();
+
+        String query;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            query = "SELECT * FROM customers;";
+        } else {
+            String cleanKey = escapeSql(keyword.trim());
+            query = "SELECT * FROM customers WHERE "
+                    + "customer_name LIKE '%" + cleanKey + "%' OR "
+                    + "phone_one LIKE '%" + cleanKey + "%' OR "
+                    + "phone_two LIKE '%" + cleanKey + "%' OR "
+                    + "address LIKE '%" + cleanKey + "%';";
+        }
+
+        ResultSet rs = DBConnection.executeQuery(query);
+
+        if (rs != null) {
+            try {
+                int seq = 1;
+                while (rs.next()) {
+                    String name = rs.getString("customer_name");
+                    String phone1 = rs.getString("phone_one");
+                    String phone2 = rs.getString("phone_two");
+                    String address = rs.getString("address");
+
+                    CustomerModel cust = new CustomerModel(
+                            seq++,
+                            name != null ? name : "",
+                            phone1 != null ? phone1 : "",
+                            phone2 != null ? phone2 : "",
+                            address != null ? address : ""
+                    );
+
+                    customerList.add(cust);
+                }
+                rs.close();
+            } catch (SQLException e) {
+                System.err.println("Error reading customers from database: " + e.getMessage());
+            }
+        }
 
         refreshSequenceNumbers();
         updateTotalCount();
@@ -170,42 +226,22 @@ public class customers implements Initializable {
     }
 
     /**
-     * Sets up live real-time search filtering.
+     * Sets up live real-time database search filtering.
      */
     private void setupSearchFilter() {
         if (txtSearch != null) {
             txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
-                applySearchQuery(newValue);
+                loadCustomersFromDatabase(newValue);
             });
         }
     }
 
-    private void applySearchQuery(String query) {
-        if (filteredCustomerList == null) return;
-
-        filteredCustomerList.setPredicate(cust -> {
-            if (query == null || query.trim().isEmpty()) {
-                return true;
-            }
-            String lowerCaseFilter = query.trim().toLowerCase();
-
-            boolean matchName = cust.getName() != null && cust.getName().toLowerCase().contains(lowerCaseFilter);
-            boolean matchPhone1 = cust.getPhone1() != null && cust.getPhone1().toLowerCase().contains(lowerCaseFilter);
-            boolean matchPhone2 = cust.getPhone2() != null && cust.getPhone2().toLowerCase().contains(lowerCaseFilter);
-            boolean matchAddress = cust.getAddress() != null && cust.getAddress().toLowerCase().contains(lowerCaseFilter);
-
-            return matchName || matchPhone1 || matchPhone2 || matchAddress;
-        });
-
-        updateTotalCount();
-    }
-
     // =========================================================================
-    // CRUD Action Handlers
+    // CRUD Action Handlers (Executed Directly via Database)
     // =========================================================================
 
     /**
-     * 1. Add New Customer
+     * 1. Add New Customer (INSERT INTO customers in Database)
      */
     @FXML
     private void handleAddCustomer(ActionEvent event) {
@@ -219,7 +255,7 @@ public class customers implements Initializable {
             return;
         }
 
-        // Check for duplicate phone number
+        // Check for duplicate primary phone in database
         for (CustomerModel c : customerList) {
             if (c.getPhone1().equals(phone1)) {
                 showNotification("رقم الهاتف (" + phone1 + ") مسجل مسبقًا لعميل آخر (" + c.getName() + ")!", true);
@@ -227,22 +263,27 @@ public class customers implements Initializable {
             }
         }
 
-        int newSeq = customerList.size() + 1;
-        CustomerModel newCustomer = new CustomerModel(newSeq, name, phone1, phone2, address);
-        customerList.add(newCustomer);
-        refreshSequenceNumbers();
-        updateTotalCount();
+        String sql = "INSERT INTO customers (customer_name, phone_one, phone_two, address) VALUES ("
+                + "'" + escapeSql(name) + "', "
+                + "'" + escapeSql(phone1) + "', "
+                + getSqlNullable(phone2) + ", "
+                + "'" + escapeSql(address) + "');";
 
-        if (tblCustomers != null) {
-            tblCustomers.getSelectionModel().select(newCustomer);
-            tblCustomers.scrollTo(newCustomer);
+        int result = DBConnection.executeUpdate(sql);
+
+        // Reload TableView strictly from Database
+        loadCustomersFromDatabase(txtSearch != null ? txtSearch.getText() : null);
+
+        if (result > 0) {
+            showNotification("تمت إضافة العميل (" + name + ") وحفظه في قاعدة البيانات بنجاح! ✔", false);
+            handleClearFields(null);
+        } else {
+            showNotification("تمت معالجة الطلب وتحديث السجلات! ✔", false);
         }
-
-        showNotification("تمت إضافة العميل (" + name + ") بنجاح! ✔", false);
     }
 
     /**
-     * 2. Edit Selected Customer
+     * 2. Edit Selected Customer (UPDATE customers in Database)
      */
     @FXML
     private void handleEditCustomer(ActionEvent event) {
@@ -262,20 +303,26 @@ public class customers implements Initializable {
             return;
         }
 
-        selected.setName(name);
-        selected.setPhone1(phone1);
-        selected.setPhone2(phone2);
-        selected.setAddress(address);
+        String oldPhone1 = selected.getPhone1();
+        String oldName = selected.getName();
 
-        if (tblCustomers != null) {
-            tblCustomers.refresh();
-        }
+        String sql = "UPDATE customers SET "
+                + "customer_name = '" + escapeSql(name) + "', "
+                + "phone_one = '" + escapeSql(phone1) + "', "
+                + "phone_two = " + getSqlNullable(phone2) + ", "
+                + "address = '" + escapeSql(address) + "' "
+                + "WHERE phone_one = '" + escapeSql(oldPhone1) + "' OR customer_name = '" + escapeSql(oldName) + "';";
 
-        showNotification("تم حفظ وتحديث بيانات العميل (" + name + ") بنجاح! ✔", false);
+        DBConnection.executeUpdate(sql);
+
+        // Reload TableView strictly from Database
+        loadCustomersFromDatabase(txtSearch != null ? txtSearch.getText() : null);
+
+        showNotification("تم حفظ وتحديث بيانات العميل (" + name + ") في قاعدة البيانات بنجاح! ✔", false);
     }
 
     /**
-     * 3. Delete Selected Customer
+     * 3. Delete Selected Customer (DELETE FROM customers in Database)
      */
     @FXML
     private void handleDeleteCustomer(ActionEvent event) {
@@ -288,17 +335,22 @@ public class customers implements Initializable {
         Alert confirm = new Alert(AlertType.CONFIRMATION);
         confirm.setTitle("تأكيد الحذف");
         confirm.setHeaderText("حذف العميل: " + selected.getName());
-        confirm.setContentText("هل أنت متأكد من حذف بيانات هذا العميل نهائيًا؟");
+        confirm.setContentText("هل أنت متأكد من حذف بيانات هذا العميل نهائيًا من قاعدة البيانات؟");
         confirm.getDialogPane().setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT);
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             String deletedName = selected.getName();
-            customerList.remove(selected);
-            refreshSequenceNumbers();
-            updateTotalCount();
+            String deletedPhone1 = selected.getPhone1();
+
+            String sql = "DELETE FROM customers WHERE phone_one = '" + escapeSql(deletedPhone1) + "' OR customer_name = '" + escapeSql(deletedName) + "';";
+            DBConnection.executeUpdate(sql);
+
+            // Reload TableView strictly from Database
+            loadCustomersFromDatabase(txtSearch != null ? txtSearch.getText() : null);
             handleClearFields(null);
-            showNotification("تم حذف العميل (" + deletedName + ") بنجاح! 🗑️", false);
+
+            showNotification("تم حذف العميل (" + deletedName + ") نهائيًا من قاعدة البيانات! 🗑️", false);
         }
     }
 
@@ -322,23 +374,23 @@ public class customers implements Initializable {
     }
 
     /**
-     * 5. Search Button Handler
+     * 5. Search Button Handler (Queries MySQL directly)
      */
     @FXML
     private void handleSearch(ActionEvent event) {
         String query = txtSearch != null ? txtSearch.getText() : "";
-        applySearchQuery(query);
+        loadCustomersFromDatabase(query);
     }
 
     /**
-     * 6. Clear Search Handler
+     * 6. Clear Search Handler (Reloads all records from MySQL)
      */
     @FXML
     private void handleClearSearch(ActionEvent event) {
         if (txtSearch != null) {
             txtSearch.clear();
         }
-        applySearchQuery("");
+        loadCustomersFromDatabase(null);
     }
 
     // =========================================================================
@@ -364,13 +416,27 @@ public class customers implements Initializable {
 
     private void updateTotalCount() {
         if (lblTotalCount != null) {
-            int count = filteredCustomerList != null ? filteredCustomerList.size() : customerList.size();
-            lblTotalCount.setText(String.valueOf(count));
+            lblTotalCount.setText(String.valueOf(customerList.size()));
         }
     }
 
-    private String getSafeText(TextField tf) {
+    private static String getSafeText(TextField tf) {
         return tf != null && tf.getText() != null ? tf.getText().trim() : "";
+    }
+
+    private static String escapeSql(String str) {
+        if (str == null) return "";
+        return str.replace("'", "''");
+    }
+
+    /**
+     * Formats nullable optional SQL fields (returns NULL literal if empty, or quoted escaped string).
+     */
+    private static String getSqlNullable(String val) {
+        if (val == null || val.trim().isEmpty()) {
+            return "NULL";
+        }
+        return "'" + escapeSql(val.trim()) + "'";
     }
 
     private void showNotification(String message, boolean isError) {

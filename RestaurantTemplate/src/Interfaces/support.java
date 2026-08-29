@@ -59,6 +59,16 @@ public class support implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initLiveDateTime();
+        initUserSessionDisplay();
+    }
+
+    private void initUserSessionDisplay() {
+        if (lblUserName != null) {
+            lblUserName.setText(UserSession.getDisplayName());
+        }
+        if (lblUserRole != null) {
+            lblUserRole.setText(UserSession.getUserRole());
+        }
     }
 
     /**

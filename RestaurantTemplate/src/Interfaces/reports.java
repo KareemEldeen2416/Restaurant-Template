@@ -130,11 +130,21 @@ public class reports implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
+        initUserSessionDisplay();
         initPeriodFilter();
         initTableColumns();
         loadReportsData();
         populateDailyChart();
         populateMonthlyChart();
+    }
+
+    private void initUserSessionDisplay() {
+        if (lblUserName != null) {
+            lblUserName.setText(UserSession.getDisplayName());
+        }
+        if (lblUserRole != null) {
+            lblUserRole.setText(UserSession.getUserRole());
+        }
     }
 
     /**

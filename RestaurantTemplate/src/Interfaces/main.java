@@ -95,7 +95,13 @@ public class main implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
-        applyAccessRights(userAccessRights);
+        if (lblUserName != null) {
+            lblUserName.setText(UserSession.getDisplayName());
+        }
+        if (lblUserRole != null) {
+            lblUserRole.setText(UserSession.getUserRole());
+        }
+        applyAccessRights(UserSession.getAccessRights());
     }
 
     /**

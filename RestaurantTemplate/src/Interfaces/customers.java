@@ -100,11 +100,21 @@ public class customers implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
+        initUserSessionDisplay();
         initTableColumns();
         createTableIfNotExists();
         loadCustomersFromDatabase(null);
         setupTableSelection();
         setupSearchFilter();
+    }
+
+    private void initUserSessionDisplay() {
+        if (lblUserName != null) {
+            lblUserName.setText(UserSession.getDisplayName());
+        }
+        if (lblUserRole != null) {
+            lblUserRole.setText(UserSession.getUserRole());
+        }
     }
 
     /**

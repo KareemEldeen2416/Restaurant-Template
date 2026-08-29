@@ -165,6 +165,7 @@ public class reservations implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
+        initUserSessionDisplay();
         initFormPickers();
         initRestaurantTableColumns();
         initReservationTableColumns();
@@ -174,6 +175,15 @@ public class reservations implements Initializable {
         setupTableSelectionHandlers();
         setupSearchFilters();
         setupDateTimeChangeListeners();
+    }
+
+    private void initUserSessionDisplay() {
+        if (lblUserName != null) {
+            lblUserName.setText(UserSession.getDisplayName());
+        }
+        if (lblUserRole != null) {
+            lblUserRole.setText(UserSession.getUserRole());
+        }
     }
 
     /**

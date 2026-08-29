@@ -173,7 +173,12 @@
                                     <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
                                        <children>
                                           <Label styleClass="field-label" text="القسم / التصنيف *" />
-                                          <JFXComboBox fx:id="cbProdCategory" editable="true" maxWidth="1.7976931348623157E308" promptText="اختر أو اكتب القسم..." styleClass="jfx-combo-box" />
+                                          <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                             <children>
+                                                <JFXComboBox fx:id="cbProdCategory" maxWidth="1.7976931348623157E308" promptText="اختر القسم..." styleClass="jfx-combo-box" HBox.hgrow="ALWAYS" />
+                                                <JFXButton fx:id="btnManageCategories" buttonType="FLAT" onAction="#handleOpenCategoryManager" style="-fx-background-color: #FFF3EB; -fx-text-fill: #E65100; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-min-width: 32px; -fx-padding: 4 8;" text="➕" />
+                                             </children>
+                                          </HBox>
                                        </children>
                                     </VBox>
 
@@ -181,7 +186,12 @@
                                     <VBox spacing="3.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
                                        <children>
                                           <Label styleClass="field-label" text="الوحدة *" />
-                                          <JFXComboBox fx:id="cbProdUnit" editable="true" maxWidth="1.7976931348623157E308" promptText="الوحدة..." styleClass="jfx-combo-box" />
+                                          <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                             <children>
+                                                <JFXComboBox fx:id="cbProdUnit" maxWidth="1.7976931348623157E308" promptText="اختر الوحدة..." styleClass="jfx-combo-box" HBox.hgrow="ALWAYS" />
+                                                <JFXButton fx:id="btnManageUnits" buttonType="FLAT" onAction="#handleOpenUnitManager" style="-fx-background-color: #FFF3EB; -fx-text-fill: #E65100; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-min-width: 32px; -fx-padding: 4 8;" text="➕" />
+                                             </children>
+                                          </HBox>
                                        </children>
                                     </VBox>
 

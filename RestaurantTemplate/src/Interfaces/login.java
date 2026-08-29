@@ -217,7 +217,8 @@ public class login implements Initializable {
         }
 
         // Authentication successful - transition to main window
-        showSuccessMessage("تم تسجيل الدخول بنجاح! مرحبًا " + fullName);
+        UserSession.setSession(username, fullName, jobTitle, accessRights);
+        showSuccessMessage("تم تسجيل الدخول بنجاح! مرحبًا " + UserSession.getDisplayName());
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/main.fxml"));
@@ -226,7 +227,7 @@ public class login implements Initializable {
             // Pass user full name, role, and access rights to main dashboard controller
             main mainController = loader.getController();
             if (mainController != null) {
-                mainController.setLoggedInUser(fullName, jobTitle, accessRights);
+                mainController.setLoggedInUser(UserSession.getDisplayName(), UserSession.getUserRole(), UserSession.getAccessRights());
             }
 
             Scene scene = new Scene(root, 1180, 750);

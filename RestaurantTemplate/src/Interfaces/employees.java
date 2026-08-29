@@ -143,6 +143,7 @@ public class employees implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
+        initUserSessionDisplay();
         initComboBoxes();
         initTableColumns();
         setupAccessRightsListeners();
@@ -150,6 +151,15 @@ public class employees implements Initializable {
         loadEmployeesFromDatabase(null);
         setupTableSelection();
         setupSearchFilter();
+    }
+
+    private void initUserSessionDisplay() {
+        if (lblUserName != null) {
+            lblUserName.setText(UserSession.getDisplayName());
+        }
+        if (lblUserRole != null) {
+            lblUserRole.setText(UserSession.getUserRole());
+        }
     }
 
     /**

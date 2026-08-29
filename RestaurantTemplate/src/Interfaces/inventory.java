@@ -177,12 +177,22 @@ public class inventory implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
+        initUserSessionDisplay();
         initDropdownOptions();
         initTableColumns();
         loadInitialMockData();
         setupTableSelectionListeners();
         setupSearchFilters();
         setupAutoTotalCalculation();
+    }
+
+    private void initUserSessionDisplay() {
+        if (lblUserName != null) {
+            lblUserName.setText(UserSession.getDisplayName());
+        }
+        if (lblUserRole != null) {
+            lblUserRole.setText(UserSession.getUserRole());
+        }
     }
 
     /**

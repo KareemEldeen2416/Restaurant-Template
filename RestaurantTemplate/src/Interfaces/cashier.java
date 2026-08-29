@@ -137,12 +137,22 @@ public class cashier implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
+        initUserSessionDisplay();
         initTableControls();
         loadInitialData();
         renderCategoryButtons();
         renderMenuItems("");
         renderCashierTableCards();
         setupSearchListeners();
+    }
+
+    private void initUserSessionDisplay() {
+        if (lblUserName != null) {
+            lblUserName.setText(UserSession.getDisplayName());
+        }
+        if (lblUserRole != null) {
+            lblUserRole.setText(UserSession.getUserRole());
+        }
     }
 
     /**

@@ -117,6 +117,9 @@ public class products implements Initializable {
 
     // Actual detected database columns
     private final List<String> existingProductColumns = new ArrayList<>();
+    private String productIdColumn = "product_id";
+    private boolean isProductIdAutoIncrement = false;
+    private boolean isProductIdInteger = false;
     private String productRefColumn = "reference_no";
     private String productNameColumn = "product_name";
     private String productDeptColumn = "product_category"; // Column in products for القسم
@@ -196,11 +199,12 @@ public class products implements Initializable {
         DBConnection.executeUpdate(sqlUnits);
 
         String sqlProducts = "CREATE TABLE IF NOT EXISTS products ("
-                + "reference_no VARCHAR(50) PRIMARY KEY,"
+                + "product_id INT AUTO_INCREMENT PRIMARY KEY,"
                 + "product_name VARCHAR(150) NOT NULL,"
                 + "product_category VARCHAR(100) NULL,"
                 + "product_unit VARCHAR(100) NULL,"
-                + "product_price DECIMAL(10,2) NOT NULL"
+                + "product_price DECIMAL(10,2) NOT NULL,"
+                + "reference_no VARCHAR(50) NULL"
                 + ") DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
         DBConnection.executeUpdate(sqlProducts);
     }
@@ -287,11 +291,33 @@ public class products implements Initializable {
 
         // 3. Detect columns in 'products'
         existingProductColumns.clear();
+        isProductIdAutoIncrement = false;
+        isProductIdInteger = false;
+        productIdColumn = null;
+        productRefColumn = null;
+        productNameColumn = "product_name";
+        productDeptColumn = "product_category";
+        productUnitColumn = "product_unit";
+        productPriceColumn = "product_price";
+
         ResultSet rsProd = DBConnection.executeQuery("SHOW COLUMNS FROM products;");
         if (rsProd != null) {
             try {
                 while (rsProd.next()) {
-                    existingProductColumns.add(rsProd.getString("Field"));
+                    String field = rsProd.getString("Field");
+                    String type = rsProd.getString("Type");
+                    String extra = rsProd.getString("Extra");
+                    existingProductColumns.add(field);
+
+                    if ("product_id".equalsIgnoreCase(field) || "prod_id".equalsIgnoreCase(field) || "id".equalsIgnoreCase(field)) {
+                        productIdColumn = field;
+                        if (type != null && (type.toLowerCase().startsWith("int") || type.toLowerCase().contains("int"))) {
+                            isProductIdInteger = true;
+                        }
+                        if (extra != null && extra.toLowerCase().contains("auto_increment")) {
+                            isProductIdAutoIncrement = true;
+                        }
+                    }
                 }
                 rsProd.close();
 
@@ -299,10 +325,13 @@ public class products implements Initializable {
                 for (String col : existingProductColumns) {
                     if ("reference_no".equalsIgnoreCase(col) || "ref_no".equalsIgnoreCase(col)
                             || "product_ref".equalsIgnoreCase(col) || "barcode".equalsIgnoreCase(col)
-                            || "ref".equalsIgnoreCase(col)) {
+                            || "ref".equalsIgnoreCase(col) || "code".equalsIgnoreCase(col)) {
                         productRefColumn = col;
                         break;
                     }
+                }
+                if (productRefColumn == null && productIdColumn != null && !isProductIdAutoIncrement) {
+                    productRefColumn = productIdColumn;
                 }
 
                 // Match name column
@@ -338,12 +367,62 @@ public class products implements Initializable {
                 // Match price column
                 for (String col : existingProductColumns) {
                     if ("product_price".equalsIgnoreCase(col) || "price".equalsIgnoreCase(col)
-                            || "item_price".equalsIgnoreCase(col) || "cost".equalsIgnoreCase(col)) {
+                            || "item_price".equalsIgnoreCase(col) || "cost".equalsIgnoreCase(col)
+                            || "sales_price".equalsIgnoreCase(col)) {
                         productPriceColumn = col;
                         break;
                     }
                 }
             } catch (SQLException ignored) {}
+        }
+    }
+
+    /**
+     * Ensures category exists in 'categories' table.
+     */
+    private void ensureCategoryExistsInDatabase(String category) {
+        if (category == null || category.trim().isEmpty() || OPTION_MANAGE_CATEGORIES.equals(category)) return;
+        String clean = escapeSql(category.trim());
+        String chk = "SELECT COUNT(*) FROM categories WHERE " + (categoryNameColumn != null ? categoryNameColumn : "category_name") + " = '" + clean + "';";
+        ResultSet rs = DBConnection.executeQuery(chk);
+        boolean exists = false;
+        if (rs != null) {
+            try {
+                if (rs.next() && rs.getInt(1) > 0) exists = true;
+                rs.close();
+            } catch (SQLException ignored) {}
+        }
+        if (!exists) {
+            String ins = "INSERT INTO categories (" + (categoryNameColumn != null ? categoryNameColumn : "category_name") + ") VALUES ('" + clean + "');";
+            DBConnection.executeUpdate(ins);
+            loadCategoriesFromDatabase();
+        }
+    }
+
+    /**
+     * Ensures unit exists in 'units' table to satisfy MySQL foreign key constraints.
+     */
+    private void ensureUnitExistsInDatabase(String unit) {
+        if (unit == null || unit.trim().isEmpty() || OPTION_MANAGE_UNITS.equals(unit)) return;
+        String clean = escapeSql(unit.trim());
+        String chk = "SELECT COUNT(*) FROM units WHERE " + (unitNameColumn != null ? unitNameColumn : "unit") + " = '" + clean + "';";
+        ResultSet rs = DBConnection.executeQuery(chk);
+        boolean exists = false;
+        if (rs != null) {
+            try {
+                if (rs.next() && rs.getInt(1) > 0) exists = true;
+                rs.close();
+            } catch (SQLException ignored) {}
+        }
+        if (!exists) {
+            String ins;
+            if (unitAbbreviationColumn != null) {
+                ins = "INSERT INTO units (" + (unitNameColumn != null ? unitNameColumn : "unit") + ", " + unitAbbreviationColumn + ") VALUES ('" + clean + "', '" + clean + "');";
+            } else {
+                ins = "INSERT INTO units (" + (unitNameColumn != null ? unitNameColumn : "unit") + ") VALUES ('" + clean + "');";
+            }
+            DBConnection.executeUpdate(ins);
+            loadUnitsFromDatabase();
         }
     }
 
@@ -485,7 +564,7 @@ public class products implements Initializable {
     /**
      * Loads products strictly from MySQL database table 'products'.
      */
-    private void loadProductsFromDatabase(String keyword) {
+    public void loadProductsFromDatabase(String keyword) {
         productsList.clear();
 
         String query;
@@ -494,10 +573,21 @@ public class products implements Initializable {
         } else {
             String cleanKey = escapeSql(keyword.trim());
             List<String> whereClauses = new ArrayList<>();
-            if (existingProductColumns.contains(productNameColumn)) whereClauses.add(productNameColumn + " LIKE '%" + cleanKey + "%'");
-            if (existingProductColumns.contains(productRefColumn)) whereClauses.add(productRefColumn + " LIKE '%" + cleanKey + "%'");
-            if (existingProductColumns.contains(productDeptColumn)) whereClauses.add(productDeptColumn + " LIKE '%" + cleanKey + "%'");
-            if (existingProductColumns.contains(productUnitColumn)) whereClauses.add(productUnitColumn + " LIKE '%" + cleanKey + "%'");
+            if (productNameColumn != null && existingProductColumns.contains(productNameColumn)) {
+                whereClauses.add(productNameColumn + " LIKE '%" + cleanKey + "%'");
+            }
+            if (productRefColumn != null && existingProductColumns.contains(productRefColumn)) {
+                whereClauses.add(productRefColumn + " LIKE '%" + cleanKey + "%'");
+            }
+            if (productIdColumn != null && existingProductColumns.contains(productIdColumn)) {
+                whereClauses.add(productIdColumn + " LIKE '%" + cleanKey + "%'");
+            }
+            if (productDeptColumn != null && existingProductColumns.contains(productDeptColumn)) {
+                whereClauses.add(productDeptColumn + " LIKE '%" + cleanKey + "%'");
+            }
+            if (productUnitColumn != null && existingProductColumns.contains(productUnitColumn)) {
+                whereClauses.add(productUnitColumn + " LIKE '%" + cleanKey + "%'");
+            }
 
             if (!whereClauses.isEmpty()) {
                 query = "SELECT * FROM products WHERE " + String.join(" OR ", whereClauses) + ";";
@@ -512,14 +602,18 @@ public class products implements Initializable {
             try {
                 int seq = 1;
                 while (rs.next()) {
-                    String ref = getColumnStringSafe(rs, productRefColumn, "reference_no", "ref", "id");
+                    String id = productIdColumn != null ? getColumnStringSafe(rs, productIdColumn) : "";
+                    String ref = productRefColumn != null ? getColumnStringSafe(rs, productRefColumn, "reference_no", "ref", "id") : id;
+                    if (ref.isEmpty() && id != null && !id.isEmpty()) {
+                        ref = id;
+                    }
                     String name = getColumnStringSafe(rs, productNameColumn, "product_name", "name");
                     String dept = getColumnStringSafe(rs, productDeptColumn, "product_category", "category", "product_unti");
                     String unit = getColumnStringSafe(rs, productUnitColumn, "product_unit", "unit", "unit_name");
                     double price = getColumnDoubleSafe(rs, productPriceColumn, "product_price", "price");
 
                     String formattedPrice = String.format(Locale.US, "%,.2f ج.م", price);
-                    ProductItemModel item = new ProductItemModel(seq++, ref, name, dept, unit, formattedPrice);
+                    ProductItemModel item = new ProductItemModel(seq++, id != null ? id : "", ref, name, dept, unit, formattedPrice);
                     productsList.add(item);
                 }
                 rs.close();
@@ -528,6 +622,9 @@ public class products implements Initializable {
             }
         }
 
+        if (tblProducts != null) {
+            tblProducts.refresh();
+        }
         updateTotalCount();
     }
 
@@ -639,10 +736,35 @@ public class products implements Initializable {
             return;
         }
 
-        // Auto-generate reference_no if not provided
+        if (OPTION_MANAGE_UNITS.equals(unit) || OPTION_MANAGE_CATEGORIES.equals(dept)) {
+            showNotification("يرجى اختيار قسم ووحدة صالحة!", true);
+            return;
+        }
+
+        double priceVal;
+        try {
+            priceVal = Double.parseDouble(priceStr.replace("ج.م", "").replace(",", "").trim());
+            if (priceVal < 0) {
+                showNotification("السعر يجب أن يكون رقمًا موجبًا!", true);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showNotification("يرجى إدخال سعر صحيح بالأرقام!", true);
+            return;
+        }
+
+        // 1. Ensure foreign key dependencies (units and categories)
+        if (!unit.isEmpty()) {
+            ensureUnitExistsInDatabase(unit);
+        }
+        if (!dept.isEmpty()) {
+            ensureCategoryExistsInDatabase(dept);
+        }
+
+        // 2. Handle reference_no
         if (ref.isEmpty()) {
             ref = generateAutoReferenceNo();
-        } else {
+        } else if (productRefColumn != null && existingProductColumns.contains(productRefColumn) && !isProductIdAutoIncrement) {
             // Check if user-entered reference already exists
             String checkQuery = "SELECT COUNT(*) FROM products WHERE " + productRefColumn + " = '" + escapeSql(ref) + "';";
             ResultSet rs = DBConnection.executeQuery(checkQuery);
@@ -658,39 +780,27 @@ public class products implements Initializable {
             }
         }
 
-        double priceVal;
-        try {
-            priceVal = Double.parseDouble(priceStr.replace("ج.م", "").replace(",", "").trim());
-            if (priceVal < 0) {
-                showNotification("السعر يجب أن يكون رقمًا موجبًا!", true);
-                return;
-            }
-        } catch (NumberFormatException e) {
-            showNotification("يرجى إدخال سعر صحيح بالأرقام!", true);
-            return;
-        }
-
-        // Build dynamic INSERT matching actual schema columns and foreign keys
+        // 3. Build dynamic INSERT matching actual schema columns and foreign keys
         List<String> insertCols = new ArrayList<>();
         List<String> insertVals = new ArrayList<>();
 
-        if (existingProductColumns.isEmpty() || existingProductColumns.contains(productRefColumn)) {
-            insertCols.add(productRefColumn);
-            insertVals.add("'" + escapeSql(ref) + "'");
-        }
-        if (existingProductColumns.isEmpty() || existingProductColumns.contains(productNameColumn)) {
+        if (productNameColumn != null && existingProductColumns.contains(productNameColumn)) {
             insertCols.add(productNameColumn);
             insertVals.add("'" + escapeSql(name) + "'");
         }
-        if (existingProductColumns.isEmpty() || existingProductColumns.contains(productDeptColumn)) {
+        if (productRefColumn != null && existingProductColumns.contains(productRefColumn) && (!productRefColumn.equalsIgnoreCase(productIdColumn) || !isProductIdAutoIncrement)) {
+            insertCols.add(productRefColumn);
+            insertVals.add("'" + escapeSql(ref) + "'");
+        }
+        if (productDeptColumn != null && existingProductColumns.contains(productDeptColumn)) {
             insertCols.add(productDeptColumn);
             insertVals.add(getSqlNullable(dept));
         }
-        if (existingProductColumns.isEmpty() || existingProductColumns.contains(productUnitColumn)) {
+        if (productUnitColumn != null && existingProductColumns.contains(productUnitColumn)) {
             insertCols.add(productUnitColumn);
             insertVals.add(getSqlNullable(unit));
         }
-        if (existingProductColumns.isEmpty() || existingProductColumns.contains(productPriceColumn)) {
+        if (productPriceColumn != null && existingProductColumns.contains(productPriceColumn)) {
             insertCols.add(productPriceColumn);
             insertVals.add(String.valueOf(priceVal));
         }
@@ -702,7 +812,7 @@ public class products implements Initializable {
         handleClearFields(null);
 
         if (result > 0) {
-            showNotification("تمت إضافة المنتج (" + name + ") برقم مرجعي (" + ref + ") بنجاح! ✔", false);
+            showNotification("تمت إضافة المنتج (" + name + ") بنجاح في قاعدة البيانات! ✔", false);
         } else {
             showNotification("تمت إضافة المنتج وتحديث السجلات! ✔", false);
         }
@@ -746,27 +856,55 @@ public class products implements Initializable {
             return;
         }
 
-        String oldRef = selected.getReferenceNo();
-
-        List<String> updateSets = new ArrayList<>();
-        if (existingProductColumns.isEmpty() || existingProductColumns.contains(productRefColumn)) {
-            updateSets.add(productRefColumn + " = '" + escapeSql(ref) + "'");
+        // 1. Ensure foreign key dependencies
+        if (!unit.isEmpty()) {
+            ensureUnitExistsInDatabase(unit);
         }
-        if (existingProductColumns.isEmpty() || existingProductColumns.contains(productNameColumn)) {
+        if (!dept.isEmpty()) {
+            ensureCategoryExistsInDatabase(dept);
+        }
+
+        // 2. Build dynamic UPDATE sets
+        List<String> updateSets = new ArrayList<>();
+        if (productNameColumn != null && existingProductColumns.contains(productNameColumn)) {
             updateSets.add(productNameColumn + " = '" + escapeSql(name) + "'");
         }
-        if (existingProductColumns.isEmpty() || existingProductColumns.contains(productDeptColumn)) {
+        if (productRefColumn != null && existingProductColumns.contains(productRefColumn) && (!productRefColumn.equalsIgnoreCase(productIdColumn) || !isProductIdAutoIncrement)) {
+            updateSets.add(productRefColumn + " = '" + escapeSql(ref) + "'");
+        }
+        if (productDeptColumn != null && existingProductColumns.contains(productDeptColumn)) {
             updateSets.add(productDeptColumn + " = " + getSqlNullable(dept));
         }
-        if (existingProductColumns.isEmpty() || existingProductColumns.contains(productUnitColumn)) {
+        if (productUnitColumn != null && existingProductColumns.contains(productUnitColumn)) {
             updateSets.add(productUnitColumn + " = " + getSqlNullable(unit));
         }
-        if (existingProductColumns.isEmpty() || existingProductColumns.contains(productPriceColumn)) {
+        if (productPriceColumn != null && existingProductColumns.contains(productPriceColumn)) {
             updateSets.add(productPriceColumn + " = " + priceVal);
         }
 
-        String sql = "UPDATE products SET " + String.join(", ", updateSets) + " WHERE " + productRefColumn + " = '" + escapeSql(oldRef) + "';";
+        // 3. Where clause
+        String oldName = selected.getName();
+        String oldDbId = selected.getDbId();
+        String whereClause;
+        if (oldDbId != null && !oldDbId.trim().isEmpty() && productIdColumn != null && existingProductColumns.contains(productIdColumn)) {
+            whereClause = productIdColumn + " = " + (isProductIdInteger ? oldDbId : "'" + escapeSql(oldDbId) + "'");
+        } else if (selected.getReferenceNo() != null && !selected.getReferenceNo().trim().isEmpty() && productRefColumn != null && existingProductColumns.contains(productRefColumn)) {
+            whereClause = productRefColumn + " = '" + escapeSql(selected.getReferenceNo()) + "'";
+        } else {
+            whereClause = productNameColumn + " = '" + escapeSql(oldName) + "'";
+        }
+
+        DBConnection.executeUpdate("SET FOREIGN_KEY_CHECKS = 0;");
+
+        String sql = "UPDATE products SET " + String.join(", ", updateSets) + " WHERE " + whereClause + ";";
         DBConnection.executeUpdate(sql);
+
+        // Also cascade update to supplements table if product_name changed
+        if (!name.equalsIgnoreCase(oldName)) {
+            DBConnection.executeUpdate("UPDATE supplements SET product_name = '" + escapeSql(name) + "' WHERE product_name = '" + escapeSql(oldName) + "';");
+        }
+
+        DBConnection.executeUpdate("SET FOREIGN_KEY_CHECKS = 1;");
 
         loadProductsFromDatabase(txtSearch != null ? txtSearch.getText() : null);
 
@@ -792,11 +930,32 @@ public class products implements Initializable {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            String ref = selected.getReferenceNo();
             String deletedName = selected.getName();
+            String dbId = selected.getDbId();
+            String ref = selected.getReferenceNo();
 
-            String sql = "DELETE FROM products WHERE " + productRefColumn + " = '" + escapeSql(ref) + "';";
+            String whereClause;
+            if (dbId != null && !dbId.trim().isEmpty() && productIdColumn != null && existingProductColumns.contains(productIdColumn)) {
+                whereClause = productIdColumn + " = " + (isProductIdInteger ? dbId : "'" + escapeSql(dbId) + "'");
+            } else if (ref != null && !ref.trim().isEmpty() && productRefColumn != null && existingProductColumns.contains(productRefColumn)) {
+                whereClause = productRefColumn + " = '" + escapeSql(ref) + "'";
+            } else {
+                whereClause = productNameColumn + " = '" + escapeSql(deletedName) + "'";
+            }
+
+            DBConnection.executeUpdate("SET FOREIGN_KEY_CHECKS = 0;");
+
+            // Cascade delete referencing records from supplements if any
+            if (dbId != null && !dbId.trim().isEmpty()) {
+                DBConnection.executeUpdate("DELETE FROM supplements WHERE product_id = '" + escapeSql(dbId) + "' OR product_name = '" + escapeSql(deletedName) + "';");
+            } else {
+                DBConnection.executeUpdate("DELETE FROM supplements WHERE product_name = '" + escapeSql(deletedName) + "';");
+            }
+
+            String sql = "DELETE FROM products WHERE " + whereClause + ";";
             DBConnection.executeUpdate(sql);
+
+            DBConnection.executeUpdate("SET FOREIGN_KEY_CHECKS = 1;");
 
             loadProductsFromDatabase(txtSearch != null ? txtSearch.getText() : null);
             handleClearFields(null);
@@ -1057,7 +1216,13 @@ public class products implements Initializable {
             txtNameInput.clear();
             txtAbbrInput.clear();
             loadData.run();
-            if (isCategory) loadCategoriesFromDatabase(); else loadUnitsFromDatabase();
+            if (isCategory) {
+                loadCategoriesFromDatabase();
+                if (cbProdCategory != null) cbProdCategory.setValue(val);
+            } else {
+                loadUnitsFromDatabase();
+                if (cbProdUnit != null) cbProdUnit.setValue(val);
+            }
         });
 
         // Edit Handler
@@ -1074,6 +1239,8 @@ public class products implements Initializable {
             }
             String oldVal = sel.getName();
 
+            DBConnection.executeUpdate("SET FOREIGN_KEY_CHECKS = 0;");
+
             String updSql;
             if (!isCategory && abbrCol != null) {
                 String abbr = txtAbbrInput.getText() != null && !txtAbbrInput.getText().trim().isEmpty() ? txtAbbrInput.getText().trim() : newVal;
@@ -1083,17 +1250,33 @@ public class products implements Initializable {
             }
             DBConnection.executeUpdate(updSql);
 
-            // Safely update referencing products only if column actually exists in products table
+            // Safely update referencing products and inventory tables
             String prodCol = isCategory ? productDeptColumn : productUnitColumn;
-            if (existingProductColumns.contains(prodCol)) {
+            if (prodCol != null && existingProductColumns.contains(prodCol)) {
                 String updProdSql = "UPDATE products SET " + prodCol + " = '" + escapeSql(newVal) + "' WHERE " + prodCol + " = '" + escapeSql(oldVal) + "';";
                 DBConnection.executeUpdate(updProdSql);
             }
+            try {
+                String invCol = isCategory ? "product_category" : "product_unit";
+                DBConnection.executeUpdate("UPDATE inventory SET " + invCol + " = '" + escapeSql(newVal) + "' WHERE " + invCol + " = '" + escapeSql(oldVal) + "';");
+            } catch (Exception ignored) {}
+
+            DBConnection.executeUpdate("SET FOREIGN_KEY_CHECKS = 1;");
 
             txtNameInput.clear();
             txtAbbrInput.clear();
             loadData.run();
-            if (isCategory) loadCategoriesFromDatabase(); else loadUnitsFromDatabase();
+            if (isCategory) {
+                loadCategoriesFromDatabase();
+                if (cbProdCategory != null && oldVal.equals(cbProdCategory.getValue())) {
+                    cbProdCategory.setValue(newVal);
+                }
+            } else {
+                loadUnitsFromDatabase();
+                if (cbProdUnit != null && oldVal.equals(cbProdUnit.getValue())) {
+                    cbProdUnit.setValue(newVal);
+                }
+            }
             loadProductsFromDatabase(txtSearch != null ? txtSearch.getText() : null);
         });
 
@@ -1114,12 +1297,25 @@ public class products implements Initializable {
 
             Optional<ButtonType> res = conf.showAndWait();
             if (res.isPresent() && res.get() == ButtonType.OK) {
+                DBConnection.executeUpdate("SET FOREIGN_KEY_CHECKS = 0;");
                 String delSql = "DELETE FROM " + tableName + " WHERE " + activeCol + " = '" + escapeSql(delVal) + "';";
                 DBConnection.executeUpdate(delSql);
+                DBConnection.executeUpdate("SET FOREIGN_KEY_CHECKS = 1;");
+
                 txtNameInput.clear();
                 txtAbbrInput.clear();
                 loadData.run();
-                if (isCategory) loadCategoriesFromDatabase(); else loadUnitsFromDatabase();
+                if (isCategory) {
+                    loadCategoriesFromDatabase();
+                    if (cbProdCategory != null && delVal.equals(cbProdCategory.getValue())) {
+                        cbProdCategory.setValue(null);
+                    }
+                } else {
+                    loadUnitsFromDatabase();
+                    if (cbProdUnit != null && delVal.equals(cbProdUnit.getValue())) {
+                        cbProdUnit.setValue(null);
+                    }
+                }
             }
         });
 
@@ -1136,8 +1332,10 @@ public class products implements Initializable {
                 LookupItem sel = tblLookup.getSelectionModel().getSelectedItem();
                 if (sel != null) {
                     if (isCategory && cbProdCategory != null) {
+                        ensureCategoryExistsInDatabase(sel.getName());
                         cbProdCategory.setValue(sel.getName());
                     } else if (!isCategory && cbProdUnit != null) {
+                        ensureUnitExistsInDatabase(sel.getName());
                         cbProdUnit.setValue(sel.getName());
                     }
                     dialog.close();
@@ -1165,13 +1363,17 @@ public class products implements Initializable {
         Optional<String> result = dialog.showAndWait();
         if (isCategory) {
             loadCategoriesFromDatabase();
-            if (result.isPresent() && result.get() != null && cbProdCategory != null) {
-                cbProdCategory.setValue(result.get());
+            if (result.isPresent() && result.get() != null && !result.get().trim().isEmpty() && cbProdCategory != null) {
+                String chosen = result.get().trim();
+                ensureCategoryExistsInDatabase(chosen);
+                cbProdCategory.setValue(chosen);
             }
         } else {
             loadUnitsFromDatabase();
-            if (result.isPresent() && result.get() != null && cbProdUnit != null) {
-                cbProdUnit.setValue(result.get());
+            if (result.isPresent() && result.get() != null && !result.get().trim().isEmpty() && cbProdUnit != null) {
+                String chosen = result.get().trim();
+                ensureUnitExistsInDatabase(chosen);
+                cbProdUnit.setValue(chosen);
             }
         }
     }
@@ -1226,6 +1428,7 @@ public class products implements Initializable {
 
     public static class ProductItemModel {
         private final SimpleIntegerProperty seq;
+        private final SimpleStringProperty dbId;
         private final SimpleStringProperty referenceNo;
         private final SimpleStringProperty name;
         private final SimpleStringProperty category;
@@ -1233,17 +1436,26 @@ public class products implements Initializable {
         private final SimpleStringProperty price;
 
         public ProductItemModel(int seq, String referenceNo, String name, String category, String unit, String price) {
+            this(seq, "", referenceNo, name, category, unit, price);
+        }
+
+        public ProductItemModel(int seq, String dbId, String referenceNo, String name, String category, String unit, String price) {
             this.seq = new SimpleIntegerProperty(seq);
-            this.referenceNo = new SimpleStringProperty(referenceNo);
-            this.name = new SimpleStringProperty(name);
-            this.category = new SimpleStringProperty(category);
-            this.unit = new SimpleStringProperty(unit);
-            this.price = new SimpleStringProperty(price);
+            this.dbId = new SimpleStringProperty(dbId != null ? dbId : "");
+            this.referenceNo = new SimpleStringProperty(referenceNo != null ? referenceNo : "");
+            this.name = new SimpleStringProperty(name != null ? name : "");
+            this.category = new SimpleStringProperty(category != null ? category : "");
+            this.unit = new SimpleStringProperty(unit != null ? unit : "");
+            this.price = new SimpleStringProperty(price != null ? price : "");
         }
 
         public SimpleIntegerProperty seqProperty() { return seq; }
         public int getSeq() { return seq.get(); }
         public void setSeq(int seq) { this.seq.set(seq); }
+
+        public SimpleStringProperty dbIdProperty() { return dbId; }
+        public String getDbId() { return dbId.get(); }
+        public void setDbId(String id) { this.dbId.set(id); }
 
         public SimpleStringProperty referenceNoProperty() { return referenceNo; }
         public String getReferenceNo() { return referenceNo.get(); }

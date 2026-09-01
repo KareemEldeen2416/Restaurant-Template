@@ -141,21 +141,26 @@
                                  <VBox spacing="12.0" HBox.hgrow="ALWAYS">
                                     <children>
                                        
-                                       <!-- Category Filters Bar & Search -->
-                                       <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="panel-card">
-                                          <children>
-                                             <Label styleClass="field-label" text="التصنيف:" />
-                                             <HBox fx:id="pnlCategoryButtons" alignment="CENTER_LEFT" spacing="8.0" />
-                                             <Region HBox.hgrow="ALWAYS" />
-                                             
-                                             <HBox alignment="CENTER_LEFT" maxWidth="260.0" prefWidth="220.0" spacing="6.0">
-                                                <children>
-                                                   <SVGPath content="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5 5 7.01 7.01 5 9.5 5 12 5 14 7.01 14 9.5 14 11.99 12 14 9.5 14z" fill="#FF7043" scaleX="0.85" scaleY="0.85" />
-                                                   <JFXTextField fx:id="txtMenuSearch" focusColor="#FF6B00" promptText="بحث في القائمة..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
-                                                </children>
-                                             </HBox>
-                                          </children>
-                                       </HBox>
+                                        <VBox spacing="10.0" style="-fx-padding: 14px 18px;" styleClass="panel-card">
+                                           <children>
+                                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                                 <children>
+                                                    <SVGPath content="M10 3H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm10 0h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zM10 13H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1zm10 0h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1z" fill="#E65100" scaleX="1.05" scaleY="1.05" />
+                                                    <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #2B1810;" styleClass="panel-header-title" text="أقسام وقائمة الأصناف" />
+                                                    <Region HBox.hgrow="ALWAYS" />
+                                                    
+                                                    <HBox alignment="CENTER_LEFT" maxWidth="320.0" minWidth="220.0" prefWidth="280.0" spacing="8.0" style="-fx-background-color: #FFFFFF; -fx-background-radius: 12px; -fx-border-color: #FFD8BE; -fx-border-radius: 12px; -fx-padding: 4 10;">
+                                                       <children>
+                                                          <SVGPath content="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5 5 7.01 7.01 5 9.5 5 12 5 14 7.01 14 9.5 14 11.99 12 14 9.5 14z" fill="#FF7043" scaleX="0.9" scaleY="0.9" />
+                                                          <JFXTextField fx:id="txtMenuSearch" focusColor="#FF6B00" promptText="بحث في القائمة أو القسم..." style="-fx-font-size: 13px;" unFocusColor="TRANSPARENT" HBox.hgrow="ALWAYS" />
+                                                       </children>
+                                                    </HBox>
+                                                 </children>
+                                              </HBox>
+
+                                              <FlowPane fx:id="pnlCategoryButtons" alignment="CENTER_LEFT" hgap="10.0" style="-fx-padding: 4 0 2 0;" vgap="8.0" />
+                                           </children>
+                                        </VBox>
 
                                        <!-- Scrollable FlowPane of Menu Items -->
                                        <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="main-scroll-pane" VBox.vgrow="ALWAYS">

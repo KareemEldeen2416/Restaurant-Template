@@ -1,16 +1,22 @@
 package Interfaces;
 
+import DBConnection.DBConnection;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -48,6 +54,7 @@ import javafx.util.Duration;
  * - 3 Main Actions on Cart: Assign to Table, Cancel, Pay.
  * - Orders Log categorized by Open, Running, Closed, and All.
  * - Tables tab displaying Empty, Assigned to Order, or Reserved status.
+ * - Live dynamic synchronization with MySQL tables 'categories', 'products', and 'inventory'.
  * 
  * @author KareemEldeen
  */
@@ -65,7 +72,7 @@ public class cashier implements Initializable {
     // =========================================================================
     // FXML Tab 1: Menu & POS Cart
     // =========================================================================
-    @FXML private HBox pnlCategoryButtons;
+    @FXML private FlowPane pnlCategoryButtons;
     @FXML private JFXTextField txtMenuSearch;
     @FXML private FlowPane pnlMenuItems;
 
@@ -118,6 +125,7 @@ public class cashier implements Initializable {
     // =========================================================================
     // Data Collections
     // =========================================================================
+    private final List<String> loadedCategories = new ArrayList<>();
     private final List<MenuItemModel> allMenuItems = new ArrayList<>();
     private final ObservableList<CartItemModel> cartList = FXCollections.observableArrayList();
     private final ObservableList<OrderModel> ordersList = FXCollections.observableArrayList();
@@ -139,7 +147,10 @@ public class cashier implements Initializable {
         initLiveDateTime();
         initUserSessionDisplay();
         initTableControls();
-        loadInitialData();
+        loadCategoriesFromDatabase();
+        loadMenuItemsFromDatabase();
+        loadSampleOrders();
+        loadTablesFromDatabase();
         renderCategoryButtons();
         renderMenuItems("");
         renderCashierTableCards();
@@ -196,57 +207,281 @@ public class cashier implements Initializable {
 
         filteredOrdersList = new FilteredList<>(ordersList, p -> true);
         if (tblOrders != null) tblOrders.setItems(filteredOrdersList);
+    }
 
-        // Table options for cart
-        if (cbOrderTable != null) {
-            ObservableList<String> tables = FXCollections.observableArrayList("تيك أواي (Takeaway)", "دليفري (Delivery)");
-            for (int i = 1; i <= 12; i++) {
-                tables.add("طاولة " + i);
+    /**
+     * Loads categories from MySQL table 'categories'.
+     */
+    private void loadCategoriesFromDatabase() {
+        loadedCategories.clear();
+        loadedCategories.add("الكل");
+
+        String query = "SELECT * FROM categories;";
+        ResultSet rs = DBConnection.executeQuery(query);
+        if (rs != null) {
+            try {
+                ResultSetMetaData meta = rs.getMetaData();
+                int count = meta.getColumnCount();
+                while (rs.next()) {
+                    String cat = null;
+                    try {
+                        cat = rs.getString("category_name");
+                    } catch (Exception ignored) {}
+                    if (cat == null) {
+                        for (int i = 1; i <= count; i++) {
+                            String cn = meta.getColumnName(i);
+                            if (!"id".equalsIgnoreCase(cn)) {
+                                cat = rs.getString(i);
+                                if (cat != null) break;
+                            }
+                        }
+                    }
+                    if (cat != null && !cat.trim().isEmpty()) {
+                        String clean = cat.trim();
+                        if (!loadedCategories.contains(clean)) {
+                            loadedCategories.add(clean);
+                        }
+                    }
+                }
+                rs.close();
+            } catch (SQLException ignored) {}
+        }
+
+        if (loadedCategories.size() <= 1) {
+            String[] defaults = {"سندوتشات", "بيتزا", "وجبات", "مكرونة", "سناكس", "مشروبات", "حلويات"};
+            for (String d : defaults) {
+                if (!loadedCategories.contains(d)) loadedCategories.add(d);
             }
-            cbOrderTable.setItems(tables);
-            cbOrderTable.setValue("طاولة 1");
         }
     }
 
     /**
-     * Loads initial menu items, tables, and existing sample orders.
+     * Loads menu items from 'products' table and from 'inventory' table (only items where show_in_menu is true).
      */
-    private void loadInitialData() {
-        // 1. Menu Items
-        allMenuItems.add(new MenuItemModel("برجر ميكس لحم دوبل", "سندوتشات", 150.0, "🍔"));
-        allMenuItems.add(new MenuItemModel("برجر تشيز مشروم فاخر", "سندوتشات", 135.0, "🍔"));
-        allMenuItems.add(new MenuItemModel("سندوتش زنجر سوبريم", "سندوتشات", 110.0, "🥪"));
-        allMenuItems.add(new MenuItemModel("بيتزا شاورما فراخ", "بيتزا", 175.0, "🍕"));
-        allMenuItems.add(new MenuItemModel("بيتزا كواترو مارجريتا", "بيتزا", 140.0, "🍕"));
-        allMenuItems.add(new MenuItemModel("وجبة ميكس جريل مشويات", "وجبات", 320.0, "🥩"));
-        allMenuItems.add(new MenuItemModel("وجبة زنجر كرسبي عائلي", "وجبات", 210.0, "🍗"));
-        allMenuItems.add(new MenuItemModel("باستا ألفريدو دجاج", "مكرونة", 130.0, "🍝"));
-        allMenuItems.add(new MenuItemModel("باستا ريد صوص بولونيز", "مكرونة", 125.0, "🍝"));
-        allMenuItems.add(new MenuItemModel("بطاطس كرسبي مع صوص جبن", "سناكس", 45.0, "🍟"));
-        allMenuItems.add(new MenuItemModel("كريب كرانشي حار", "سناكس", 95.0, "🌯"));
-        allMenuItems.add(new MenuItemModel("عصير برتقال فريش طبيعي", "مشروبات", 50.0, "🍹"));
-        allMenuItems.add(new MenuItemModel("موهيتو رمان ونعناع", "مشروبات", 55.0, "🍸"));
-        allMenuItems.add(new MenuItemModel("مولتن كيك شوكولاتة ساخنة", "حلويات", 85.0, "🍰"));
-        allMenuItems.add(new MenuItemModel("تشيز كيك لوتس فاخر", "حلويات", 90.0, "🍰"));
+    private void loadMenuItemsFromDatabase() {
+        allMenuItems.clear();
+        Set<String> addedNames = new HashSet<>();
 
-        // 2. Tables Floor Map
-        int[] tableChairs = {2, 4, 4, 6, 2, 4, 8, 6, 4, 2, 8, 10};
-        for (int i = 1; i <= 12; i++) {
-            cashierTables.add(new CashierTableModel(i, tableChairs[i - 1]));
+        // 1. Load from table 'products'
+        String prodSql = "SELECT * FROM products;";
+        ResultSet rsProd = DBConnection.executeQuery(prodSql);
+        if (rsProd != null) {
+            try {
+                while (rsProd.next()) {
+                    String name = getColumnStringSafe(rsProd, "product_name", "name");
+                    String cat = getColumnStringSafe(rsProd, "product_category", "category");
+                    double price = getColumnDoubleSafe(rsProd, "product_price", "price", "sales_price");
+
+                    if (name != null && !name.trim().isEmpty()) {
+                        String cleanName = name.trim();
+                        String cleanCat = (cat != null && !cat.trim().isEmpty()) ? cat.trim() : "أصناف متنوعة";
+                        if (!addedNames.contains(cleanName.toLowerCase())) {
+                            allMenuItems.add(new MenuItemModel(cleanName, cleanCat, price, getFoodIcon(cleanName, cleanCat)));
+                            addedNames.add(cleanName.toLowerCase());
+                            if (!loadedCategories.contains(cleanCat)) {
+                                loadedCategories.add(cleanCat);
+                            }
+                        }
+                    }
+                }
+                rsProd.close();
+            } catch (SQLException ignored) {}
         }
 
-        // Setup mock table statuses
-        cashierTables.get(1).setState(TableState.ASSIGNED, "#ORD-498", "محمد طارق", "435.00 ج.م");
-        cashierTables.get(3).setState(TableState.ASSIGNED, "#ORD-499", "أحمد الشناوي", "320.00 ج.م");
-        cashierTables.get(6).setState(TableState.RESERVED, "", "مروان خالد (حجز 09:00 م)", "");
-        cashierTables.get(10).setState(TableState.RESERVED, "", "ياسمين سامي (حجز 08:30 م)", "");
+        // 2. Load from table 'inventory' only items where show_in_menu is 1 / true
+        String invSql = "SELECT * FROM inventory;";
+        ResultSet rsInv = DBConnection.executeQuery(invSql);
+        if (rsInv != null) {
+            try {
+                while (rsInv.next()) {
+                    boolean showInMenu = getColumnBooleanSafe(rsInv, "show_in_menu", "show_menu");
+                    if (!showInMenu) continue;
 
-        // 3. Existing Sample Orders
-        ordersList.add(new OrderModel("#ORD-498", "محمد طارق", "2x برجر دوبل، 1x باستا ألفريدو", "طاولة 2", "435.00 ج.م", "07:30 م", "جاري التنفيذ (Running)"));
-        ordersList.add(new OrderModel("#ORD-499", "أحمد الشناوي", "1x وجبة ميكس جريل", "طاولة 4", "320.00 ج.م", "07:45 م", "مفتوح (Open)"));
-        ordersList.add(new OrderModel("#ORD-500", "نورهان علاء", "1x بيتزا شاورما، 2x موهيتو", "طاولة 7", "285.00 ج.م", "08:10 م", "مكتمل ومدفوع (Closed)"));
+                    String name = getColumnStringSafe(rsInv, "product_name", "name");
+                    String cat = getColumnStringSafe(rsInv, "product_category", "category");
+                    double price = getColumnDoubleSafe(rsInv, "sales_price", "sell_price", "product_price", "price");
 
+                    if (name != null && !name.trim().isEmpty()) {
+                        String cleanName = name.trim();
+                        String cleanCat = (cat != null && !cat.trim().isEmpty()) ? cat.trim() : "أصناف متنوعة";
+                        if (!addedNames.contains(cleanName.toLowerCase())) {
+                            allMenuItems.add(new MenuItemModel(cleanName, cleanCat, price, getFoodIcon(cleanName, cleanCat)));
+                            addedNames.add(cleanName.toLowerCase());
+                            if (!loadedCategories.contains(cleanCat)) {
+                                loadedCategories.add(cleanCat);
+                            }
+                        }
+                    }
+                }
+                rsInv.close();
+            } catch (SQLException ignored) {}
+        }
+    }
+
+    private String getColumnStringSafe(ResultSet rs, String... cols) {
+        for (String col : cols) {
+            try {
+                String val = rs.getString(col);
+                if (val != null) return val;
+            } catch (Exception ignored) {}
+        }
+        return null;
+    }
+
+    private double getColumnDoubleSafe(ResultSet rs, String... cols) {
+        for (String col : cols) {
+            try {
+                return rs.getDouble(col);
+            } catch (Exception ignored) {}
+        }
+        return 0.0;
+    }
+
+    private boolean getColumnBooleanSafe(ResultSet rs, String... cols) {
+        for (String col : cols) {
+            try {
+                return rs.getBoolean(col);
+            } catch (Exception ignored) {}
+        }
+        return true;
+    }
+
+    private String getFoodIcon(String name, String cat) {
+        String text = (name + " " + (cat != null ? cat : "")).toLowerCase();
+        if (text.contains("برجر") || text.contains("burger")) return "🍔";
+        if (text.contains("بيتزا") || text.contains("pizza")) return "🍕";
+        if (text.contains("شاورما") || text.contains("سندوتش") || text.contains("كريب") || text.contains("sandwich") || text.contains("ساندوتش")) return "🥪";
+        if (text.contains("فراخ") || text.contains("دجاج") || text.contains("كرسبي") || text.contains("chicken") || text.contains("زنجر")) return "🍗";
+        if (text.contains("لحم") || text.contains("مشويات") || text.contains("جريل") || text.contains("كباب") || text.contains("meat") || text.contains("steak") || text.contains("كفتة")) return "🥩";
+        if (text.contains("مكرونة") || text.contains("باستا") || text.contains("pasta") || text.contains("spaghetti")) return "🍝";
+        if (text.contains("بطاطس") || text.contains("سناكس") || text.contains("fries")) return "🍟";
+        if (text.contains("عصير") || text.contains("مشروب") || text.contains("بيبسي") || text.contains("كولا") || text.contains("موهيتو") || text.contains("drink") || text.contains("juice") || text.contains("شاي") || text.contains("قهوة") || text.contains("ماء") || text.contains("مياه")) return "🍹";
+        if (text.contains("كيك") || text.contains("حلو") || text.contains("شوكولاتة") || text.contains("dessert") || text.contains("cake") || text.contains("تشيز") || text.contains("وافل") || text.contains("بان كيك")) return "🍰";
+        if (text.contains("سلطة") || text.contains("salad")) return "🥗";
+        if (text.contains("أرز") || text.contains("rice")) return "🍚";
+        if (text.contains("سمك") || text.contains("جمبري") || text.contains("seafood") || text.contains("fish") || text.contains("جمبرى")) return "🍤";
+        if (text.contains("شوربة") || text.contains("soup")) return "🍲";
+        return "🍽️";
+    }
+
+    /**
+     * Loads restaurant tables from MySQL database table 'tables_list'
+     * and checks their availability based on 'available' column at current time.
+     */
+    private void loadTablesFromDatabase() {
+        cashierTables.clear();
+        ObservableList<String> tableOptions = FXCollections.observableArrayList("تيك أواي (Takeaway)", "دليفري (Delivery)");
+
+        String query = "SELECT * FROM tables_list ORDER BY CAST(table_no AS UNSIGNED), table_no;";
+        ResultSet rs = DBConnection.executeQuery(query);
+        if (rs == null) {
+            // Fallback if ORDER BY CAST fails
+            query = "SELECT * FROM tables_list;";
+            rs = DBConnection.executeQuery(query);
+        }
+
+        boolean hasDbTables = false;
+        if (rs != null) {
+            try {
+                while (rs.next()) {
+                    hasDbTables = true;
+                    String tNo = rs.getString("table_no");
+                    int seats = 4;
+                    try {
+                        seats = rs.getInt("number_of_seats");
+                        if (seats <= 0) seats = 4;
+                    } catch (Exception ignored) {}
+
+                    boolean isReserved = false;
+                    try {
+                        isReserved = rs.getBoolean("available");
+                    } catch (Exception ignored) {}
+
+                    String cleanNo = tNo != null ? tNo.trim() : "1";
+                    String displayTitle = cleanNo.startsWith("طاولة") ? cleanNo : "طاولة " + cleanNo;
+
+                    CashierTableModel model = new CashierTableModel(cleanNo, seats);
+
+                    if (isReserved) {
+                        String resCust = getReservationCustomerForTable(cleanNo);
+                        model.setState(TableState.RESERVED, "", resCust.isEmpty() ? "محجوزة في الوقت الحالي" : resCust, "");
+                    } else {
+                        model.setState(TableState.EMPTY, "", "", "");
+                    }
+
+                    cashierTables.add(model);
+                    tableOptions.add(displayTitle);
+                }
+                rs.close();
+            } catch (SQLException ignored) {}
+        }
+
+        // Fallback default tables if table 'tables_list' is currently empty
+        if (!hasDbTables) {
+            int[] tableChairs = {2, 4, 4, 6, 2, 4, 8, 6, 4, 2, 8, 10};
+            for (int i = 1; i <= 12; i++) {
+                CashierTableModel model = new CashierTableModel(String.valueOf(i), tableChairs[i - 1]);
+                cashierTables.add(model);
+                tableOptions.add("طاولة " + i);
+            }
+        }
+
+        if (cbOrderTable != null) {
+            cbOrderTable.setItems(tableOptions);
+            if (!tableOptions.isEmpty()) {
+                cbOrderTable.setValue(tableOptions.get(0));
+            }
+        }
+
+        syncTablesWithActiveOrders();
         updateTableBadges();
+    }
+
+    private String getReservationCustomerForTable(String tableNo) {
+        String clean = tableNo.replace("طاولة", "").trim();
+        String query = "SELECT customer_name, time_of_reservation FROM reservations WHERE table_no = '" + escapeSql(clean) + "' OR table_no = '" + escapeSql(tableNo) + "' ORDER BY date_of_reservation DESC LIMIT 1;";
+        ResultSet rs = DBConnection.executeQuery(query);
+        if (rs != null) {
+            try {
+                if (rs.next()) {
+                    String cName = rs.getString("customer_name");
+                    String time = rs.getString("time_of_reservation");
+                    rs.close();
+                    return (cName != null ? cName : "") + (time != null ? " (" + time + ")" : "");
+                }
+                rs.close();
+            } catch (SQLException ignored) {}
+        }
+        return "";
+    }
+
+    private void syncTablesWithActiveOrders() {
+        for (OrderModel ord : ordersList) {
+            if (ord.getStatus() != null && (ord.getStatus().contains("Running") || ord.getStatus().contains("Open") || ord.getStatus().contains("جاري") || ord.getStatus().contains("مفتوح"))) {
+                String tblStr = ord.getTableNo();
+                if (tblStr != null && !tblStr.isEmpty() && !tblStr.contains("تيك أواي") && !tblStr.contains("دليفري")) {
+                    for (CashierTableModel t : cashierTables) {
+                        if (tblStr.equalsIgnoreCase(t.getTableDisplayName()) || tblStr.equalsIgnoreCase(t.getTableNo()) || tblStr.contains(t.getTableNo())) {
+                            t.setState(TableState.ASSIGNED, ord.getOrderId(), ord.getCustomerName(), ord.getTotalAmount());
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private String escapeSql(String val) {
+        if (val == null) return "";
+        return val.replace("\\", "\\\\").replace("'", "''");
+    }
+
+    private void loadSampleOrders() {
+        if (ordersList.isEmpty()) {
+            ordersList.add(new OrderModel("#ORD-498", "محمد طارق", "2x برجر دوبل، 1x باستا ألفريدو", "طاولة 2", "435.00 ج.م", "07:30 م", "جاري التنفيذ (Running)"));
+            ordersList.add(new OrderModel("#ORD-499", "أحمد الشناوي", "1x وجبة ميكس جريل", "طاولة 4", "320.00 ج.م", "07:45 م", "مفتوح (Open)"));
+            ordersList.add(new OrderModel("#ORD-500", "نورهان علاء", "1x بيتزا شاورما، 2x موهيتو", "طاولة 7", "285.00 ج.م", "08:10 م", "مكتمل ومدفوع (Closed)"));
+        }
         updateOrderCount();
         updateCurrentOrderLabel();
     }
@@ -258,9 +493,11 @@ public class cashier implements Initializable {
         if (pnlCategoryButtons == null) return;
         pnlCategoryButtons.getChildren().clear();
 
-        String[] categories = {"الكل", "سندوتشات", "بيتزا", "وجبات", "مكرونة", "سناكس", "مشروبات", "حلويات"};
-        for (String cat : categories) {
+        for (String cat : loadedCategories) {
             JFXButton btn = new JFXButton(cat);
+            btn.setMinHeight(40.0);
+            btn.setPrefHeight(40.0);
+            btn.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 12px; -fx-cursor: hand;");
             btn.getStyleClass().add(cat.equals(selectedCategory) ? "btn-action-add" : "btn-action-clear");
             btn.setOnAction(e -> {
                 selectedCategory = cat;
@@ -281,10 +518,10 @@ public class cashier implements Initializable {
         String query = search != null ? search.trim().toLowerCase() : "";
 
         for (MenuItemModel item : allMenuItems) {
-            if (!selectedCategory.equals("الكل") && !item.getCategory().equals(selectedCategory)) {
+            if (!selectedCategory.equals("الكل") && !item.getCategory().equalsIgnoreCase(selectedCategory)) {
                 continue;
             }
-            if (!query.isEmpty() && !item.getName().toLowerCase().contains(query)) {
+            if (!query.isEmpty() && !item.getName().toLowerCase().contains(query) && !item.getCategory().toLowerCase().contains(query)) {
                 continue;
             }
 
@@ -312,6 +549,16 @@ public class cashier implements Initializable {
             });
 
             pnlMenuItems.getChildren().add(card);
+        }
+
+        if (pnlMenuItems.getChildren().isEmpty()) {
+            VBox emptyBox = new VBox(8.0);
+            emptyBox.setAlignment(Pos.CENTER);
+            emptyBox.setStyle("-fx-padding: 30px;");
+            Label lblEmpty = new Label("لا توجد أصناف مطابقة للبحث أو التصنيف المحدد");
+            lblEmpty.setStyle("-fx-text-fill: #8D6E63; -fx-font-size: 14px; -fx-font-weight: bold;");
+            emptyBox.getChildren().add(lblEmpty);
+            pnlMenuItems.getChildren().add(emptyBox);
         }
     }
 
@@ -374,7 +621,7 @@ public class cashier implements Initializable {
             tableIcon.setScaleX(0.95);
             tableIcon.setScaleY(0.95);
 
-            Label lblTable = new Label("طاولة " + table.getTableNo());
+            Label lblTable = new Label(table.getTableDisplayName());
             lblTable.getStyleClass().add("table-title-text");
 
             Region spacer = new Region();
@@ -429,7 +676,7 @@ public class cashier implements Initializable {
 
             // Table card selection
             card.setOnMouseClicked(e -> {
-                if (cbOrderTable != null) cbOrderTable.setValue("طاولة " + table.getTableNo());
+                if (cbOrderTable != null) cbOrderTable.setValue(table.getTableDisplayName());
                 if (tabPaneCashier != null) tabPaneCashier.getSelectionModel().select(0); // Switch to Menu & Cart
             });
 
@@ -468,12 +715,14 @@ public class cashier implements Initializable {
         ordersList.add(0, newOrder);
 
         // Update Table status in Floor plan if assigned to a specific table
-        if (tableStr.startsWith("طاولة ")) {
-            int tIndex = extractTableNumber(tableStr) - 1;
-            if (tIndex >= 0 && tIndex < cashierTables.size()) {
-                cashierTables.get(tIndex).setState(TableState.ASSIGNED, orderId, custName, grandTotal);
-                renderCashierTableCards();
-                updateTableBadges();
+        if (tableStr != null && !tableStr.contains("تيك أواي") && !tableStr.contains("دليفري")) {
+            for (CashierTableModel t : cashierTables) {
+                if (tableStr.equalsIgnoreCase(t.getTableDisplayName()) || tableStr.equalsIgnoreCase(t.getTableNo()) || tableStr.contains(t.getTableNo())) {
+                    t.setState(TableState.ASSIGNED, orderId, custName, grandTotal);
+                    renderCashierTableCards();
+                    updateTableBadges();
+                    break;
+                }
             }
         }
 
@@ -533,12 +782,14 @@ public class cashier implements Initializable {
         ordersList.add(0, newOrder);
 
         // Free Table if was occupied
-        if (tableStr.startsWith("طاولة ")) {
-            int tIndex = extractTableNumber(tableStr) - 1;
-            if (tIndex >= 0 && tIndex < cashierTables.size()) {
-                cashierTables.get(tIndex).setState(TableState.EMPTY, "", "", "");
-                renderCashierTableCards();
-                updateTableBadges();
+        if (tableStr != null && !tableStr.contains("تيك أواي") && !tableStr.contains("دليفري")) {
+            for (CashierTableModel t : cashierTables) {
+                if (tableStr.equalsIgnoreCase(t.getTableDisplayName()) || tableStr.equalsIgnoreCase(t.getTableNo()) || tableStr.contains(t.getTableNo())) {
+                    t.setState(TableState.EMPTY, "", "", "");
+                    renderCashierTableCards();
+                    updateTableBadges();
+                    break;
+                }
             }
         }
 
@@ -781,27 +1032,31 @@ public class cashier implements Initializable {
     }
 
     public static class CashierTableModel {
-        private final int tableNo;
+        private final String tableNo;
         private final int chairs;
         private TableState state;
         private String activeOrderId = "";
         private String activeCustomer = "";
         private String activeTotal = "";
 
-        public CashierTableModel(int tableNo, int chairs) {
-            this.tableNo = tableNo;
+        public CashierTableModel(String tableNo, int chairs) {
+            this.tableNo = tableNo != null ? tableNo : "1";
             this.chairs = chairs;
             this.state = TableState.EMPTY;
         }
 
-        public int getTableNo() { return tableNo; }
+        public String getTableNo() { return tableNo; }
+        public String getTableDisplayName() {
+            if (tableNo == null) return "طاولة";
+            return tableNo.startsWith("طاولة") ? tableNo : "طاولة " + tableNo;
+        }
         public int getChairs() { return chairs; }
         public TableState getState() { return state; }
         public void setState(TableState state, String orderId, String customer, String total) {
             this.state = state;
-            this.activeOrderId = orderId;
-            this.activeCustomer = customer;
-            this.activeTotal = total;
+            this.activeOrderId = orderId != null ? orderId : "";
+            this.activeCustomer = customer != null ? customer : "";
+            this.activeTotal = total != null ? total : "";
         }
 
         public String getActiveOrderId() { return activeOrderId; }

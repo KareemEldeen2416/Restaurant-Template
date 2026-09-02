@@ -157,7 +157,7 @@
                                                 </children>
                                              </HBox>
 
-                                             <!-- 10 INPUT FIELDS GRID (BALANCED 5 COLUMNS X 2 ROWS) -->
+                                             <!-- 5 INPUT FIELDS GRID (BALANCED 5 COLUMNS X 1 ROW) -->
                                              <GridPane hgap="16.0" vgap="12.0">
                                                 <columnConstraints>
                                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
@@ -167,7 +167,6 @@
                                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" />
                                                 </columnConstraints>
                                                 <rowConstraints>
-                                                   <RowConstraints minHeight="58.0" />
                                                    <RowConstraints minHeight="58.0" />
                                                 </rowConstraints>
                                                 <children>
@@ -188,67 +187,27 @@
                                                       </children>
                                                    </VBox>
 
-                                                   <!-- 3. UNIT -->
+                                                   <!-- 3. CATEGORY -->
                                                    <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
-                                                      <children>
-                                                         <Label styleClass="field-label" text="الوحدة الأساسية *" />
-                                                         <JFXComboBox fx:id="cbProdUnit" maxWidth="1.7976931348623157E308" promptText="اختر الوحدة (كجم، لتر..)" styleClass="jfx-combo-box" />
-                                                      </children>
-                                                   </VBox>
-
-                                                   <!-- 4. QUANTITY -->
-                                                   <VBox spacing="3.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
-                                                      <children>
-                                                         <Label styleClass="field-label" text="الكمية المتوفرة *" />
-                                                         <JFXTextField fx:id="txtProdQty" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="الكمية الحالية..." unFocusColor="#FFDEC9" />
-                                                      </children>
-                                                   </VBox>
-
-                                                   <!-- 5. MINIMUM QUANTITY ALLOWED -->
-                                                   <VBox spacing="3.0" GridPane.columnIndex="4" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
-                                                      <children>
-                                                         <Label styleClass="field-label" text="الحد الأدنى للطلب (أمان) *" />
-                                                         <JFXTextField fx:id="txtProdMinQty" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="أقل كمية مقبولة..." unFocusColor="#FFDEC9" />
-                                                      </children>
-                                                   </VBox>
-
-                                                   <!-- 6. COST PRICE -->
-                                                   <VBox spacing="3.0" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
-                                                      <children>
-                                                         <Label styleClass="field-label" text="سعر الشراء / التكلفة (ج.م) *" />
-                                                         <JFXTextField fx:id="txtProdCostPrice" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="تكلفة الوحدة..." unFocusColor="#FFDEC9" />
-                                                      </children>
-                                                   </VBox>
-
-                                                   <!-- 7. PRICE FOR CUSTOMERS -->
-                                                   <VBox spacing="3.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
-                                                      <children>
-                                                         <Label styleClass="field-label" text="سعر البيع للعملاء (ج.م) *" />
-                                                         <JFXTextField fx:id="txtProdSellPrice" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="سعر البيع بالمنيو..." unFocusColor="#FFDEC9" />
-                                                      </children>
-                                                   </VBox>
-
-                                                   <!-- 8. CATEGORY -->
-                                                   <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
                                                       <children>
                                                          <Label styleClass="field-label" text="القسم / التصنيف *" />
                                                          <JFXComboBox fx:id="cbProdCategory" maxWidth="1.7976931348623157E308" promptText="اختر القسم..." styleClass="jfx-combo-box" />
                                                       </children>
                                                    </VBox>
 
-                                                   <!-- 9. SUPPLIER -->
-                                                   <VBox spacing="3.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
+                                                   <!-- 4. MINIMUM QUANTITY ALLOWED -->
+                                                   <VBox spacing="3.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
                                                       <children>
-                                                         <Label styleClass="field-label" text="المورد المعتمد *" />
-                                                         <JFXComboBox fx:id="cbProdSupplier" maxWidth="1.7976931348623157E308" promptText="اختر المورد..." styleClass="jfx-combo-box" />
+                                                         <Label styleClass="field-label" text="الحد الأدنى للطلب (أمان) *" />
+                                                         <JFXTextField fx:id="txtProdMinQty" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="أقل كمية مقبولة..." unFocusColor="#FFDEC9" />
                                                       </children>
                                                    </VBox>
 
-                                                   <!-- 10. DATE OF SUPPLEMENT -->
-                                                   <VBox spacing="3.0" GridPane.columnIndex="4" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
+                                                   <!-- 5. PRICE FOR CUSTOMERS -->
+                                                   <VBox spacing="3.0" GridPane.columnIndex="4" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
                                                       <children>
-                                                         <Label styleClass="field-label" text="تاريخ آخر توريد *" />
-                                                         <DatePicker fx:id="dpProdSupplementDate" maxWidth="1.7976931348623157E308" promptText="تاريخ التوريد..." styleClass="material-date-picker" />
+                                                         <Label styleClass="field-label" text="سعر البيع للعملاء (ج.م) *" />
+                                                         <JFXTextField fx:id="txtProdSellPrice" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="سعر البيع بالمنيو..." unFocusColor="#FFDEC9" />
                                                       </children>
                                                    </VBox>
 
@@ -314,7 +273,6 @@
                                                    <TableColumn fx:id="colProdSellPrice" minWidth="95.0" prefWidth="110.0" text="سعر البيع" />
                                                    <TableColumn fx:id="colProdShowInMenu" minWidth="90.0" prefWidth="95.0" text="عرض في المنيو" />
                                                    <TableColumn fx:id="colProdSupplier" minWidth="120.0" prefWidth="140.0" text="المورد" />
-                                                   <TableColumn fx:id="colProdDate" minWidth="100.0" prefWidth="115.0" text="تاريخ التوريد" />
                                                 </columns>
                                                 <columnResizePolicy>
                                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

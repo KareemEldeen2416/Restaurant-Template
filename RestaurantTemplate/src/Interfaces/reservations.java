@@ -166,6 +166,7 @@ public class reservations implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
         initUserSessionDisplay();
+        setupNumericInputFilters();
         initFormPickers();
         initRestaurantTableColumns();
         initReservationTableColumns();
@@ -175,6 +176,62 @@ public class reservations implements Initializable {
         setupTableSelectionHandlers();
         setupSearchFilters();
         setupDateTimeChangeListeners();
+    }
+
+    /**
+     * Enforces numeric-only input on all numeric fields in the reservations window:
+     * - txtTableNumber (رقم الطاولة)
+     * - txtSeatsCount (عدد المقاعد)
+     * - txtPersonsCount (عدد الأفراد)
+     * - txtCustomerPhone (رقم الهاتف)
+     */
+    private void setupNumericInputFilters() {
+        // 1. Table Number (رقم الطاولة) -> Digits only
+        if (txtTableNumber != null) {
+            txtTableNumber.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                String filtered = newVal.replaceAll("[^0-9]", "");
+                if (!filtered.equals(newVal)) {
+                    txtTableNumber.setText(filtered);
+                }
+            });
+        }
+
+        // 2. Seats Count (عدد المقاعد) -> Digits only
+        if (txtSeatsCount != null) {
+            txtSeatsCount.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                String filtered = newVal.replaceAll("[^0-9]", "");
+                if (!filtered.equals(newVal)) {
+                    txtSeatsCount.setText(filtered);
+                }
+            });
+        }
+
+        // 3. Persons / Guests Count (عدد الأفراد) -> Digits only
+        if (txtPersonsCount != null) {
+            txtPersonsCount.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                String filtered = newVal.replaceAll("[^0-9]", "");
+                if (!filtered.equals(newVal)) {
+                    txtPersonsCount.setText(filtered);
+                }
+            });
+        }
+
+        // 4. Customer Phone (رقم الهاتف) -> Digits only, max 11 digits
+        if (txtCustomerPhone != null) {
+            txtCustomerPhone.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                String filtered = newVal.replaceAll("[^0-9]", "");
+                if (filtered.length() > 11) {
+                    filtered = filtered.substring(0, 11);
+                }
+                if (!filtered.equals(newVal)) {
+                    txtCustomerPhone.setText(filtered);
+                }
+            });
+        }
     }
 
     private void initUserSessionDisplay() {

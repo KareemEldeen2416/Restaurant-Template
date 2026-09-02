@@ -177,7 +177,12 @@
                                     <VBox spacing="3.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
                                        <children>
                                           <Label styleClass="field-label" text="المسمى الوظيفي *" />
-                                          <JFXComboBox fx:id="cbJobTitle" editable="true" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="اختر أو اكتب المسمى..." unFocusColor="#FFDEC9" />
+                                          <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                             <children>
+                                                <JFXComboBox fx:id="cbJobTitle" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="اختر أو حدد المسمى..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                                <JFXButton fx:id="btnManageJobTitle" onAction="#handleOpenJobTitleManager" style="-fx-background-color: #FFF3EB; -fx-text-fill: #E65100; -fx-border-color: #FFB380; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-font-weight: bold; -fx-cursor: hand;" text="⚙️" />
+                                             </children>
+                                          </HBox>
                                        </children>
                                     </VBox>
 
@@ -185,7 +190,12 @@
                                     <VBox spacing="3.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0">
                                        <children>
                                           <Label styleClass="field-label" text="القسم / الإدارة *" />
-                                          <JFXComboBox fx:id="cbDepartment" editable="true" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="اختر أو اكتب القسم..." unFocusColor="#FFDEC9" />
+                                          <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                             <children>
+                                                <JFXComboBox fx:id="cbDepartment" focusColor="#FF6B00" maxWidth="1.7976931348623157E308" promptText="اختر أو حدد القسم..." unFocusColor="#FFDEC9" HBox.hgrow="ALWAYS" />
+                                                <JFXButton fx:id="btnManageDepartment" onAction="#handleOpenDepartmentManager" style="-fx-background-color: #FFF3EB; -fx-text-fill: #E65100; -fx-border-color: #FFB380; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-font-weight: bold; -fx-cursor: hand;" text="⚙️" />
+                                             </children>
+                                          </HBox>
                                        </children>
                                     </VBox>
 

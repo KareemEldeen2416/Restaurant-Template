@@ -101,11 +101,43 @@ public class customers implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
         initUserSessionDisplay();
+        setupNumericFilters();
         initTableColumns();
         createTableIfNotExists();
         loadCustomersFromDatabase(null);
         setupTableSelection();
         setupSearchFilter();
+    }
+
+    /**
+     * Sets up numeric-only text restrictions on phone fields.
+     */
+    private void setupNumericFilters() {
+        if (txtPhone1 != null) {
+            txtPhone1.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                String filtered = newVal.replaceAll("[^0-9]", "");
+                if (filtered.length() > 11) {
+                    filtered = filtered.substring(0, 11);
+                }
+                if (!filtered.equals(newVal)) {
+                    txtPhone1.setText(filtered);
+                }
+            });
+        }
+
+        if (txtPhone2 != null) {
+            txtPhone2.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                String filtered = newVal.replaceAll("[^0-9]", "");
+                if (filtered.length() > 11) {
+                    filtered = filtered.substring(0, 11);
+                }
+                if (!filtered.equals(newVal)) {
+                    txtPhone2.setText(filtered);
+                }
+            });
+        }
     }
 
     private void initUserSessionDisplay() {
@@ -265,6 +297,18 @@ public class customers implements Initializable {
             return;
         }
 
+        // Validate primary phone length (11 digits)
+        if (phone1.length() != 11) {
+            showNotification("يجب أن يتكون رقم الهاتف الأساسي من 11 رقماً بالضبط (الحالي: " + phone1.length() + " أرقام)!", true);
+            return;
+        }
+
+        // Validate secondary phone length (11 digits if entered)
+        if (!phone2.isEmpty() && phone2.length() != 11) {
+            showNotification("يجب أن يتكون رقم الهاتف الإضافي من 11 رقماً بالضبط (الحالي: " + phone2.length() + " أرقام)!", true);
+            return;
+        }
+
         // Check for duplicate primary phone in database
         for (CustomerModel c : customerList) {
             if (c.getPhone1().equals(phone1)) {
@@ -310,6 +354,18 @@ public class customers implements Initializable {
 
         if (name.isEmpty() || phone1.isEmpty()) {
             showNotification("لا يمكن ترك اسم العميل أو رقم الهاتف فارغًا!", true);
+            return;
+        }
+
+        // Validate primary phone length (11 digits)
+        if (phone1.length() != 11) {
+            showNotification("يجب أن يتكون رقم الهاتف الأساسي من 11 رقماً بالضبط (الحالي: " + phone1.length() + " أرقام)!", true);
+            return;
+        }
+
+        // Validate secondary phone length (11 digits if entered)
+        if (!phone2.isEmpty() && phone2.length() != 11) {
+            showNotification("يجب أن يتكون رقم الهاتف الإضافي من 11 رقماً بالضبط (الحالي: " + phone2.length() + " أرقام)!", true);
             return;
         }
 

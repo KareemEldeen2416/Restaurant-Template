@@ -672,7 +672,27 @@ public class products implements Initializable {
                 } catch (Exception ignored) {}
             }
         }
-        return "PRD-" + (max + 1);
+
+        String refCol = productRefColumn != null && existingProductColumns.contains(productRefColumn) ? productRefColumn : (productIdColumn != null ? productIdColumn : "reference_no");
+        int candidate = max + 1;
+        while (true) {
+            String candidateRef = "PRD-" + candidate;
+            String chkSql = "SELECT COUNT(*) FROM products WHERE " + refCol + " = '" + escapeSql(candidateRef) + "';";
+            ResultSet rs = DBConnection.executeQuery(chkSql);
+            boolean exists = false;
+            if (rs != null) {
+                try {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        exists = true;
+                    }
+                    rs.close();
+                } catch (SQLException ignored) {}
+            }
+            if (!exists) {
+                return candidateRef;
+            }
+            candidate++;
+        }
     }
 
     /**
@@ -761,23 +781,23 @@ public class products implements Initializable {
             ensureCategoryExistsInDatabase(dept);
         }
 
-        // 2. Handle reference_no
+        // 2. Handle reference_no and enforce strict uniqueness in database
         if (ref.isEmpty()) {
             ref = generateAutoReferenceNo();
-        } else if (productRefColumn != null && existingProductColumns.contains(productRefColumn) && !isProductIdAutoIncrement) {
-            // Check if user-entered reference already exists
-            String checkQuery = "SELECT COUNT(*) FROM products WHERE " + productRefColumn + " = '" + escapeSql(ref) + "';";
-            ResultSet rs = DBConnection.executeQuery(checkQuery);
-            if (rs != null) {
-                try {
-                    if (rs.next() && rs.getInt(1) > 0) {
-                        rs.close();
-                        showNotification("الرقم المرجعي (" + ref + ") مسجل مسبقًا لمنتج آخر في قاعدة البيانات!", true);
-                        return;
-                    }
+        }
+
+        String refCol = productRefColumn != null && existingProductColumns.contains(productRefColumn) ? productRefColumn : (productIdColumn != null ? productIdColumn : "reference_no");
+        String checkQuery = "SELECT COUNT(*) FROM products WHERE " + refCol + " = '" + escapeSql(ref) + "';";
+        ResultSet rs = DBConnection.executeQuery(checkQuery);
+        if (rs != null) {
+            try {
+                if (rs.next() && rs.getInt(1) > 0) {
                     rs.close();
-                } catch (SQLException ignored) {}
-            }
+                    showNotification("الرقم المرجعي (" + ref + ") مسجل مسبقًا لمنتج آخر في قاعدة البيانات!", true);
+                    return;
+                }
+                rs.close();
+            } catch (SQLException ignored) {}
         }
 
         // 3. Build dynamic INSERT matching actual schema columns and foreign keys
@@ -844,6 +864,32 @@ public class products implements Initializable {
             ref = selected.getReferenceNo();
         }
 
+        // Check reference uniqueness against other products in database
+        String refCol = productRefColumn != null && existingProductColumns.contains(productRefColumn) ? productRefColumn : (productIdColumn != null ? productIdColumn : "reference_no");
+        String oldDbId = selected.getDbId();
+        String oldRef = selected.getReferenceNo();
+
+        String checkEditRefSql;
+        if (oldDbId != null && !oldDbId.trim().isEmpty() && productIdColumn != null && existingProductColumns.contains(productIdColumn)) {
+            checkEditRefSql = "SELECT COUNT(*) FROM products WHERE " + refCol + " = '" + escapeSql(ref) + "' AND " + productIdColumn + " != " + (isProductIdInteger ? oldDbId : "'" + escapeSql(oldDbId) + "'") + ";";
+        } else if (oldRef != null && !oldRef.trim().isEmpty()) {
+            checkEditRefSql = "SELECT COUNT(*) FROM products WHERE " + refCol + " = '" + escapeSql(ref) + "' AND " + refCol + " != '" + escapeSql(oldRef) + "';";
+        } else {
+            checkEditRefSql = "SELECT COUNT(*) FROM products WHERE " + refCol + " = '" + escapeSql(ref) + "' AND " + productNameColumn + " != '" + escapeSql(selected.getName()) + "';";
+        }
+
+        ResultSet rsEdit = DBConnection.executeQuery(checkEditRefSql);
+        if (rsEdit != null) {
+            try {
+                if (rsEdit.next() && rsEdit.getInt(1) > 0) {
+                    rsEdit.close();
+                    showNotification("الرقم المرجعي (" + ref + ") مسجل مسبقًا لمنتج آخر في قاعدة البيانات!", true);
+                    return;
+                }
+                rsEdit.close();
+            } catch (SQLException ignored) {}
+        }
+
         double priceVal;
         try {
             priceVal = Double.parseDouble(priceStr.replace("ج.م", "").replace(",", "").trim());
@@ -884,7 +930,6 @@ public class products implements Initializable {
 
         // 3. Where clause
         String oldName = selected.getName();
-        String oldDbId = selected.getDbId();
         String whereClause;
         if (oldDbId != null && !oldDbId.trim().isEmpty() && productIdColumn != null && existingProductColumns.contains(productIdColumn)) {
             whereClause = productIdColumn + " = " + (isProductIdInteger ? oldDbId : "'" + escapeSql(oldDbId) + "'");

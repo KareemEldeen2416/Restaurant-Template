@@ -7,6 +7,7 @@ import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import java.net.URL;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,14 +26,22 @@ import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.NodeOrientation;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.util.Duration;
 
 /**
@@ -74,7 +83,9 @@ public class employees implements Initializable {
     @FXML private JFXTextField txtNationalId;
     @FXML private JFXTextField txtName;
     @FXML private JFXComboBox<String> cbJobTitle;
+    @FXML private JFXButton btnManageJobTitle;
     @FXML private JFXComboBox<String> cbDepartment;
+    @FXML private JFXButton btnManageDepartment;
     @FXML private JFXTextField txtPhone1;
     @FXML private JFXTextField txtPhone2;
     @FXML private JFXTextField txtAddress;
@@ -134,6 +145,11 @@ public class employees implements Initializable {
     // Data Structures & Timers
     // =========================================================================
     private final ObservableList<EmployeeModel> employeeList = FXCollections.observableArrayList();
+    private final ObservableList<String> departmentsList = FXCollections.observableArrayList();
+    private final ObservableList<String> jobTitlesList = FXCollections.observableArrayList();
+
+    private static final String OPTION_MANAGE_DEPTS = "➕ إضافة / إدارة الأقسام...";
+    private static final String OPTION_MANAGE_JOBS = "➕ إضافة / إدارة المسميات...";
 
     private Timeline clockTimeline;
     private final Locale arabicLocale = Locale.forLanguageTag("ar");
@@ -144,10 +160,12 @@ public class employees implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
         initUserSessionDisplay();
-        initComboBoxes();
+        createTableIfNotExists();
+        setupFieldLimitersAndTriggers();
+        loadDepartmentsFromDatabase();
+        loadJobTitlesFromDatabase();
         initTableColumns();
         setupAccessRightsListeners();
-        createTableIfNotExists();
         loadEmployeesFromDatabase(null);
         setupTableSelection();
         setupSearchFilter();
@@ -186,16 +204,179 @@ public class employees implements Initializable {
     }
 
     /**
-     * Empties Department and Job Title Combo Boxes.
+     * Sets up strict character limits, numeric formatting, and Click triggers.
      */
-    private void initComboBoxes() {
+    private void setupFieldLimitersAndTriggers() {
+        // 1. National ID: Digits only, max 14 characters
+        if (txtNationalId != null) {
+            txtNationalId.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                String filtered = newVal.replaceAll("[^0-9]", "");
+                if (filtered.length() > 14) {
+                    filtered = filtered.substring(0, 14);
+                }
+                if (!filtered.equals(newVal)) {
+                    txtNationalId.setText(filtered);
+                }
+            });
+        }
+
+        // 2. Phone 1: Digits only, max 11 characters
+        if (txtPhone1 != null) {
+            txtPhone1.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                String filtered = newVal.replaceAll("[^0-9]", "");
+                if (filtered.length() > 11) {
+                    filtered = filtered.substring(0, 11);
+                }
+                if (!filtered.equals(newVal)) {
+                    txtPhone1.setText(filtered);
+                }
+            });
+        }
+
+        // 3. Phone 2: Digits only, max 11 characters
+        if (txtPhone2 != null) {
+            txtPhone2.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                String filtered = newVal.replaceAll("[^0-9]", "");
+                if (filtered.length() > 11) {
+                    filtered = filtered.substring(0, 11);
+                }
+                if (!filtered.equals(newVal)) {
+                    txtPhone2.setText(filtered);
+                }
+            });
+        }
+
+        // 4. ComboBox Click and selection triggers
         if (cbDepartment != null) {
-            cbDepartment.setItems(FXCollections.observableArrayList());
+            cbDepartment.setOnMouseClicked(e -> openLookupManagerDialog(true));
+            cbDepartment.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (OPTION_MANAGE_DEPTS.equals(newVal)) {
+                    javafx.application.Platform.runLater(() -> {
+                        cbDepartment.setValue(oldVal);
+                        openLookupManagerDialog(true);
+                    });
+                }
+            });
         }
 
         if (cbJobTitle != null) {
-            cbJobTitle.setItems(FXCollections.observableArrayList());
+            cbJobTitle.setOnMouseClicked(e -> openLookupManagerDialog(false));
+            cbJobTitle.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (OPTION_MANAGE_JOBS.equals(newVal)) {
+                    javafx.application.Platform.runLater(() -> {
+                        cbJobTitle.setValue(oldVal);
+                        openLookupManagerDialog(false);
+                    });
+                }
+            });
         }
+    }
+
+    /**
+     * Loads departments from MySQL database table 'depts'.
+     */
+    private void loadDepartmentsFromDatabase() {
+        departmentsList.clear();
+        departmentsList.add(OPTION_MANAGE_DEPTS);
+
+        String query = "SELECT * FROM depts;";
+        ResultSet rs = DBConnection.executeQuery(query);
+        int count = 0;
+        if (rs != null) {
+            try {
+                while (rs.next()) {
+                    String d = null;
+                    try {
+                        d = rs.getString("dept_name");
+                    } catch (Exception ignored) {}
+                    if (d == null) {
+                        d = rs.getString(1);
+                    }
+                    if (d != null && !d.trim().isEmpty()) {
+                        String clean = d.trim();
+                        if (!departmentsList.contains(clean)) {
+                            departmentsList.add(clean);
+                            count++;
+                        }
+                    }
+                }
+                rs.close();
+            } catch (SQLException ignored) {}
+        }
+
+        if (count == 0) {
+            String[] defaults = {"الإدارة العامة", "المطبخ", "الكاشير والصالة", "المخازن والمشتريات", "خدمة التوصيل", "المحاسبة والمالية"};
+            for (String d : defaults) {
+                if (!departmentsList.contains(d)) {
+                    departmentsList.add(d);
+                    DBConnection.executeUpdate("INSERT IGNORE INTO depts (dept_name) VALUES ('" + escapeSql(d) + "');");
+                }
+            }
+        }
+
+        if (cbDepartment != null) {
+            cbDepartment.setItems(departmentsList);
+        }
+    }
+
+    /**
+     * Loads job titles from MySQL database table 'job_titles'.
+     */
+    private void loadJobTitlesFromDatabase() {
+        jobTitlesList.clear();
+        jobTitlesList.add(OPTION_MANAGE_JOBS);
+
+        String query = "SELECT * FROM job_titles;";
+        ResultSet rs = DBConnection.executeQuery(query);
+        int count = 0;
+        if (rs != null) {
+            try {
+                while (rs.next()) {
+                    String j = null;
+                    try {
+                        j = rs.getString("job_title");
+                    } catch (Exception ignored) {}
+                    if (j == null) {
+                        j = rs.getString(1);
+                    }
+                    if (j != null && !j.trim().isEmpty()) {
+                        String clean = j.trim();
+                        if (!jobTitlesList.contains(clean)) {
+                            jobTitlesList.add(clean);
+                            count++;
+                        }
+                    }
+                }
+                rs.close();
+            } catch (SQLException ignored) {}
+        }
+
+        if (count == 0) {
+            String[] defaults = {"مدير مطعم", "شيف عمومي", "كاشير", "ويتر / صالة", "أمين مخزن", "سائق دليفري", "محاسب"};
+            for (String j : defaults) {
+                if (!jobTitlesList.contains(j)) {
+                    jobTitlesList.add(j);
+                    DBConnection.executeUpdate("INSERT IGNORE INTO job_titles (job_title) VALUES ('" + escapeSql(j) + "');");
+                }
+            }
+        }
+
+        if (cbJobTitle != null) {
+            cbJobTitle.setItems(jobTitlesList);
+        }
+    }
+
+    @FXML
+    private void handleOpenDepartmentManager(ActionEvent event) {
+        openLookupManagerDialog(true);
+    }
+
+    @FXML
+    private void handleOpenJobTitleManager(ActionEvent event) {
+        openLookupManagerDialog(false);
     }
 
     /**
@@ -221,7 +402,7 @@ public class employees implements Initializable {
     }
 
     /**
-     * Ensures the MySQL table 'employees' exists with all matching columns.
+     * Ensures MySQL tables 'employees', 'depts', and 'job_titles' exist with all matching columns.
      */
     private void createTableIfNotExists() {
         String sql = "CREATE TABLE IF NOT EXISTS employees ("
@@ -240,6 +421,16 @@ public class employees implements Initializable {
                 + "access_rights VARCHAR(20)"
                 + ") DEFAULT CHARSET=utf8mb4;";
         DBConnection.executeUpdate(sql);
+
+        String sqlDepts = "CREATE TABLE IF NOT EXISTS depts ("
+                + "dept_name VARCHAR(100) PRIMARY KEY"
+                + ") DEFAULT CHARSET=utf8mb4;";
+        DBConnection.executeUpdate(sqlDepts);
+
+        String sqlJobs = "CREATE TABLE IF NOT EXISTS job_titles ("
+                + "job_title VARCHAR(100) PRIMARY KEY"
+                + ") DEFAULT CHARSET=utf8mb4;";
+        DBConnection.executeUpdate(sqlJobs);
     }
 
     /**
@@ -519,9 +710,9 @@ public class employees implements Initializable {
         String nationalId = getSafeText(txtNationalId);
         String name = getSafeText(txtName);
         String jobTitle = getComboBoxValue(cbJobTitle);
-        if (jobTitle.isEmpty()) jobTitle = "موظف";
+        if (jobTitle.isEmpty() || OPTION_MANAGE_JOBS.equals(jobTitle)) jobTitle = "موظف";
         String department = getComboBoxValue(cbDepartment);
-        if (department.isEmpty()) department = "عام";
+        if (department.isEmpty() || OPTION_MANAGE_DEPTS.equals(department)) department = "عام";
         String phone1 = getSafeText(txtPhone1);
         String phone2 = getSafeText(txtPhone2);
         String address = getSafeText(txtAddress);
@@ -536,12 +727,45 @@ public class employees implements Initializable {
             return;
         }
 
-        // Check for duplicate national ID in database
+        // 1. National ID: Exactly 14 digits
+        if (nationalId.length() != 14) {
+            showNotification("يجب أن يتكون الرقم القومي من 14 رقماً بالضبط (الحالي: " + nationalId.length() + " أرقام)!", true);
+            return;
+        }
+
+        // 2. Primary Phone: Exactly 11 digits
+        if (phone1.isEmpty() || phone1.length() != 11) {
+            showNotification("يجب أن يتكون رقم الهاتف الأساسي من 11 رقماً بالضبط (الحالي: " + phone1.length() + " أرقام)!", true);
+            return;
+        }
+
+        // 3. Secondary Phone: Exactly 11 digits if entered
+        if (!phone2.isEmpty() && phone2.length() != 11) {
+            showNotification("يجب أن يتكون رقم الهاتف الإضافي من 11 رقماً بالضبط (الحالي: " + phone2.length() + " أرقام)!", true);
+            return;
+        }
+
+        // 4. Check for duplicate national ID in database
         for (EmployeeModel emp : employeeList) {
             if (emp.getNationalId().equalsIgnoreCase(nationalId)) {
                 showNotification("الرقم القومي (" + nationalId + ") مسجل مسبقًا للموظف (" + emp.getName() + ")!", true);
                 return;
             }
+        }
+
+        // 5. Check for duplicate username in database
+        String userChkSql = "SELECT full_name FROM employees WHERE user_name = '" + escapeSql(username) + "';";
+        ResultSet rsUser = DBConnection.executeQuery(userChkSql);
+        if (rsUser != null) {
+            try {
+                if (rsUser.next()) {
+                    String existingName = rsUser.getString("full_name");
+                    rsUser.close();
+                    showNotification("اسم المستخدم (" + username + ") مستخدم بالفعل للموظف (" + (existingName != null ? existingName : "") + ")! يرجى اختيار اسم مستخدم آخر.", true);
+                    return;
+                }
+                rsUser.close();
+            } catch (SQLException ignored) {}
         }
 
         String birthDateStr = birthDate != null ? birthDate.toString() : "";
@@ -588,9 +812,9 @@ public class employees implements Initializable {
         String nationalId = getSafeText(txtNationalId);
         String name = getSafeText(txtName);
         String jobTitle = getComboBoxValue(cbJobTitle);
-        if (jobTitle.isEmpty()) jobTitle = selected.getJobTitle();
+        if (jobTitle.isEmpty() || OPTION_MANAGE_JOBS.equals(jobTitle)) jobTitle = selected.getJobTitle();
         String department = getComboBoxValue(cbDepartment);
-        if (department.isEmpty()) department = selected.getDepartment();
+        if (department.isEmpty() || OPTION_MANAGE_DEPTS.equals(department)) department = selected.getDepartment();
         String phone1 = getSafeText(txtPhone1);
         String phone2 = getSafeText(txtPhone2);
         String address = getSafeText(txtAddress);
@@ -603,6 +827,49 @@ public class employees implements Initializable {
         if (nationalId.isEmpty() || name.isEmpty() || username.isEmpty() || salaryStr.isEmpty()) {
             showNotification("لا يمكن ترك الرقم القومي، الاسم، اسم المستخدم، أو الراتب فارغًا!", true);
             return;
+        }
+
+        // 1. National ID: Exactly 14 digits
+        if (nationalId.length() != 14) {
+            showNotification("يجب أن يتكون الرقم القومي من 14 رقماً بالضبط (الحالي: " + nationalId.length() + " أرقام)!", true);
+            return;
+        }
+
+        // 2. Primary Phone: Exactly 11 digits
+        if (phone1.isEmpty() || phone1.length() != 11) {
+            showNotification("يجب أن يتكون رقم الهاتف الأساسي من 11 رقماً بالضبط (الحالي: " + phone1.length() + " أرقام)!", true);
+            return;
+        }
+
+        // 3. Secondary Phone: Exactly 11 digits if entered
+        if (!phone2.isEmpty() && phone2.length() != 11) {
+            showNotification("يجب أن يتكون رقم الهاتف الإضافي من 11 رقماً بالضبط (الحالي: " + phone2.length() + " أرقام)!", true);
+            return;
+        }
+
+        // 4. Check for duplicate national ID if changed
+        if (!nationalId.equalsIgnoreCase(selected.getNationalId())) {
+            for (EmployeeModel emp : employeeList) {
+                if (emp.getNationalId().equalsIgnoreCase(nationalId)) {
+                    showNotification("الرقم القومي (" + nationalId + ") مسجل مسبقًا لموظف آخر (" + emp.getName() + ")!", true);
+                    return;
+                }
+            }
+        }
+
+        // 5. Check for duplicate username in database for other employees
+        String userChkSql = "SELECT full_name FROM employees WHERE user_name = '" + escapeSql(username) + "' AND n_id != '" + escapeSql(selected.getNationalId()) + "';";
+        ResultSet rsUser = DBConnection.executeQuery(userChkSql);
+        if (rsUser != null) {
+            try {
+                if (rsUser.next()) {
+                    String existingName = rsUser.getString("full_name");
+                    rsUser.close();
+                    showNotification("اسم المستخدم (" + username + ") مستخدم بالفعل للموظف (" + (existingName != null ? existingName : "") + ")! يرجى اختيار اسم مستخدم آخر.", true);
+                    return;
+                }
+                rsUser.close();
+            } catch (SQLException ignored) {}
         }
 
         selected.setNationalId(nationalId);
@@ -820,6 +1087,282 @@ public class employees implements Initializable {
             lblActionMessage.getStyleClass().add(isError ? "login-msg-error" : "login-msg-success");
             lblActionMessage.setVisible(true);
         }
+    }
+
+    /**
+     * Opens a modal popup window for managing Departments (table: depts, col: dept_name)
+     * or Job Titles (table: job_titles, col: job_title).
+     */
+    private void openLookupManagerDialog(boolean isDepartment) {
+        String entityTitle = isDepartment ? "الأقسام والإدارات" : "المسميات الوظيفية";
+        String singleTitle = isDepartment ? "القسم" : "المسمى الوظيفي";
+        String tableName = isDepartment ? "depts" : "job_titles";
+        String columnName = isDepartment ? "dept_name" : "job_title";
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("إدارة " + entityTitle);
+        dialog.setHeaderText("إضافة، تعديل، حذف، وبحث في قائمة " + entityTitle);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.getDialogPane().setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CLOSE);
+
+        VBox content = new VBox(12.0);
+        content.setPrefWidth(520.0);
+        content.setPrefHeight(480.0);
+        content.setPadding(new Insets(12.0));
+
+        // Form Box
+        VBox formBox = new VBox(10.0);
+        formBox.setStyle("-fx-background-color: #FFF8F4; -fx-padding: 12px; -fx-background-radius: 8px; -fx-border-color: #FFDEC9; -fx-border-radius: 8px;");
+
+        VBox nameBox = new VBox(4.0);
+        Label lblInputPrompt = new Label("اسم " + singleTitle + " *:");
+        lblInputPrompt.setStyle("-fx-font-weight: bold; -fx-text-fill: #4E342E;");
+        JFXTextField txtNameInput = new JFXTextField();
+        txtNameInput.setPromptText("اكتب اسم " + singleTitle + "...");
+        txtNameInput.setFocusColor(javafx.scene.paint.Color.web("#FF6B00"));
+        txtNameInput.setUnFocusColor(javafx.scene.paint.Color.web("#FFDEC9"));
+        nameBox.getChildren().addAll(lblInputPrompt, txtNameInput);
+
+        HBox btnBox = new HBox(8.0);
+        btnBox.setAlignment(Pos.CENTER_LEFT);
+
+        JFXButton btnAddLookup = new JFXButton("➕ إضافة");
+        btnAddLookup.setStyle("-fx-background-color: #FF6B00; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;");
+
+        JFXButton btnEditLookup = new JFXButton("✏️ تعديل");
+        btnEditLookup.setStyle("-fx-background-color: #E65100; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;");
+
+        JFXButton btnDeleteLookup = new JFXButton("🗑️ حذف");
+        btnDeleteLookup.setStyle("-fx-background-color: #D32F2F; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;");
+
+        JFXButton btnClearLookup = new JFXButton("🔄 تفريغ");
+        btnClearLookup.setStyle("-fx-background-color: #E0E0E0; -fx-text-fill: #424242; -fx-font-weight: bold; -fx-background-radius: 6px; -fx-cursor: hand;");
+
+        btnBox.getChildren().addAll(btnAddLookup, btnEditLookup, btnDeleteLookup, btnClearLookup);
+        formBox.getChildren().addAll(nameBox, btnBox);
+
+        // Search Field
+        JFXTextField txtSearchLookup = new JFXTextField();
+        txtSearchLookup.setPromptText("🔍 بحث في قائمة " + entityTitle + "...");
+        txtSearchLookup.setFocusColor(javafx.scene.paint.Color.web("#FF6B00"));
+        txtSearchLookup.setUnFocusColor(javafx.scene.paint.Color.web("#FFDEC9"));
+
+        // TableView
+        TableView<LookupItem> tblLookup = new TableView<>();
+        tblLookup.setStyle("-fx-background-radius: 8px;");
+        VBox.setVgrow(tblLookup, Priority.ALWAYS);
+
+        TableColumn<LookupItem, Number> colSeqL = new TableColumn<>("م");
+        colSeqL.setCellValueFactory(c -> c.getValue().seqProperty());
+        colSeqL.setPrefWidth(50.0);
+
+        TableColumn<LookupItem, String> colNameL = new TableColumn<>("اسم " + singleTitle);
+        colNameL.setCellValueFactory(c -> c.getValue().nameProperty());
+        colNameL.setPrefWidth(420.0);
+
+        tblLookup.getColumns().addAll(colSeqL, colNameL);
+
+        ObservableList<LookupItem> lookupData = FXCollections.observableArrayList();
+        tblLookup.setItems(lookupData);
+
+        // Load data from DB
+        Runnable loadData = () -> {
+            lookupData.clear();
+            String q = txtSearchLookup.getText() != null ? txtSearchLookup.getText().trim() : "";
+            String sql = "SELECT * FROM " + tableName + ";";
+            ResultSet rs = DBConnection.executeQuery(sql);
+            if (rs != null) {
+                try {
+                    ResultSetMetaData meta = rs.getMetaData();
+                    int count = meta.getColumnCount();
+                    int seq = 1;
+                    while (rs.next()) {
+                        String n = null;
+                        try {
+                            n = rs.getString(columnName);
+                        } catch (Exception ignored) {}
+                        if (n == null) {
+                            for (int i = 1; i <= count; i++) {
+                                String cn = meta.getColumnName(i);
+                                if (!cn.equalsIgnoreCase("id")) {
+                                    n = rs.getString(i);
+                                    if (n != null) break;
+                                }
+                            }
+                        }
+
+                        if (n != null && !n.trim().isEmpty()) {
+                            if (q.isEmpty() || n.toLowerCase().contains(q.toLowerCase())) {
+                                lookupData.add(new LookupItem(seq++, n.trim()));
+                            }
+                        }
+                    }
+                    rs.close();
+                } catch (SQLException ignored) {}
+            }
+        };
+
+        txtSearchLookup.textProperty().addListener((obs, oldVal, newVal) -> loadData.run());
+        loadData.run();
+
+        // Selection listener
+        tblLookup.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                txtNameInput.setText(newVal.getName());
+            }
+        });
+
+        // Double-click row to select into main form
+        tblLookup.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && tblLookup.getSelectionModel().getSelectedItem() != null) {
+                String selectedVal = tblLookup.getSelectionModel().getSelectedItem().getName();
+                if (isDepartment) {
+                    if (cbDepartment != null) cbDepartment.setValue(selectedVal);
+                } else {
+                    if (cbJobTitle != null) cbJobTitle.setValue(selectedVal);
+                }
+                dialog.close();
+            }
+        });
+
+        // Add Action
+        btnAddLookup.setOnAction(e -> {
+            String val = txtNameInput.getText() != null ? txtNameInput.getText().trim() : "";
+            if (val.isEmpty()) {
+                showSimpleAlert(AlertType.WARNING, "تنبيه", "يرجى إدخال اسم " + singleTitle + " أولاً!");
+                return;
+            }
+
+            // Duplicate check
+            String chkSql = "SELECT COUNT(*) FROM " + tableName + " WHERE " + columnName + " = '" + escapeSql(val) + "';";
+            ResultSet rs = DBConnection.executeQuery(chkSql);
+            if (rs != null) {
+                try {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        rs.close();
+                        showSimpleAlert(AlertType.WARNING, "تنبيه", "اسم " + singleTitle + " (" + val + ") مسجل مسبقًا في قاعدة البيانات!");
+                        return;
+                    }
+                    rs.close();
+                } catch (SQLException ignored) {}
+            }
+
+            String insSql = "INSERT INTO " + tableName + " (" + columnName + ") VALUES ('" + escapeSql(val) + "');";
+            DBConnection.executeUpdate(insSql);
+            txtNameInput.clear();
+            loadData.run();
+
+            if (isDepartment) {
+                loadDepartmentsFromDatabase();
+                if (cbDepartment != null) cbDepartment.setValue(val);
+            } else {
+                loadJobTitlesFromDatabase();
+                if (cbJobTitle != null) cbJobTitle.setValue(val);
+            }
+        });
+
+        // Edit Action
+        btnEditLookup.setOnAction(e -> {
+            LookupItem sel = tblLookup.getSelectionModel().getSelectedItem();
+            if (sel == null) {
+                showSimpleAlert(AlertType.WARNING, "تنبيه", "يرجى اختيار عنصر من الجدول لتعديله!");
+                return;
+            }
+            String newVal = txtNameInput.getText() != null ? txtNameInput.getText().trim() : "";
+            if (newVal.isEmpty()) {
+                showSimpleAlert(AlertType.WARNING, "تنبيه", "لا يمكن ترك الاسم فارغًا!");
+                return;
+            }
+            String oldVal = sel.getName();
+
+            DBConnection.executeUpdate("SET FOREIGN_KEY_CHECKS = 0;");
+            String updSql = "UPDATE " + tableName + " SET " + columnName + " = '" + escapeSql(newVal) + "' WHERE " + columnName + " = '" + escapeSql(oldVal) + "';";
+            DBConnection.executeUpdate(updSql);
+
+            // Update employees table references
+            String empCol = isDepartment ? "department" : "job_title";
+            String updEmp = "UPDATE employees SET " + empCol + " = '" + escapeSql(newVal) + "' WHERE " + empCol + " = '" + escapeSql(oldVal) + "';";
+            DBConnection.executeUpdate(updEmp);
+
+            loadData.run();
+            if (isDepartment) {
+                loadDepartmentsFromDatabase();
+                if (cbDepartment != null) cbDepartment.setValue(newVal);
+            } else {
+                loadJobTitlesFromDatabase();
+                if (cbJobTitle != null) cbJobTitle.setValue(newVal);
+            }
+        });
+
+        // Delete Action
+        btnDeleteLookup.setOnAction(e -> {
+            LookupItem sel = tblLookup.getSelectionModel().getSelectedItem();
+            if (sel == null) {
+                showSimpleAlert(AlertType.WARNING, "تنبيه", "يرجى اختيار عنصر من الجدول لحذفه!");
+                return;
+            }
+            String delVal = sel.getName();
+
+            Alert confirm = new Alert(AlertType.CONFIRMATION);
+            confirm.setTitle("تأكيد الحذف");
+            confirm.setHeaderText("حذف " + singleTitle + ": " + delVal);
+            confirm.setContentText("هل أنت متأكد من حذف هذا العنصر نهائيًا من جدول (" + tableName + ")؟");
+            confirm.getDialogPane().setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+
+            Optional<ButtonType> res = confirm.showAndWait();
+            if (res.isPresent() && res.get() == ButtonType.OK) {
+                DBConnection.executeUpdate("SET FOREIGN_KEY_CHECKS = 0;");
+                String delSql = "DELETE FROM " + tableName + " WHERE " + columnName + " = '" + escapeSql(delVal) + "';";
+                DBConnection.executeUpdate(delSql);
+                txtNameInput.clear();
+                loadData.run();
+                if (isDepartment) {
+                    loadDepartmentsFromDatabase();
+                    if (cbDepartment != null && delVal.equals(cbDepartment.getValue())) cbDepartment.setValue(null);
+                } else {
+                    loadJobTitlesFromDatabase();
+                    if (cbJobTitle != null && delVal.equals(cbJobTitle.getValue())) cbJobTitle.setValue(null);
+                }
+            }
+        });
+
+        // Clear Action
+        btnClearLookup.setOnAction(e -> {
+            txtNameInput.clear();
+            tblLookup.getSelectionModel().clearSelection();
+        });
+
+        content.getChildren().addAll(formBox, txtSearchLookup, tblLookup);
+        dialog.getDialogPane().setContent(content);
+        dialog.showAndWait();
+    }
+
+    private void showSimpleAlert(AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.getDialogPane().setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        alert.showAndWait();
+    }
+
+    public static class LookupItem {
+        private final SimpleIntegerProperty seq;
+        private final SimpleStringProperty name;
+
+        public LookupItem(int seq, String name) {
+            this.seq = new SimpleIntegerProperty(seq);
+            this.name = new SimpleStringProperty(name);
+        }
+
+        public SimpleIntegerProperty seqProperty() { return seq; }
+        public int getSeq() { return seq.get(); }
+        public void setSeq(int val) { this.seq.set(val); }
+
+        public SimpleStringProperty nameProperty() { return name; }
+        public String getName() { return name.get(); }
+        public void setName(String val) { this.name.set(val); }
     }
 
     // =========================================================================

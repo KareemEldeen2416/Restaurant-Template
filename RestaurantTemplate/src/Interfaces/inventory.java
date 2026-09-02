@@ -83,16 +83,10 @@ public class inventory implements Initializable {
     // =========================================================================
     @FXML private JFXTextField txtProdName;
     @FXML private JFXTextField txtProdRef;
-    @FXML private JFXComboBox<String> cbProdUnit;
-    @FXML private JFXButton btnManageUnits;
-    @FXML private JFXTextField txtProdQty;
     @FXML private JFXTextField txtProdMinQty;
-    @FXML private JFXTextField txtProdCostPrice;
     @FXML private JFXTextField txtProdSellPrice;
     @FXML private JFXComboBox<String> cbProdCategory;
     @FXML private JFXButton btnManageCategories;
-    @FXML private JFXComboBox<String> cbProdSupplier;
-    @FXML private DatePicker dpProdSupplementDate;
 
     @FXML private JFXButton btnProdAdd;
     @FXML private JFXButton btnProdEdit;
@@ -119,7 +113,6 @@ public class inventory implements Initializable {
     @FXML private TableColumn<ProductModel, String> colProdSellPrice;
     @FXML private TableColumn<ProductModel, String> colProdShowInMenu;
     @FXML private TableColumn<ProductModel, String> colProdSupplier;
-    @FXML private TableColumn<ProductModel, String> colProdDate;
 
     // =========================================================================
     // FXML Tab 2: Suppliers
@@ -207,7 +200,7 @@ public class inventory implements Initializable {
     private String invCostPriceColumn = "purchase_price";
     private String invSellPriceColumn = "sales_price";
     private String invSupplierColumn = "supplier";
-    private String invDateColumn = "date_of_last_supplement";
+    private String invDateColumn = null;
     private String invShowMenuColumn = "show_in_menu";
 
     // Database column mappings for suppliers table
@@ -240,6 +233,23 @@ public class inventory implements Initializable {
     private String unitNameColumn = "unit";
     private String unitAbbreviationColumn = null;
 
+    private boolean hasColumn(List<String> columns, String target) {
+        if (columns == null || target == null) return false;
+        for (String c : columns) {
+            if (target.equalsIgnoreCase(c.trim())) return true;
+        }
+        return false;
+    }
+
+    private String getActualColumnName(List<String> columns, String target, String fallback) {
+        if (columns != null && target != null) {
+            for (String c : columns) {
+                if (target.equalsIgnoreCase(c.trim())) return c;
+            }
+        }
+        return fallback;
+    }
+
     private Timeline clockTimeline;
     private final Locale arabicLocale = Locale.forLanguageTag("ar");
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE، d MMMM yyyy", arabicLocale);
@@ -249,6 +259,7 @@ public class inventory implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         initLiveDateTime();
         initUserSessionDisplay();
+        setupNumericInputFilters();
         initTableColumns();
         ensureDatabaseTablesExist();
         detectDatabaseColumnNames();
@@ -260,6 +271,68 @@ public class inventory implements Initializable {
         setupTableSelectionListeners();
         setupSearchFilters();
         setupComboBoxActionListeners();
+    }
+
+    /**
+     * Helper to keep only digits in text input.
+     */
+    private void applyIntegerFilter(JFXTextField field, int maxLen) {
+        if (field == null) return;
+        field.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) return;
+            String filtered = newVal.replaceAll("[^0-9]", "");
+            if (maxLen > 0 && filtered.length() > maxLen) {
+                filtered = filtered.substring(0, maxLen);
+            }
+            if (!filtered.equals(newVal)) {
+                field.setText(filtered);
+            }
+        });
+    }
+
+    /**
+     * Helper to keep only valid numeric values (digits and at most one decimal point).
+     */
+    private void applyDecimalFilter(JFXTextField field) {
+        if (field == null) return;
+        field.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) return;
+            StringBuilder sb = new StringBuilder();
+            boolean hasDot = false;
+            for (char c : newVal.toCharArray()) {
+                if (Character.isDigit(c)) {
+                    sb.append(c);
+                } else if (c == '.' && !hasDot) {
+                    sb.append(c);
+                    hasDot = true;
+                }
+            }
+            String filtered = sb.toString();
+            if (!filtered.equals(newVal)) {
+                field.setText(filtered);
+            }
+        });
+    }
+
+    /**
+     * Sets up numeric-only constraints on all numeric fields across inventory tabs:
+     * - Tab 1 (Products): Quantity, Min Quantity, Purchase/Cost Price, Sell Price
+     * - Tab 2 (Suppliers): National ID (14 digits), Phone (11 digits), Bank Account (numbers only)
+     * - Tab 3 (Supplements / Information): Quantity, Unit Price
+     */
+    private void setupNumericInputFilters() {
+        // Tab 1: Products
+        applyDecimalFilter(txtProdMinQty);
+        applyDecimalFilter(txtProdSellPrice);
+
+        // Tab 2: Suppliers
+        applyIntegerFilter(txtSuppNationalId, 14);
+        applyIntegerFilter(txtSuppPhone, 11);
+        applyIntegerFilter(txtSuppAccount, -1);
+
+        // Tab 3: Supplement Processes
+        applyDecimalFilter(txtProcQty);
+        applyDecimalFilter(txtProcUnitPrice);
     }
 
     private void initUserSessionDisplay() {
@@ -306,7 +379,6 @@ public class inventory implements Initializable {
         if (colProdSellPrice != null) colProdSellPrice.setCellValueFactory(c -> c.getValue().sellPriceProperty());
         if (colProdShowInMenu != null) colProdShowInMenu.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().isShowInMenu() ? "✔ نعم" : "❌ لا"));
         if (colProdSupplier != null) colProdSupplier.setCellValueFactory(c -> c.getValue().supplierProperty());
-        if (colProdDate != null) colProdDate.setCellValueFactory(c -> c.getValue().supplementDateProperty());
 
         if (tblProducts != null) tblProducts.setItems(productList);
 
@@ -360,7 +432,6 @@ public class inventory implements Initializable {
                 + "purchase_price DECIMAL(10,2) DEFAULT 0,"
                 + "sales_price DECIMAL(10,2) DEFAULT 0,"
                 + "supplier VARCHAR(150) NULL,"
-                + "date_of_last_supplement DATE NULL,"
                 + "show_in_menu BOOLEAN DEFAULT TRUE"
                 + ") DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
         DBConnection.executeUpdate(sqlInventory);
@@ -497,6 +568,7 @@ public class inventory implements Initializable {
 
         // 3. Detect columns in 'inventory'
         existingInventoryColumns.clear();
+        invDateColumn = null;
         ResultSet rsInv = DBConnection.executeQuery("SHOW COLUMNS FROM inventory;");
         if (rsInv != null) {
             try {
@@ -769,9 +841,6 @@ public class inventory implements Initializable {
             }
         }
 
-        if (cbProdUnit != null) {
-            cbProdUnit.setItems(unitsList);
-        }
         if (cbProcUnit != null) {
             cbProcUnit.setItems(unitsList);
         }
@@ -1000,7 +1069,6 @@ public class inventory implements Initializable {
             } catch (SQLException ignored) {}
         }
 
-        if (dpProdSupplementDate != null) dpProdSupplementDate.setValue(LocalDate.now());
         if (dpProcDate != null) dpProcDate.setValue(LocalDate.now());
 
         if (lblProcTotalCount != null) {
@@ -1221,7 +1289,6 @@ public class inventory implements Initializable {
                 suppNames.add(s.getName());
             }
         }
-        if (cbProdSupplier != null) cbProdSupplier.setItems(suppNames);
         if (cbProcSupplier != null) cbProcSupplier.setItems(suppNames);
 
         ObservableList<String> prodNames = FXCollections.observableArrayList();
@@ -1237,6 +1304,20 @@ public class inventory implements Initializable {
                     }
                 }
                 rsInv.close();
+            } catch (SQLException ignored) {}
+        }
+
+        // Also include from supplements table
+        ResultSet rsSupp = DBConnection.executeQuery("SELECT DISTINCT " + suppProcProdNameColumn + " FROM supplements WHERE " + suppProcProdNameColumn + " IS NOT NULL AND " + suppProcProdNameColumn + " != '';");
+        if (rsSupp != null) {
+            try {
+                while (rsSupp.next()) {
+                    String pName = rsSupp.getString(1);
+                    if (pName != null && !pName.trim().isEmpty() && !prodNames.contains(pName.trim())) {
+                        prodNames.add(pName.trim());
+                    }
+                }
+                rsSupp.close();
             } catch (SQLException ignored) {}
         }
 
@@ -1311,16 +1392,6 @@ public class inventory implements Initializable {
                 }
             });
         }
-        if (cbProdUnit != null) {
-            cbProdUnit.valueProperty().addListener((obs, oldVal, newVal) -> {
-                if (OPTION_MANAGE_UNITS.equals(newVal)) {
-                    javafx.application.Platform.runLater(() -> {
-                        cbProdUnit.setValue(oldVal);
-                        openLookupManagerDialog(false);
-                    });
-                }
-            });
-        }
         if (cbProcUnit != null) {
             cbProcUnit.valueProperty().addListener((obs, oldVal, newVal) -> {
                 if (OPTION_MANAGE_UNITS.equals(newVal)) {
@@ -1351,18 +1422,13 @@ public class inventory implements Initializable {
     private void handleAddProduct(ActionEvent event) {
         String name = getSafeText(txtProdName);
         String ref = getSafeText(txtProdRef);
-        String unit = cbProdUnit != null && cbProdUnit.getValue() != null && !OPTION_MANAGE_UNITS.equals(cbProdUnit.getValue()) ? cbProdUnit.getValue() : "";
-        String qtyStr = getSafeText(txtProdQty);
         String minQtyStr = getSafeText(txtProdMinQty);
-        String costStr = getSafeText(txtProdCostPrice);
         String sellStr = getSafeText(txtProdSellPrice);
         String cat = cbProdCategory != null && cbProdCategory.getValue() != null && !OPTION_MANAGE_CATEGORIES.equals(cbProdCategory.getValue()) ? cbProdCategory.getValue() : "";
-        String supp = cbProdSupplier != null && cbProdSupplier.getValue() != null ? cbProdSupplier.getValue() : "";
-        LocalDate date = dpProdSupplementDate != null ? dpProdSupplementDate.getValue() : LocalDate.now();
         boolean showInMenu = chkShowInMenu != null && chkShowInMenu.isSelected();
 
-        if (name.isEmpty() || qtyStr.isEmpty() || costStr.isEmpty() || sellStr.isEmpty()) {
-            showProductNotification("يرجى ملء الحقول الإجبارية (الاسم، الكمية، سعر الشراء، سعر البيع)!", true);
+        if (name.isEmpty() || sellStr.isEmpty()) {
+            showProductNotification("يرجى ملء الحقول الإجبارية (اسم الصنف، سعر البيع)!", true);
             return;
         }
 
@@ -1383,51 +1449,56 @@ public class inventory implements Initializable {
             }
         }
 
-        double qty = 0, minQty = 0, costPrice = 0, sellPrice = 0;
+        double minQty = 0, sellPrice = 0;
         try {
-            qty = Double.parseDouble(qtyStr.replace("ج.م", "").replace(",", "").trim());
             minQty = minQtyStr.isEmpty() ? 0 : Double.parseDouble(minQtyStr.replace("ج.م", "").replace(",", "").trim());
-            costPrice = Double.parseDouble(costStr.replace("ج.م", "").replace(",", "").trim());
             sellPrice = Double.parseDouble(sellStr.replace("ج.م", "").replace(",", "").trim());
         } catch (NumberFormatException e) {
-            showProductNotification("يرجى إدخال قيم رقمية صحيحة للكميات والأسعار!", true);
+            showProductNotification("يرجى إدخال قيم رقمية صحيحة للحد الأدنى وسعر البيع!", true);
             return;
         }
-
-        if (unit.isEmpty()) {
-            unit = getFirstAvailableUnit();
-        }
-        ensureUnitExistsInDatabase(unit);
 
         if (!cat.isEmpty()) {
             ensureCategoryExistsInDatabase(cat);
         }
 
-        String dateStr = date != null ? date.toString() : LocalDate.now().toString();
+        List<String> insertCols = new ArrayList<>();
+        List<String> insertVals = new ArrayList<>();
 
-        String sql = "INSERT INTO inventory ("
-                + invNameColumn + ", "
-                + invRefColumn + ", "
-                + invUnitColumn + ", "
-                + invCategoryColumn + ", "
-                + invQtyColumn + ", "
-                + invMinQtyColumn + ", "
-                + invCostPriceColumn + ", "
-                + invSellPriceColumn + ", "
-                + invSupplierColumn + ", "
-                + invDateColumn + ", "
-                + invShowMenuColumn + ") VALUES ("
-                + "'" + escapeSql(name) + "', "
-                + "'" + escapeSql(ref) + "', "
-                + getSqlNullable(unit) + ", "
-                + getSqlNullable(cat) + ", "
-                + qty + ", "
-                + minQty + ", "
-                + costPrice + ", "
-                + sellPrice + ", "
-                + getSqlNullable(supp) + ", "
-                + getSqlNullable(dateStr) + ", "
-                + (showInMenu ? "1" : "0") + ");";
+        if (hasColumn(existingInventoryColumns, invNameColumn) || existingInventoryColumns.isEmpty()) {
+            insertCols.add(invNameColumn);
+            insertVals.add("'" + escapeSql(name) + "'");
+        }
+        if (hasColumn(existingInventoryColumns, invRefColumn) || existingInventoryColumns.isEmpty()) {
+            insertCols.add(invRefColumn);
+            insertVals.add("'" + escapeSql(ref) + "'");
+        }
+        if (hasColumn(existingInventoryColumns, invCategoryColumn) || existingInventoryColumns.isEmpty()) {
+            insertCols.add(invCategoryColumn);
+            insertVals.add(getSqlNullable(cat));
+        }
+        if (hasColumn(existingInventoryColumns, invQtyColumn) || existingInventoryColumns.isEmpty()) {
+            insertCols.add(invQtyColumn);
+            insertVals.add("0");
+        }
+        if (hasColumn(existingInventoryColumns, invMinQtyColumn) || existingInventoryColumns.isEmpty()) {
+            insertCols.add(invMinQtyColumn);
+            insertVals.add(String.valueOf(minQty));
+        }
+        if (hasColumn(existingInventoryColumns, invCostPriceColumn) || existingInventoryColumns.isEmpty()) {
+            insertCols.add(invCostPriceColumn);
+            insertVals.add("0");
+        }
+        if (hasColumn(existingInventoryColumns, invSellPriceColumn) || existingInventoryColumns.isEmpty()) {
+            insertCols.add(invSellPriceColumn);
+            insertVals.add(String.valueOf(sellPrice));
+        }
+        if (hasColumn(existingInventoryColumns, invShowMenuColumn) || existingInventoryColumns.isEmpty()) {
+            insertCols.add(invShowMenuColumn);
+            insertVals.add(showInMenu ? "1" : "0");
+        }
+
+        String sql = "INSERT INTO inventory (" + String.join(", ", insertCols) + ") VALUES (" + String.join(", ", insertVals) + ");";
 
         int res = DBConnection.executeUpdate(sql);
         loadProductsFromDatabase(txtProdSearch != null ? txtProdSearch.getText() : null);
@@ -1450,14 +1521,9 @@ public class inventory implements Initializable {
 
         String name = getSafeText(txtProdName);
         String ref = getSafeText(txtProdRef);
-        String unit = cbProdUnit != null && cbProdUnit.getValue() != null && !OPTION_MANAGE_UNITS.equals(cbProdUnit.getValue()) ? cbProdUnit.getValue() : selected.getUnit();
-        String qtyStr = getSafeText(txtProdQty);
         String minQtyStr = getSafeText(txtProdMinQty);
-        String costStr = getSafeText(txtProdCostPrice);
         String sellStr = getSafeText(txtProdSellPrice);
         String cat = cbProdCategory != null && cbProdCategory.getValue() != null && !OPTION_MANAGE_CATEGORIES.equals(cbProdCategory.getValue()) ? cbProdCategory.getValue() : selected.getCategory();
-        String supp = cbProdSupplier != null && cbProdSupplier.getValue() != null ? cbProdSupplier.getValue() : selected.getSupplier();
-        LocalDate date = dpProdSupplementDate != null ? dpProdSupplementDate.getValue() : null;
         boolean showInMenu = chkShowInMenu != null && chkShowInMenu.isSelected();
 
         if (name.isEmpty()) {
@@ -1469,41 +1535,42 @@ public class inventory implements Initializable {
             ref = selected.getReferenceNo();
         }
 
-        double qty = 0, minQty = 0, costPrice = 0, sellPrice = 0;
+        double minQty = 0, sellPrice = 0;
         try {
-            qty = !qtyStr.isEmpty() ? Double.parseDouble(qtyStr.replace("ج.م", "").replace(",", "").trim()) : selected.getQuantity();
             minQty = !minQtyStr.isEmpty() ? Double.parseDouble(minQtyStr.replace("ج.م", "").replace(",", "").trim()) : selected.getMinQuantity();
-            costPrice = !costStr.isEmpty() ? Double.parseDouble(costStr.replace("ج.م", "").replace(",", "").trim()) : 0;
             sellPrice = !sellStr.isEmpty() ? Double.parseDouble(sellStr.replace("ج.م", "").replace(",", "").trim()) : 0;
         } catch (NumberFormatException e) {
-            showProductNotification("يرجى إدخال أرقام صحيحة للكمية والسعر!", true);
+            showProductNotification("يرجى إدخال أرقام صحيحة للحد الأدنى وسعر البيع!", true);
             return;
         }
-
-        if (unit.isEmpty()) {
-            unit = getFirstAvailableUnit();
-        }
-        ensureUnitExistsInDatabase(unit);
 
         if (!cat.isEmpty()) {
             ensureCategoryExistsInDatabase(cat);
         }
 
         String oldRef = selected.getReferenceNo();
-        String dateStr = date != null ? date.toString() : selected.getSupplementDate();
 
-        String sql = "UPDATE inventory SET "
-                + invNameColumn + " = '" + escapeSql(name) + "', "
-                + invRefColumn + " = '" + escapeSql(ref) + "', "
-                + invUnitColumn + " = " + getSqlNullable(unit) + ", "
-                + invCategoryColumn + " = " + getSqlNullable(cat) + ", "
-                + invQtyColumn + " = " + qty + ", "
-                + invMinQtyColumn + " = " + minQty + ", "
-                + invCostPriceColumn + " = " + costPrice + ", "
-                + invSellPriceColumn + " = " + sellPrice + ", "
-                + invSupplierColumn + " = " + getSqlNullable(supp) + ", "
-                + invDateColumn + " = " + getSqlNullable(dateStr) + ", "
-                + invShowMenuColumn + " = " + (showInMenu ? "1" : "0")
+        List<String> setClauses = new ArrayList<>();
+        if (hasColumn(existingInventoryColumns, invNameColumn) || existingInventoryColumns.isEmpty()) {
+            setClauses.add(invNameColumn + " = '" + escapeSql(name) + "'");
+        }
+        if (hasColumn(existingInventoryColumns, invRefColumn) || existingInventoryColumns.isEmpty()) {
+            setClauses.add(invRefColumn + " = '" + escapeSql(ref) + "'");
+        }
+        if (hasColumn(existingInventoryColumns, invCategoryColumn) || existingInventoryColumns.isEmpty()) {
+            setClauses.add(invCategoryColumn + " = " + getSqlNullable(cat));
+        }
+        if (hasColumn(existingInventoryColumns, invMinQtyColumn) || existingInventoryColumns.isEmpty()) {
+            setClauses.add(invMinQtyColumn + " = " + minQty);
+        }
+        if (hasColumn(existingInventoryColumns, invSellPriceColumn) || existingInventoryColumns.isEmpty()) {
+            setClauses.add(invSellPriceColumn + " = " + sellPrice);
+        }
+        if (hasColumn(existingInventoryColumns, invShowMenuColumn) || existingInventoryColumns.isEmpty()) {
+            setClauses.add(invShowMenuColumn + " = " + (showInMenu ? "1" : "0"));
+        }
+
+        String sql = "UPDATE inventory SET " + String.join(", ", setClauses)
                 + " WHERE " + invRefColumn + " = '" + escapeSql(oldRef) + "';";
 
         DBConnection.executeUpdate(sql);
@@ -1543,15 +1610,10 @@ public class inventory implements Initializable {
     private void handleClearProductFields(ActionEvent event) {
         if (txtProdName != null) txtProdName.clear();
         if (txtProdRef != null) txtProdRef.clear();
-        if (cbProdUnit != null) cbProdUnit.setValue(null);
-        if (txtProdQty != null) txtProdQty.clear();
         if (txtProdMinQty != null) txtProdMinQty.clear();
-        if (txtProdCostPrice != null) txtProdCostPrice.clear();
         if (txtProdSellPrice != null) txtProdSellPrice.clear();
         if (chkShowInMenu != null) chkShowInMenu.setSelected(true);
         if (cbProdCategory != null) cbProdCategory.setValue(null);
-        if (cbProdSupplier != null) cbProdSupplier.setValue(null);
-        if (dpProdSupplementDate != null) dpProdSupplementDate.setValue(LocalDate.now());
 
         if (tblProducts != null) tblProducts.getSelectionModel().clearSelection();
         if (lblProdFormStatus != null) lblProdFormStatus.setText("تم تفريغ الحقول. جاهز لإدخال صنف جديد.");
@@ -1769,7 +1831,6 @@ public class inventory implements Initializable {
                 if (cbProdCategory != null) cbProdCategory.setValue(val);
             } else {
                 loadUnitsFromDatabase();
-                if (cbProdUnit != null) cbProdUnit.setValue(val);
                 if (cbProcUnit != null) cbProcUnit.setValue(val);
             }
         });
@@ -1822,9 +1883,6 @@ public class inventory implements Initializable {
                 }
             } else {
                 loadUnitsFromDatabase();
-                if (cbProdUnit != null && oldVal.equals(cbProdUnit.getValue())) {
-                    cbProdUnit.setValue(newVal);
-                }
                 if (cbProcUnit != null && oldVal.equals(cbProcUnit.getValue())) {
                     cbProcUnit.setValue(newVal);
                 }
@@ -1864,9 +1922,6 @@ public class inventory implements Initializable {
                     }
                 } else {
                     loadUnitsFromDatabase();
-                    if (cbProdUnit != null && delVal.equals(cbProdUnit.getValue())) {
-                        cbProdUnit.setValue(null);
-                    }
                     if (cbProcUnit != null && delVal.equals(cbProcUnit.getValue())) {
                         cbProcUnit.setValue(null);
                     }
@@ -1891,7 +1946,6 @@ public class inventory implements Initializable {
                         cbProdCategory.setValue(sel.getName());
                     } else if (!isCategory) {
                         ensureUnitExistsInDatabase(sel.getName());
-                        if (cbProdUnit != null) cbProdUnit.setValue(sel.getName());
                         if (cbProcUnit != null) cbProcUnit.setValue(sel.getName());
                     }
                     dialog.close();
@@ -1915,7 +1969,6 @@ public class inventory implements Initializable {
                         cbProdCategory.setValue(sel.getName());
                     } else if (!isCategory) {
                         ensureUnitExistsInDatabase(sel.getName());
-                        if (cbProdUnit != null) cbProdUnit.setValue(sel.getName());
                         if (cbProcUnit != null) cbProcUnit.setValue(sel.getName());
                     }
                 } else {
@@ -1926,7 +1979,6 @@ public class inventory implements Initializable {
                             cbProdCategory.setValue(input);
                         } else if (!isCategory) {
                             ensureUnitExistsInDatabase(input);
-                            if (cbProdUnit != null) cbProdUnit.setValue(input);
                             if (cbProcUnit != null) cbProcUnit.setValue(input);
                         }
                     }
@@ -2151,14 +2203,20 @@ public class inventory implements Initializable {
 
         // 3. Insert into 'supplements' table in MySQL database
         String dateStr = date != null ? date.toString() : LocalDate.now().toString();
-        StringBuilder insSql = new StringBuilder("INSERT INTO supplements (");
-        StringBuilder valSql = new StringBuilder(" VALUES (");
 
         List<String> cols = new ArrayList<>();
         List<String> vals = new ArrayList<>();
 
-        if (existingSupplementColumns.contains(suppProcProdIdColumn)) {
-            cols.add(suppProcProdIdColumn);
+        String actualProdIdCol = getActualColumnName(existingSupplementColumns, suppProcProdIdColumn, "product_id");
+        String actualProdNameCol = getActualColumnName(existingSupplementColumns, suppProcProdNameColumn, "product_name");
+        String actualSuppNameCol = getActualColumnName(existingSupplementColumns, suppProcSuppNameColumn, "supplier_name");
+        String actualDateCol = getActualColumnName(existingSupplementColumns, suppProcDateColumn, "date_of_supplement");
+        String actualUnitCol = getActualColumnName(existingSupplementColumns, suppProcUnitColumn, "unit");
+        String actualQtyCol = getActualColumnName(existingSupplementColumns, suppProcQtyColumn, "quantity");
+        String actualUnitPriceCol = getActualColumnName(existingSupplementColumns, suppProcUnitPriceColumn, "unit_price");
+
+        if (hasColumn(existingSupplementColumns, actualProdIdCol) || existingSupplementColumns.isEmpty()) {
+            cols.add(actualProdIdCol);
             if (suppProcProdIdIsInteger) {
                 String numOnly = prodId.replaceAll("[^0-9]", "");
                 vals.add(!numOnly.isEmpty() ? numOnly : "0");
@@ -2166,59 +2224,56 @@ public class inventory implements Initializable {
                 vals.add("'" + escapeSql(prodId) + "'");
             }
         }
-        if (existingSupplementColumns.contains(suppProcProdNameColumn)) {
-            cols.add(suppProcProdNameColumn);
-            vals.add("'" + escapeSql(prodName) + "'");
-        }
-        if (existingSupplementColumns.contains(suppProcSuppNameColumn)) {
-            cols.add(suppProcSuppNameColumn);
-            vals.add("'" + escapeSql(suppName) + "'");
-        }
-        if (existingSupplementColumns.contains(suppProcDateColumn)) {
-            cols.add(suppProcDateColumn);
-            vals.add("'" + escapeSql(dateStr) + "'");
-        }
-        if (existingSupplementColumns.contains(suppProcUnitColumn)) {
-            cols.add(suppProcUnitColumn);
-            vals.add("'" + escapeSql(unit) + "'");
-        }
-        if (existingSupplementColumns.contains(suppProcQtyColumn)) {
-            cols.add(suppProcQtyColumn);
-            vals.add(String.valueOf(qty));
-        }
-        if (existingSupplementColumns.contains(suppProcUnitPriceColumn)) {
-            cols.add(suppProcUnitPriceColumn);
-            vals.add(String.valueOf(unitPrice));
-        }
-        if (suppProcTotalPriceColumn != null && existingSupplementColumns.contains(suppProcTotalPriceColumn)) {
+        cols.add(actualProdNameCol);
+        vals.add("'" + escapeSql(prodName) + "'");
+
+        cols.add(actualSuppNameCol);
+        vals.add("'" + escapeSql(suppName) + "'");
+
+        cols.add(actualDateCol);
+        vals.add("'" + escapeSql(dateStr) + "'");
+
+        cols.add(actualUnitCol);
+        vals.add("'" + escapeSql(unit) + "'");
+
+        cols.add(actualQtyCol);
+        vals.add(String.valueOf(qty));
+
+        cols.add(actualUnitPriceCol);
+        vals.add(String.valueOf(unitPrice));
+
+        if (suppProcTotalPriceColumn != null && hasColumn(existingSupplementColumns, suppProcTotalPriceColumn)) {
             cols.add(suppProcTotalPriceColumn);
             vals.add(String.valueOf(qty * unitPrice));
         }
 
-        insSql.append(String.join(", ", cols)).append(")");
-        valSql.append(String.join(", ", vals)).append(");");
+        String insSql = "INSERT INTO supplements (" + String.join(", ", cols) + ") VALUES (" + String.join(", ", vals) + ");";
+        DBConnection.executeUpdate(insSql);
 
-        DBConnection.executeUpdate(insSql.toString() + valSql.toString());
-
-        // 4. Auto-increment product stock in 'inventory' table if product is present
-        for (ProductModel p : productList) {
-            if (p.getName().equalsIgnoreCase(prodName)) {
-                double newQty = p.getQuantity() + qty;
-                p.setQuantity(newQty);
-                p.setSupplementDate(dateStr);
-                p.setCostPrice(String.format(Locale.US, "%,.2f ج.م", unitPrice));
-
-                String updSql = "UPDATE inventory SET " 
-                        + invQtyColumn + " = " + newQty + ", "
-                        + invDateColumn + " = '" + escapeSql(dateStr) + "', "
-                        + invCostPriceColumn + " = " + unitPrice 
-                        + " WHERE " + invNameColumn + " = '" + escapeSql(prodName) + "';";
-                DBConnection.executeUpdate(updSql);
-                break;
-            }
+        // 4. Auto-increment product stock and update unit/supplier/cost in 'inventory' table if product is present
+        List<String> invSets = new ArrayList<>();
+        if (hasColumn(existingInventoryColumns, invQtyColumn) || existingInventoryColumns.isEmpty()) {
+            invSets.add(invQtyColumn + " = " + invQtyColumn + " + " + qty);
         }
-        if (tblProducts != null) tblProducts.refresh();
+        if (hasColumn(existingInventoryColumns, invCostPriceColumn) || existingInventoryColumns.isEmpty()) {
+            invSets.add(invCostPriceColumn + " = " + unitPrice);
+        }
+        if (unit != null && !unit.trim().isEmpty() && (hasColumn(existingInventoryColumns, invUnitColumn) || existingInventoryColumns.isEmpty())) {
+            invSets.add(invUnitColumn + " = '" + escapeSql(unit) + "'");
+        }
+        if (suppName != null && !suppName.trim().isEmpty() && (hasColumn(existingInventoryColumns, invSupplierColumn) || existingInventoryColumns.isEmpty())) {
+            invSets.add(invSupplierColumn + " = '" + escapeSql(suppName) + "'");
+        }
+        if (invDateColumn != null && hasColumn(existingInventoryColumns, invDateColumn)) {
+            invSets.add(invDateColumn + " = '" + escapeSql(dateStr) + "'");
+        }
+        if (!invSets.isEmpty()) {
+            String updSql = "UPDATE inventory SET " + String.join(", ", invSets)
+                    + " WHERE " + invNameColumn + " = '" + escapeSql(prodName) + "';";
+            DBConnection.executeUpdate(updSql);
+        }
 
+        loadProductsFromDatabase(txtProdSearch != null ? txtProdSearch.getText() : null);
         loadSupplementsFromDatabase(null);
         handleClearProcFields(null);
         showProcNotification("تم تسجيل وحفظ عملية التوريد في قاعدة البيانات بنجاح! ✔", false);
@@ -2265,49 +2320,47 @@ public class inventory implements Initializable {
         String prodId = ensureProductExistsInProductsTable(prodName, unit, unitPrice);
 
         String dateStr = date != null ? date.toString() : selected.getDate();
-        StringBuilder updSql = new StringBuilder("UPDATE supplements SET ");
+        String actualProdIdCol = getActualColumnName(existingSupplementColumns, suppProcProdIdColumn, "product_id");
+        String actualProdNameCol = getActualColumnName(existingSupplementColumns, suppProcProdNameColumn, "product_name");
+        String actualSuppNameCol = getActualColumnName(existingSupplementColumns, suppProcSuppNameColumn, "supplier_name");
+        String actualDateCol = getActualColumnName(existingSupplementColumns, suppProcDateColumn, "date_of_supplement");
+        String actualUnitCol = getActualColumnName(existingSupplementColumns, suppProcUnitColumn, "unit");
+        String actualQtyCol = getActualColumnName(existingSupplementColumns, suppProcQtyColumn, "quantity");
+        String actualUnitPriceCol = getActualColumnName(existingSupplementColumns, suppProcUnitPriceColumn, "unit_price");
+
         List<String> sets = new ArrayList<>();
 
-        if (existingSupplementColumns.contains(suppProcProdIdColumn)) {
+        if (hasColumn(existingSupplementColumns, actualProdIdCol) || existingSupplementColumns.isEmpty()) {
             if (suppProcProdIdIsInteger) {
                 String numOnly = prodId.replaceAll("[^0-9]", "");
-                sets.add(suppProcProdIdColumn + " = " + (!numOnly.isEmpty() ? numOnly : "0"));
+                sets.add(actualProdIdCol + " = " + (!numOnly.isEmpty() ? numOnly : "0"));
             } else {
-                sets.add(suppProcProdIdColumn + " = '" + escapeSql(prodId) + "'");
+                sets.add(actualProdIdCol + " = '" + escapeSql(prodId) + "'");
             }
         }
-        if (existingSupplementColumns.contains(suppProcProdNameColumn)) {
-            sets.add(suppProcProdNameColumn + " = '" + escapeSql(prodName) + "'");
-        }
-        if (existingSupplementColumns.contains(suppProcSuppNameColumn)) {
-            sets.add(suppProcSuppNameColumn + " = '" + escapeSql(suppName) + "'");
-        }
-        if (existingSupplementColumns.contains(suppProcDateColumn)) {
-            sets.add(suppProcDateColumn + " = '" + escapeSql(dateStr) + "'");
-        }
-        if (existingSupplementColumns.contains(suppProcUnitColumn)) {
-            sets.add(suppProcUnitColumn + " = '" + escapeSql(unit) + "'");
-        }
-        if (existingSupplementColumns.contains(suppProcQtyColumn)) {
-            sets.add(suppProcQtyColumn + " = " + qty);
-        }
-        if (existingSupplementColumns.contains(suppProcUnitPriceColumn)) {
-            sets.add(suppProcUnitPriceColumn + " = " + unitPrice);
-        }
-        if (suppProcTotalPriceColumn != null && existingSupplementColumns.contains(suppProcTotalPriceColumn)) {
+        sets.add(actualProdNameCol + " = '" + escapeSql(prodName) + "'");
+        sets.add(actualSuppNameCol + " = '" + escapeSql(suppName) + "'");
+        sets.add(actualDateCol + " = '" + escapeSql(dateStr) + "'");
+        sets.add(actualUnitCol + " = '" + escapeSql(unit) + "'");
+        sets.add(actualQtyCol + " = " + qty);
+        sets.add(actualUnitPriceCol + " = " + unitPrice);
+
+        if (suppProcTotalPriceColumn != null && hasColumn(existingSupplementColumns, suppProcTotalPriceColumn)) {
             sets.add(suppProcTotalPriceColumn + " = " + (qty * unitPrice));
         }
 
+        StringBuilder updSql = new StringBuilder("UPDATE supplements SET ");
         updSql.append(String.join(", ", sets));
 
-        if (selected.getDbId() > 0 && existingSupplementColumns.contains(suppProcIdColumn)) {
+        if (selected.getDbId() > 0 && hasColumn(existingSupplementColumns, suppProcIdColumn)) {
             updSql.append(" WHERE ").append(suppProcIdColumn).append(" = ").append(selected.getDbId()).append(";");
         } else {
-            updSql.append(" WHERE ").append(suppProcProdNameColumn).append(" = '").append(escapeSql(selected.getProductName())).append("'")
-                  .append(" AND ").append(suppProcDateColumn).append(" = '").append(escapeSql(selected.getDate())).append("' LIMIT 1;");
+            updSql.append(" WHERE ").append(actualProdNameCol).append(" = '").append(escapeSql(selected.getProductName())).append("'")
+                  .append(" AND ").append(actualDateCol).append(" = '").append(escapeSql(selected.getDate())).append("' LIMIT 1;");
         }
 
         DBConnection.executeUpdate(updSql.toString());
+        loadProductsFromDatabase(txtProdSearch != null ? txtProdSearch.getText() : null);
         loadSupplementsFromDatabase(null);
         showProcNotification("تم حفظ وتحديث عملية التوريد في قاعدة البيانات بنجاح! ✔", false);
     }
@@ -2328,14 +2381,18 @@ public class inventory implements Initializable {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
+            String actualProdNameCol = getActualColumnName(existingSupplementColumns, suppProcProdNameColumn, "product_name");
+            String actualDateCol = getActualColumnName(existingSupplementColumns, suppProcDateColumn, "date_of_supplement");
+
             String delSql;
-            if (selected.getDbId() > 0 && existingSupplementColumns.contains(suppProcIdColumn)) {
+            if (selected.getDbId() > 0 && hasColumn(existingSupplementColumns, suppProcIdColumn)) {
                 delSql = "DELETE FROM supplements WHERE " + suppProcIdColumn + " = " + selected.getDbId() + ";";
             } else {
-                delSql = "DELETE FROM supplements WHERE " + suppProcProdNameColumn + " = '" + escapeSql(selected.getProductName()) + "' AND " + suppProcDateColumn + " = '" + escapeSql(selected.getDate()) + "' LIMIT 1;";
+                delSql = "DELETE FROM supplements WHERE " + actualProdNameCol + " = '" + escapeSql(selected.getProductName()) + "' AND " + actualDateCol + " = '" + escapeSql(selected.getDate()) + "' LIMIT 1;";
             }
             DBConnection.executeUpdate(delSql);
 
+            loadProductsFromDatabase(txtProdSearch != null ? txtProdSearch.getText() : null);
             loadSupplementsFromDatabase(null);
             handleClearProcFields(null);
             showProcNotification("تم حذف سجل عملية التوريد من قاعدة البيانات بنجاح! 🗑️", false);
@@ -2373,17 +2430,10 @@ public class inventory implements Initializable {
     private void populateProductFields(ProductModel model) {
         if (txtProdName != null) txtProdName.setText(model.getName());
         if (txtProdRef != null) txtProdRef.setText(model.getReferenceNo());
-        if (cbProdUnit != null) cbProdUnit.setValue(model.getUnit());
-        if (txtProdQty != null) txtProdQty.setText(String.valueOf(model.getQuantity()));
         if (txtProdMinQty != null) txtProdMinQty.setText(String.valueOf(model.getMinQuantity()));
-        if (txtProdCostPrice != null) txtProdCostPrice.setText(model.getCostPrice().replace("ج.م", "").replace(",", "").trim());
         if (txtProdSellPrice != null) txtProdSellPrice.setText(model.getSellPrice().replace("ج.م", "").replace(",", "").trim());
         if (chkShowInMenu != null) chkShowInMenu.setSelected(model.isShowInMenu());
         if (cbProdCategory != null) cbProdCategory.setValue(model.getCategory());
-        if (cbProdSupplier != null) cbProdSupplier.setValue(model.getSupplier());
-        if (dpProdSupplementDate != null && model.getSupplementDate() != null) {
-            try { dpProdSupplementDate.setValue(LocalDate.parse(model.getSupplementDate())); } catch (Exception ignored) {}
-        }
         if (lblProdFormStatus != null) lblProdFormStatus.setText("تم عرض بيانات الصنف: " + model.getName());
     }
 

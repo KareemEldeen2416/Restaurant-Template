@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXCheckBox?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import com.jfoenix.controls.JFXToggleButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -114,7 +117,7 @@
          <center>
             <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="main-scroll-pane" BorderPane.alignment="CENTER">
                <content>
-                  <VBox maxWidth="900.0" spacing="18.0">
+                  <VBox spacing="18.0">
                      <padding>
                         <Insets bottom="20.0" left="30.0" right="30.0" top="12.0" />
                      </padding>
@@ -131,13 +134,13 @@
                                           <SVGPath content="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
                                        </children>
                                     </StackPane>
-                                    <VBox>
+                                    <VBox HBox.hgrow="ALWAYS">
                                        <children>
-                                          <Label styleClass="panel-header-title" text="تفعيل وترخيص البرنامج (Software Activation)" />
-                                          <Label styleClass="panel-header-desc" text="أدخل مفتاح الترخيص الخاص بمؤسستك لتفعيل كافة الميزات السحابية وقاعدة البيانات" />
+                                          <Label styleClass="panel-header-title" text="تفعيل وترخيص البرنامج (Software Activation)" wrapText="true" />
+                                          <Label styleClass="panel-header-desc" text="أدخل مفتاح الترخيص الخاص بمؤسستك لتفعيل كافة الميزات السحابية وقاعدة البيانات" wrapText="true" />
                                        </children>
                                     </VBox>
-                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Region />
                                     <!-- License Status Badge -->
                                     <HBox alignment="CENTER" spacing="6.0" styleClass="info-chip">
                                        <children>
@@ -255,6 +258,72 @@
                                     <Label fx:id="lblSettingsSavedMsg" styleClass="login-msg-success" text="" visible="false" />
                                  </children>
                               </HBox>
+
+                           </children>
+                        </VBox>
+
+                        <!-- ================= 4. PAYMENT METHODS MANAGEMENT PANEL ================= -->
+                        <VBox spacing="14.0" styleClass="panel-card">
+                           <children>
+                              
+                              <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                 <children>
+                                    <StackPane style="-fx-background-color: #FFF3EB; -fx-background-radius: 10px; -fx-min-width: 36px; -fx-min-height: 36px;">
+                                       <children>
+                                          <!-- Credit Card / Payment SVG -->
+                                          <SVGPath content="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" fill="#E65100" scaleX="1.0" scaleY="1.0" />
+                                       </children>
+                                    </StackPane>
+                                    <VBox HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label styleClass="panel-header-title" text="إدارة طرق الدفع (Payment Methods)" wrapText="true" />
+                                          <Label styleClass="panel-header-desc" text="إضافة وتفعيل أو إيقاف طرق الدفع المقبولة في المطعم ونقاط البيع" wrapText="true" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+
+                              <!-- Input Fields -->
+                              <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                 <children>
+                                    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label styleClass="field-label" text="اسم طريقة الدفع: *" />
+                                          <JFXTextField fx:id="txtPaymentMethodName" focusColor="#FF6B00" promptText="مثال: نقداً، بطاقة بنكية، محفظة إلكترونية" unFocusColor="#FFDEC9" />
+                                       </children>
+                                    </VBox>
+                                    <VBox alignment="BOTTOM_LEFT" minWidth="280.0">
+                                       <padding>
+                                          <Insets bottom="6.0" />
+                                       </padding>
+                                       <children>
+                                          <JFXCheckBox fx:id="chkPaymentActive" minWidth="280.0" selected="true" styleClass="jfx-check-box" text="طريقة دفع نشطة ومقبولة (Active)" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+
+                              <!-- Action Buttons & Feedback Message -->
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <children>
+                                    <JFXButton fx:id="btnAddPaymentMethod" buttonType="RAISED" minWidth="150.0" onAction="#handleAddPaymentMethod" ripplerFill="#FFE0B2" styleClass="btn-action-add" text="➕ إضافة طريقة دفع" />
+                                    <JFXButton fx:id="btnEditPaymentMethod" buttonType="RAISED" minWidth="90.0" onAction="#handleEditPaymentMethod" ripplerFill="#FFE0B2" styleClass="btn-action-edit" text="✏️ تعديل" />
+                                    <JFXButton fx:id="btnDeletePaymentMethod" buttonType="RAISED" minWidth="90.0" onAction="#handleDeletePaymentMethod" ripplerFill="#FFCDD2" styleClass="btn-action-delete" text="🗑️ حذف" />
+                                    <JFXButton fx:id="btnClearPaymentFields" minWidth="90.0" onAction="#handleClearPaymentFields" ripplerFill="#FFCCAA" styleClass="btn-action-clear" text="🔄 تفريغ" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Label fx:id="lblPaymentMsg" styleClass="login-msg-success" text="" visible="false" wrapText="true" />
+                                 </children>
+                              </HBox>
+
+                              <!-- Payment Methods Table (Full text without dots) -->
+                              <TableView fx:id="tblPaymentMethods" minHeight="250.0" prefHeight="270.0" styleClass="custom-table-view">
+                                 <columns>
+                                    <TableColumn fx:id="colPaymentSeq" minWidth="50.0" prefWidth="60.0" text="م" />
+                                    <TableColumn fx:id="colPaymentName" minWidth="260.0" prefWidth="380.0" text="اسم طريقة الدفع" />
+                                    <TableColumn fx:id="colPaymentStatus" minWidth="160.0" prefWidth="200.0" text="حالة التفعيل" />
+                                    <TableColumn fx:id="colPaymentDate" minWidth="220.0" prefWidth="280.0" text="تاريخ ووقت الإضافة" />
+                                 </columns>
+                              </TableView>
 
                            </children>
                         </VBox>

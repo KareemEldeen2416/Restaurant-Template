@@ -410,6 +410,7 @@
     -jfx-checked-color: #E65100;
     -jfx-unchecked-color: #FFB380;
     -fx-cursor: hand;
+    -fx-text-overrun: clip;
 }
 
 .access-rights-box {
@@ -1095,6 +1096,13 @@
 .custom-table-view .column-header .label {
     -fx-text-fill: #3E2415;
     -fx-alignment: CENTER_RIGHT;
+    -fx-text-overrun: clip;
+}
+
+.custom-table-view .table-cell {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-padding: 6px 10px;
+    -fx-text-overrun: clip;
 }
 
 .custom-table-view .table-row-cell {
